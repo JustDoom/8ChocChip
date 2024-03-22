@@ -198,12 +198,12 @@ void Cpu::runInstruction(uint16_t opcode) {
         case 0xC000: {
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_int_distribution<uint8_t> dis(0, 0xFF);
+            std::uniform_int_distribution<int> dis(0, 0xFF);
 
-            // Generate a random number
-            const uint16_t rand_num = dis(gen);
+            int randInt = dis(gen); // Generate a random number
+            uint16_t rand = static_cast<uint16_t>(randInt);
 
-            this->registers[x] = rand_num & (opcode & 0xFF);
+            this->registers[x] = rand & (opcode & 0xFF);
             break;
         }
         case 0xD000: {
