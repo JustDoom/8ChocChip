@@ -19,7 +19,7 @@ public:
     Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker);
 
     void loadSpritesIntoMemory();
-    void loadProgramIntoMemory(const char *filename);
+    void loadProgramIntoMemory(std::ifstream* file);
 
     void cycle();
     void runInstruction(uint16_t opcode);
