@@ -31,60 +31,63 @@ jobs:
 
   build-windows:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, x86]  # Target architectures for Windows EXE
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-  
-    - name: Install dependencies
-      run: |
-        sudo apt-get update && sudo apt-get install -y wget p7zip-full make
-  
-    - name: Download and Install MinGW toolchain
-      run: |
-        wget -q https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
-        mkdir mingw64
-        7z x x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z -o./mingw64
-  
-    - name: Add MinGW bin directory to PATH
-      run: |
-        echo "export PATH=\$PATH:$PWD/mingw64/bin" >> $HOME/.bashrc
-        source $HOME/.bashrc
-  
-    - name: Download and Install CMake
-      run: |
-        wget -q https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-Linux-x86_64.sh
-        chmod +x cmake-3.22.0-Linux-x86_64.sh
-        sudo ./cmake-3.22.0-Linux-x86_64.sh --skip-license --prefix=/usr/local
-  
-    - name: Download and Install SFML
-      run: |
-        wget -q https://www.sfml-dev.org/files/SFML-2.6.1-linux-gcc-64-bit.tar.gz
-        tar xf SFML-2.6.1-linux-gcc-64-bit.tar.gz
-        sudo mv SFML-2.6.1 /usr/local/
-  
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/runner/work/8ChocChip/8ChocChip/build/../mingw64/share/cmake/mingw/toolchain.cmake -DSFML_DIR=/usr/local/SFML-2.6.1/lib/cmake/SFML
-  
-    - name: Build
-      run: |
-        cmake --build build --config Release
+      - uses: actions/checkout@v3
 
-    - name: Package executable
-      run: |
-        # Package the executable as needed (e.g., zip or install to an installer)
-        # For example, you can zip the executable
-        cd build
-        7z a 8ChocChip.zip Release/8ChocChip.exe
+      - name: Install dependencies (SFML, build tools)
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            build-essential \
+            cmake \
+            gcc-multilib \
+            g++-multilib \
+            libtool \
+            pkg-config \
+            libsfml-dev
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: MyApp
-        path: build/8ChocChip.zip
+      - name: Configure build environment for target architecture
+        run: |
+          export TARGET_ARCH=${{ matrix.arch }}
+          case $TARGET_ARCH in
+            x64)
+              # Set compiler and linker for 64-bit Windows target
+              export TOOLCHAIN=$(command -v x86_64-w64-mingw32-g++-posix)
+              ;;
+            x86)
+              # Set compiler and linker for 32-bit Windows target
+              export TOOLCHAIN=$(command -v i686-w64-mingw32-g++-posix)
+              ;;
+            *)
+              echo "Unsupported architecture: $TARGET_ARCH"
+              exit 1
+              ;;
+          esac
+          echo "Using compiler: $TOOLCHAIN"
+
+      - name: Create build directory
+        run: mkdir build
+
+      - name: Configure CMake (cross-compiling)
+        env:
+          CMAKE_C_COMPILER: $TOOLCHAIN
+          CMAKE_CXX_COMPILER: $TOOLCHAIN
+        working-directory: build
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DSFML_DIR=/usr/lib/x86_64-linux-gnu/pkgconfig/SFML.pc (or adjust for your SFML installation path)
+
+      - name: Build
+        working-directory: build
+        run: cmake --build . --config Release
+
+      - name: Archive Windows EXE (optional)
+        if: success()  # Only run if previous steps succeed
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-exe-${{ matrix.arch }}
+          path: build/bin/8ChocChip.exe
 
 
 
