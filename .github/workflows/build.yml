@@ -40,7 +40,12 @@ jobs:
         run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
   
       - name: Install vcpkg
-        run: choco install --pre vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat
+        working-directory: ${{ github.workspace }}
+
   
       - name: Set VCPKG_ROOT environment variable
         run: echo "VCPKG_ROOT=$(vcpkg root)" >> $GITHUB_ENV
