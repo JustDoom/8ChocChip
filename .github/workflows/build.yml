@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows-executable
-          path: 8ChocChip.exe
+          path: build\src\Debug\*.exe
 
 
   # build-macos:
