@@ -1,8 +1,0 @@
-/home/doom/.local/share/JetBrains/Toolbox/apps/clion-nova/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/doom/.local/share/JetBrains/Toolbox/apps/clion-nova/bin/ninja/linux/x64/ninja -G Ninja -S /home/doom/Documents/GitHub/8ChickenChipEmulator -B /home/doom/Documents/GitHub/8ChickenChipEmulator/cmake-build-debug
--- Fetching SFML...
--- libudev stable: 0
--- Found UDev: /usr/lib/x86_64-linux-gnu/libudev.so
---    include: /usr/include
--- Configuring done (0.1s)
--- Generating done (0.0s)
--- Build files have been written to: /home/doom/Documents/GitHub/8ChickenChipEmulator/cmake-build-debug
