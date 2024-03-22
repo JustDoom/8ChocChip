@@ -46,14 +46,14 @@ jobs:
 
     - name: Download and Install SFML
       run: |
-        Invoke-WebRequest -Uri "https://www.sfml-dev.org/files/SFML-2.5.1-windows-vc15-64-bit.zip" -OutFile sfml.zip
+        Invoke-WebRequest -Uri "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -OutFile sfml.zip
         Expand-Archive sfml.zip -DestinationPath "C:\SFML"
 
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 16" -A x64 -DCMAKE_PREFIX_PATH="C:\SFML"
+        cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="C:\SFML"
 
     - name: Build
       run: |
