@@ -31,30 +31,35 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-
+  
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+  
       - name: Install CMake
         run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
-
-      - name: Install SFML
-        run: |
-          choco install --pre vcpkg
-          vcpkg install sfml
-
+  
+      - name: Install vcpkg
+        run: choco install --pre vcpkg
+  
+      - name: Set VCPKG_ROOT environment variable
+        run: echo "VCPKG_ROOT=$(vcpkg root)" >> $GITHUB_ENV
+  
+      - name: Install SFML with vcpkg
+        run: vcpkg install sfml
+  
       - name: Configure and build
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_TOOLCHAIN_FILE="C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
+          cmake ..
           cmake --build .
-
+  
       - name: Upload executable
         uses: actions/upload-artifact@v2
         with:
           name: windows-executable
           path: build/src/8ChocChip
+
 
   build-macos:
     runs-on: macos-latest
