@@ -87,13 +87,19 @@ jobs:
       - name: Build
         working-directory: build
         run: cmake --build . --config Release
-
-      - name: Archive Windows EXE (optional)
-        if: success()  # Only run if previous steps succeed
-        uses: actions/upload-artifact@v3
+  
+      - name: Package executable
+        run: |
+          # Package the executable as needed (e.g., zip or install to an installer)
+          # For example, you can zip the executable
+          cd build
+          7z a 8ChocChip.zip Release/8ChocChip.exe
+  
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          name: windows-exe-${{ matrix.arch }}
-          path: build/bin/8ChocChip.exe
+          name: 8ChocChip
+          path: build/8ChocChip.zip
 
 
 
