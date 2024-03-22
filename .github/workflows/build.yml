@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: my_project_artifact
-          path: build/my_project.exe
+          path: build/8ChocChip.exe
             
 
 
