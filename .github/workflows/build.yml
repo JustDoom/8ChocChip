@@ -35,40 +35,40 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+  
     - name: Install dependencies
       run: |
-        sudo apt-get update && sudo apt-get install -y wget p7zip-full
-
+        sudo apt-get update && sudo apt-get install -y wget p7zip-full make
+  
     - name: Download and Install MinGW toolchain
       run: |
         wget -q https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
         mkdir mingw64
         7z x x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z -o./mingw64
-
+  
     - name: Add MinGW bin directory to PATH
       run: |
         echo "export PATH=\$PATH:$PWD/mingw64/bin" >> $HOME/.bashrc
         source $HOME/.bashrc
-
+  
     - name: Download and Install CMake
       run: |
         wget -q https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-Linux-x86_64.sh
         chmod +x cmake-3.22.0-Linux-x86_64.sh
         sudo ./cmake-3.22.0-Linux-x86_64.sh --skip-license --prefix=/usr/local
-
+  
     - name: Download and Install SFML
       run: |
         wget -q https://www.sfml-dev.org/files/SFML-2.6.1-linux-gcc-64-bit.tar.gz
         tar xf SFML-2.6.1-linux-gcc-64-bit.tar.gz
         sudo mv SFML-2.6.1 /usr/local/
-
+  
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_TOOLCHAIN_FILE=$PWD/../mingw64/share/cmake/mingw/toolchain.cmake -DSFML_DIR=/usr/local/SFML-2.6.1/lib/cmake/SFML
-
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=/home/runner/work/8ChocChip/8ChocChip/build/../mingw64/share/cmake/mingw/toolchain.cmake -DSFML_DIR=/usr/local/SFML-2.6.1/lib/cmake/SFML
+  
     - name: Build
       run: |
         cmake --build build --config Release
