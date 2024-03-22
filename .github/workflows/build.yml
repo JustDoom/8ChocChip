@@ -45,11 +45,10 @@ jobs:
           cd vcpkg
           .\bootstrap-vcpkg.bat
         working-directory: ${{ github.workspace }}
-
   
       - name: Set VCPKG_ROOT environment variable
-        run: echo "VCPKG_ROOT=$(vcpkg root)" >> $GITHUB_ENV
-  
+        run: echo "VCPKG_ROOT=$(vcpkg.exe root)" >> $GITHUB_ENV
+
       - name: Install SFML with vcpkg
         run: vcpkg install sfml
   
