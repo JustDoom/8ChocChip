@@ -6,31 +6,16 @@ on:
       - actions
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+  build-ubuntu:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Install dependencies
-        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev
-
-      - name: Install dependencies
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install cmake sfml -y
-
-      - name: Install dependencies
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew update && brew install cmake sfml
 
       - name: Configure and build
         run: |
@@ -41,5 +26,49 @@ jobs:
       - name: Upload executable
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ runner.os }}-executable
+          name: ubuntu-executable
+          path: build/src/8ChocChip
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: choco install cmake sfml -y
+
+      - name: Configure and build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-executable
+          path: build/src/8ChocChip
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: brew update && brew install cmake sfml
+
+      - name: Configure and build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-executable
           path: build/src/8ChocChip
