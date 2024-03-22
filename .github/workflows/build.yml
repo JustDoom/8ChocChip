@@ -47,7 +47,13 @@ jobs:
             g++-multilib \
             libtool \
             pkg-config \
-            libsfml-dev
+            libsfml-dev \
+            libudev-dev \
+            libopenal-dev \
+            libvorbis-dev \
+            libflac-dev \
+            libxrandr-dev \
+            libxcursor-dev
 
       - name: Configure build environment for target architecture
         run: |
