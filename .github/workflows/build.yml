@@ -36,40 +36,48 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install build dependencies
+    - name: Download and Install MinGW toolchain
       run: |
-        sudo apt update
-        sudo apt install build-essential cmake pkg-config libssl-dev zlib1g-dev libx11-dev libxft-dev mingw-w64-x86-64-gcc mingw-w64-x86-64-g++
+        sudo apt-get update && sudo apt-get install -y wget
+        wget -q https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+        sudo apt-get install -y p7zip-full
+        7z x x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z -o/usr/local/mingw64
+        export PATH=$PATH:/usr/local/mingw64/bin
 
-    - name: Download SFML (Optional)
+    - name: Download and Install CMake
       run: |
-        # Download pre-built Windows SFML if needed (replace URL with desired version)
-        wget https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip
-        unzip sfml.zip
+        wget -q https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-Linux-x86_64.sh
+        chmod +x cmake-3.22.0-Linux-x86_64.sh
+        sudo ./cmake-3.22.0-Linux-x86_64.sh --skip-license --prefix=/usr/local
 
-    - name: Configure CMake (cross-compile)
+    - name: Download and Install SFML
+      run: |
+        wget -q https://www.sfml-dev.org/files/SFML-2.6.1-linux-gcc-64-bit.tar.gz
+        tar xf SFML-2.6.1-linux-gcc-64-bit.tar.gz
+        sudo mv SFML-2.6.1 /usr/local/
+
+    - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake .. -G "MinGW Makefile" -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -DCMAKE_BUILD_TYPE=Release
-
-    - name: Generate toolchain file (optional)
-      run: |
-        # Create a toolchain.cmake file if not downloaded with SFML
-        echo "SET(CMAKE_SYSTEM_NAME Windows)" >> toolchain.cmake
-        echo "SET(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)" >> toolchain.cmake
-        echo "SET(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)" >> toolchain.cmake
-        # Add other compiler/linker settings as needed
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=/usr/local/mingw64/share/cmake/mingw/toolchain.cmake -DSFML_DIR=/usr/local/SFML-2.6.1/lib/cmake/SFML
 
     - name: Build
       run: |
-        make
+        cmake --build build --config Release
 
-    - name: Upload artifact (optional)
+    - name: Package executable
+      run: |
+        # Package the executable as needed (e.g., zip or install to an installer)
+        # For example, you can zip the executable
+        cd build
+        7z a 8ChocChip.zip Release/8ChocChip.exe
+
+    - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: 8ChocCHip.exe
-        path: build/8ChocCHip.exe
+        name: MyApp
+        path: build/8ChocChip.zip
 
 
 
