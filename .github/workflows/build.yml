@@ -30,54 +30,46 @@ jobs:
           path: build/src/8ChocChip
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install Visual Studio Build Tools (Desktop development with C++)
-      uses: actions/checkout@v2
-      with:
-        url: https://github.com/actions/virtual-environments#actions-runner-images
-        ref: v2
-        path: ./vs-build-tools
-
-    - name: Install required build tools
+    - name: Install build dependencies
       run: |
-        ./vs-build-tools/scripts/install_build_tools.ps1 -Workload "desktop development with c++"
-        # Install additional dependencies for SFML if needed (e.g., git, python)
+        sudo apt update
+        sudo apt install build-essential cmake pkg-config libssl-dev zlib1g-dev libx11-dev libxft-dev mingw-w64-x86-64-gcc mingw-w64-x86-64-g++
 
-    - name: Download and Install CMake
+    - name: Download SFML (Optional)
       run: |
-        Invoke-WebRequest -Uri "https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-windows-x86_64.msi" -OutFile cmake.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/i cmake.msi /quiet /norestart'
+        # Download pre-built Windows SFML if needed (replace URL with desired version)
+        wget https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip
+        unzip sfml.zip
 
-    - name: Download and Install SFML
-      run: |
-        Invoke-WebRequest -Uri "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -OutFile sfml.zip
-        Expand-Archive sfml.zip -DestinationPath "C:\SFML"
-
-    - name: Configure CMake
+    - name: Configure CMake (cross-compile)
       run: |
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="C:\SFML"
+        cmake .. -G "MinGW Makefile" -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+
+    - name: Generate toolchain file (optional)
+      run: |
+        # Create a toolchain.cmake file if not downloaded with SFML
+        echo "SET(CMAKE_SYSTEM_NAME Windows)" >> toolchain.cmake
+        echo "SET(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)" >> toolchain.cmake
+        echo "SET(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)" >> toolchain.cmake
+        # Add other compiler/linker settings as needed
 
     - name: Build
       run: |
-        cmake --build . --config Release
+        make
 
-    - name: Package executable
-      run: |
-        cd build
-        7z a 8ChocCHip.zip Release/8ChocCHip.exe
-
-    - name: Upload artifact
+    - name: Upload artifact (optional)
       uses: actions/upload-artifact@v2
       with:
-        name: 8ChocCHip
-        path: build/8ChocCHip.zip
+        name: 8ChocCHip.exe
+        path: build/8ChocCHip.exe
 
 
 
