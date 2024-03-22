@@ -30,35 +30,45 @@ jobs:
           path: build/src/8ChocChip
 
   build-windows:
-    name: Build and Package
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up CMake and Ninja
-        id: cmake_and_ninja
-        run: |
-          set(ninja_version "1.9.0")
-          set(cmake_version "3.16.2")
-          message(STATUS "Using host CMake version: ${CMAKE_VERSION}")
+    - name: Install Visual Studio Build Tools
+      uses: microsoft/setup-msbuild@v1
 
-      - name: Configure CMake
-        run: cmake -B build -S .
+    - name: Install CMake
+      uses: lukka/get-cmake@v1
 
-      - name: Build
-        run: cmake --build build --config Release
+    - name: Install SFML
+      run: |
+        choco install sfml -y
 
-      - name: Package
-        run: cpack -C Release
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "Visual Studio 16" -A x64
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: my_project_artifact
-          path: build/8ChocChip.exe
-            
+    - name: Build
+      run: |
+        cmake --build build --config Release
+  
+    - name: Package executable
+      run: |
+        # Package the executable as needed (e.g., zip or install to an installer)
+        # For example, you can zip the executable
+        cd build
+        7z a 8ChocCHip.zip Release/8ChocCHip.exe
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: 8ChocCHip
+        path: build/8ChocCHip.zip
+
 
 
   # build-macos:
