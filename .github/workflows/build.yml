@@ -30,43 +30,34 @@ jobs:
           path: build/src/8ChocChip
 
   build-windows:
-    runs-on: windows-latest
-  
+    name: Build and Package
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-  
-      - name: Install CMake
-        run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
-  
-      - name: Install vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          .\bootstrap-vcpkg.bat
-        working-directory: ${{ github.workspace }}
-  
-      - name: Set VCPKG_ROOT environment variable
-        run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
 
-      - name: Install SFML with vcpkg
-        run: vcpkg install sfml
-  
-      - name: Configure and build
+      - name: Set up CMake and Ninja
+        id: cmake_and_ninja
         run: |
-          mkdir build && cd build
-          cmake ..
-          cmake --build .
-  
-      - name: Upload executable
+          set(ninja_version "1.9.0")
+          set(cmake_version "3.16.2")
+          message(STATUS "Using host CMake version: ${CMAKE_VERSION}")
+
+      - name: Configure CMake
+        run: cmake -B build -S .
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        run: cpack -C Release
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: windows-executable
-          path: |
-            build\src\Debug\*.exe 
-            build\*.exe
-            build\bin\*.exe
-            build\bin\Release\*.exe
+          name: my_project_artifact
+          path: build/my_project.exe
             
 
 
