@@ -1,5 +1,3 @@
-find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
-
 add_executable(8ChocChip main.cpp
         Keyboard.cpp
         Keyboard.h
@@ -9,7 +7,7 @@ add_executable(8ChocChip main.cpp
         Renderer.h
         Cpu.cpp
         Cpu.h)
-target_link_libraries(8ChocChip PRIVATE sfml-graphics sfml-audio sfml-window sfml-system)
+target_link_libraries(8ChocChip PRIVATE sfml-graphics sfml-audio)
 
 if (WIN32)
     foreach (SFML_LIB ${SFML_LIBRARIES})
