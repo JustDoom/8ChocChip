@@ -12,6 +12,7 @@
 #include "Keyboard.h"
 #include "Speaker.h"
 #include "Renderer.h"
+#include <cstdint>
 
 class Cpu {
 public:
@@ -21,17 +22,17 @@ public:
     void loadProgramIntoMemory(const char *filename);
 
     void cycle();
-    void runInstruction(u_int16_t opcode);
+    void runInstruction(uint16_t opcode);
     void updateTimers();
 private:
-    std::vector<u_int8_t> memory;
-    std::vector<u_int8_t> registers;
-    u_int16_t address;
-    u_int8_t delay;
-    u_int8_t soundTimer;
+    std::vector<uint8_t> memory;
+    std::vector<uint8_t> registers;
+    uint16_t address;
+    uint8_t delay;
+    uint8_t soundTimer;
 
-    u_int16_t pc;
-    std::vector<u_int16_t> stack;
+    uint16_t pc;
+    std::vector<uint16_t> stack;
     bool paused;
     int8_t speed;
 

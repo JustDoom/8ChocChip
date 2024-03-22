@@ -7,6 +7,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <cstdint>
 
 class Renderer {
 public:
