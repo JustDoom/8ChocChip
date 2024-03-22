@@ -62,7 +62,12 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows-executable
-          path: build\src\Debug\*.exe
+          path: |
+            build\src\Debug\*.exe 
+            build\*.exe
+            build\bin\*.exe
+            build\bin\Release\*.exe
+            
 
 
   # build-macos:
