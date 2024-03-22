@@ -1,0 +1,40 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - actions
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+        run: |
+          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev
+
+      - name: Install dependencies
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install cmake sfml -y
+
+      - name: Configure and build
+        run: |
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ runner.os }}-executable
+          path: build/src/8ChocChip
