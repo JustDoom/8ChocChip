@@ -39,8 +39,10 @@ jobs:
     - name: Install Visual Studio Build Tools
       uses: microsoft/setup-msbuild@v1
 
-    - name: Install CMake
-      uses: lukka/get-cmake@v1
+    - name: Download and Install CMake
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-windows-x86_64.msi" -OutFile cmake.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/i cmake.msi /quiet /norestart'
 
     - name: Install SFML
       run: |
