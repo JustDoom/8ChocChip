@@ -36,8 +36,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install Visual Studio Build Tools
-      uses: microsoft/setup-msbuild@v1
+    - name: Install Visual Studio Build Tools (Desktop development with C++)
+      uses: actions/checkout@v2
+      with:
+        url: https://github.com/actions/virtual-environments#actions-runner-images
+        ref: v2
+        path: ./vs-build-tools
+
+    - name: Install required build tools
+      run: |
+        ./vs-build-tools/scripts/install_build_tools.ps1 -Workload "desktop development with c++"
+        # Install additional dependencies for SFML if needed (e.g., git, python)
 
     - name: Download and Install CMake
       run: |
@@ -57,12 +66,10 @@ jobs:
 
     - name: Build
       run: |
-        cmake --build build --config Release
-  
+        cmake --build . --config Release
+
     - name: Package executable
       run: |
-        # Package the executable as needed (e.g., zip or install to an installer)
-        # For example, you can zip the executable
         cd build
         7z a 8ChocCHip.zip Release/8ChocCHip.exe
 
