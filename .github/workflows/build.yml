@@ -15,7 +15,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev
+          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev
 
       - name: Configure and build
         run: |
@@ -36,13 +36,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: choco install cmake sfml -y
+      - name: Install CMake
+        run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
+
+      - name: Install SFML
+        run: |
+          choco install --pre vcpkg
+          vcpkg install sfml
 
       - name: Configure and build
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake -DCMAKE_TOOLCHAIN_FILE="C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake" ..
           cmake --build .
 
       - name: Upload executable
