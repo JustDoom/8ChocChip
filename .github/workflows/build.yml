@@ -48,7 +48,7 @@ jobs:
 
     - name: Add MinGW bin directory to PATH
       run: |
-        echo "export PATH=\$PATH:/path/to/mingw64/bin" >> $HOME/.bashrc
+        echo "export PATH=\$PATH:$PWD/mingw64/bin" >> $HOME/.bashrc
         source $HOME/.bashrc
 
     - name: Download and Install CMake
@@ -67,7 +67,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/to/mingw64/share/cmake/mingw/toolchain.cmake -DSFML_DIR=/usr/local/SFML-2.6.1/lib/cmake/SFML
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=$PWD/../mingw64/share/cmake/mingw/toolchain.cmake -DSFML_DIR=/usr/local/SFML-2.6.1/lib/cmake/SFML
 
     - name: Build
       run: |
