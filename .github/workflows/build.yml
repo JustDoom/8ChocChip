@@ -47,7 +47,7 @@ jobs:
         working-directory: ${{ github.workspace }}
   
       - name: Set VCPKG_ROOT environment variable
-        run: echo "VCPKG_ROOT=$(vcpkg integrate install --print-root)" >> $GITHUB_ENV
+        run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
 
       - name: Install SFML with vcpkg
         run: vcpkg install sfml
