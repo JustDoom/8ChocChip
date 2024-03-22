@@ -44,15 +44,16 @@ jobs:
         Invoke-WebRequest -Uri "https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-windows-x86_64.msi" -OutFile cmake.msi
         Start-Process msiexec.exe -Wait -ArgumentList '/i cmake.msi /quiet /norestart'
 
-    - name: Install SFML
+    - name: Download and Install SFML
       run: |
-        choco install sfml -y
+        Invoke-WebRequest -Uri "https://www.sfml-dev.org/files/SFML-2.5.1-windows-vc15-64-bit.zip" -OutFile sfml.zip
+        Expand-Archive sfml.zip -DestinationPath "C:\SFML"
 
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 16" -A x64
+        cmake .. -G "Visual Studio 16" -A x64 -DCMAKE_PREFIX_PATH="C:\SFML"
 
     - name: Build
       run: |
