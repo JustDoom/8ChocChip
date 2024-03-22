@@ -76,7 +76,7 @@ jobs:
           CMAKE_C_COMPILER: $TOOLCHAIN
           CMAKE_CXX_COMPILER: $TOOLCHAIN
         working-directory: build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DSFML_DIR=/usr/lib/x86_64-linux-gnu/pkgconfig/SFML.pc (or adjust for your SFML installation path)
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DSFML_DIR=/usr/lib/x86_64-linux-gnu/pkgconfig/SFML.pc # (or adjust for your SFML installation path)
 
       - name: Build
         working-directory: build
