@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build
 
 on:
   push:
@@ -29,31 +29,43 @@ jobs:
           name: ubuntu-executable
           path: build/src/8ChocChip
 
-  # build-windows:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       arch: [x64, x86]  # Target architectures for Windows EXE
 
-  #   steps:
-  #     - uses: actions/checkout@v3
+  build-windows:
+    runs-on: windows-latest
+  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+  
+      - name: Install CMake
+        run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
+  
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat
+        working-directory: ${{ github.workspace }}
+  
+      - name: Set VCPKG_ROOT environment variable
+        run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
 
-  #     - name: Install dependencies (SFML, build tools)
-  #       run: |
-  #         sudo apt-get update && sudo apt-get install -y \
-  #           build-essential \
-  #           cmake \
-  #           gcc-multilib \
-  #           g++-multilib \
-  #           libtool \
-  #           pkg-config \
-  #           libsfml-dev \
-  #           libudev-dev \
-  #           libopenal-dev \
-  #           libvorbis-dev \
-  #           libflac-dev \
-  #           libxrandr-dev \
-  #           libxcursor-dev
+      - name: Install SFML with vcpkg
+        run: vcpkg install sfml
+  
+      - name: Configure and build
+        run: |
+          mkdir build && cd build
+          cmake -DBUILD_SHARED_LIBS=OFF ..
+          cmake --build . --config Release
+  
+      - name: Upload executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-executable
+          path: |
+            build/src/Release/*.exe
+            build/src/Release/*.dll
 
   #     - name: Configure build environment for target architecture
   #       run: |

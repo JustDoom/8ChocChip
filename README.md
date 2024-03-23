@@ -13,6 +13,8 @@ Thanks to these two blogs that helped me through creating this emulator
 There are a couple of things left to do until I would say it works well enough
 - [ ] Fix issue with score not increasing in the `BLINKY` game
 - [ ] Cleaner/more optimised code
+- [x] Windows Support
+- [ ] MacOS Support
 
 ## Usage
 

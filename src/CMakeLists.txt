@@ -7,15 +7,16 @@ add_executable(8ChocChip main.cpp
         Renderer.h
         Cpu.cpp
         Cpu.h)
-target_link_libraries(8ChocChip PRIVATE sfml-graphics sfml-audio)
+target_link_libraries(8ChocChip PRIVATE sfml-graphics sfml-audio sfml-window sfml-system)
 
-if (WIN32)
-    foreach (SFML_LIB ${SFML_LIBRARIES})
-        get_filename_component(SFML_LIB_DIR ${SFML_LIB} DIRECTORY)
-        file(GLOB SFML_DLLS "${SFML_LIB_DIR}/*.dll")
-        foreach (SFML_DLL ${SFML_DLLS})
-            add_custom_command(TARGET 8ChocChip POST_BUILD COMMAND
-                    ${CMAKE_COMMAND} -E copy_if_different ${SFML_DLL} $<TARGET_FILE_DIR:8ChocChip>)
-        endforeach()
-    endforeach()
+# Copy DLLs needed for runtime on Windows
+if(WIN32)
+    if (BUILD_SHARED_LIBS)
+        add_custom_command(TARGET 8ChocChip POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:sfml-graphics>
+                $<TARGET_FILE:sfml-window>
+                $<TARGET_FILE:sfml-system>
+                $<TARGET_FILE_DIR:8ChocChip>)
+    endif()
 endif()
