@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include <SFML/Graphics.hpp>
+#include <cstdint>
 
 class Keyboard {
 public:

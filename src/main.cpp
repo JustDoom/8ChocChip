@@ -6,6 +6,7 @@
 #include "Keyboard.h"
 #include "Renderer.h"
 #include "Speaker.h"
+#include "fstream"
 
 int main(int argc, char** argv)
 {
@@ -14,7 +15,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (std::filesystem::exists(argv[1])) {
+    std::ifstream file(argv[1], std::ios::binary | std::ios::ate);
+    if (file.good()) {
         std::cout << argv[1] << std::endl;
     } else {
         std::cerr << "Can not find file" << std::endl;
@@ -28,7 +30,7 @@ int main(int argc, char** argv)
 
     cpu.loadSpritesIntoMemory();
 
-    cpu.loadProgramIntoMemory(argv[1]);
+    cpu.loadProgramIntoMemory(&file);
 
     sf::RenderWindow window(sf::VideoMode(renderer.getColumns() * renderer.getScale(), renderer.getRows() * renderer.getScale()), "CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
     // TODO: Add icon - window.setIcon();

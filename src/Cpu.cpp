@@ -20,7 +20,7 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker) {
 }
 
 void Cpu::loadSpritesIntoMemory() {
-    std::vector<u_int8_t> sprites = {
+    const std::vector<uint8_t> sprites = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
         0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -39,19 +39,18 @@ void Cpu::loadSpritesIntoMemory() {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    for (int i = 0; i < sprites.size(); i++) {
-        this->memory[i] = sprites[i];
+    for (unsigned char sprite : sprites) {
+        this->memory.push_back(sprite);
     }
 }
 
-void Cpu::loadProgramIntoMemory(const char *filename) {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
-    if (file.is_open()) {
-        std::streampos size = file.tellg();
+void Cpu::loadProgramIntoMemory(std::ifstream* file) {
+    if (file->is_open()) {
+        std::streampos size = file->tellg();
         std::vector<char> buffer(size);
-        file.seekg(0, std::ios::beg);
-        file.read(buffer.data(), size);
-        file.close();
+        file->seekg(0, std::ios::beg);
+        file->read(buffer.data(), size);
+        file->close();
 
         // Load ROM into memory
         std::copy(buffer.begin(), buffer.end(), this->memory.begin() + 0x200);
@@ -62,7 +61,7 @@ void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
         if (this->paused) continue;
 
-        u_int16_t opcode = (this->memory[this->pc] << 8 | this->memory[this->pc + 1]);
+        uint16_t opcode = (this->memory[this->pc] << 8 | this->memory[this->pc + 1]);
         runInstruction(opcode);
     }
 
@@ -78,11 +77,11 @@ void Cpu::cycle() {
     }
 }
 
-void Cpu::runInstruction(u_int16_t opcode) {
+void Cpu::runInstruction(uint16_t opcode) {
     this->pc += 2;
 
-    u_int8_t x = (opcode & 0x0F00) >> 8;
-    u_int8_t y = (opcode & 0x00F0) >> 4;
+    uint8_t x = (opcode & 0x0F00) >> 8;
+    uint8_t y = (opcode & 0x00F0) >> 4;
 
     switch (opcode & 0xF000) {
         case 0x0000:
@@ -143,7 +142,7 @@ void Cpu::runInstruction(u_int16_t opcode) {
                     this->registers[x] ^= this->registers[y];
                     break;
                 case 0x4: {
-                    const u_int16_t sum = this->registers[x] += this->registers[y];
+                    const uint16_t sum = this->registers[x] += this->registers[y];
 
                     this->registers[0xF] = 0;
 
@@ -199,12 +198,12 @@ void Cpu::runInstruction(u_int16_t opcode) {
         case 0xC000: {
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_int_distribution<uint8_t> dis(0, 0xFF);
+            std::uniform_int_distribution<int> dis(0, 0xFF);
 
-            // Generate a random number
-            const uint16_t rand_num = dis(gen);
+            int randInt = dis(gen); // Generate a random number
+            uint16_t rand = static_cast<uint16_t>(randInt);
 
-            this->registers[x] = rand_num & (opcode & 0xFF);
+            this->registers[x] = rand & (opcode & 0xFF);
             break;
         }
         case 0xD000: {
