@@ -57,15 +57,15 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DBUILD_SHARED_LIBS=OFF ..
-          cmake --build .
+          cmake --build . --config Release
   
       - name: Upload executable
         uses: actions/upload-artifact@v2
         with:
           name: windows-executable
           path: |
-            build/src/Debug/*.exe
-            build/src/Debug/*.dll
+            build/src/Release/*.exe
+            build/src/Release/*.dll
 
   #     - name: Configure build environment for target architecture
   #       run: |
