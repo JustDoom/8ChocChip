@@ -56,7 +56,7 @@ jobs:
       - name: Configure and build
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake -DBUILD_SHARED_LIBS=OFF ..
           cmake --build .
   
       - name: Upload executable
