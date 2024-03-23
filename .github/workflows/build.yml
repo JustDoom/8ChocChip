@@ -88,18 +88,12 @@ jobs:
         working-directory: build
         run: cmake --build . --config Release
   
-      - name: Package executable
-        run: |
-          # Package the executable as needed (e.g., zip or install to an installer)
-          # For example, you can zip the executable
-          cd build
-          7z a 8ChocChip.zip Release/8ChocChip.exe
-  
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
+      - name: Archive Windows EXEs (recursive)
+        if: success()  # Only run if previous steps succeed
+        uses: actions/upload-artifact@v3
         with:
-          name: 8ChocChip
-          path: build/8ChocChip.zip
+          name: windows-exe  # Generic name (you can customize)
+          path: build/**/*.exe  # Capture all .exe files recursively
 
 
 
