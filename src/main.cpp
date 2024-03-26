@@ -25,7 +25,7 @@ public:
         button.setSize(sf::Vector2f(width, height));
         button.setPosition(sf::Vector2f(x, y));
 
-        font.loadFromFile("/home/doom/Downloads/font.ttf"); // Load your font here
+        font.loadFromFile("../assets/font.ttf"); // Load your font here
         text.setFont(font);
         text.setString(buttonText);
         text.setCharacterSize(24); // Set your text size
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 
     // sf::RenderWindow window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator");
     //
-    // TextButton button(300, 200, 200, 80, "CLick!");
+     TextButton button(300, 200, 200, 80, "CLick!");
     //
     // while (window.isOpen()) {
     //     sf::Event event;
