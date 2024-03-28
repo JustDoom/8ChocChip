@@ -16,7 +16,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev
+          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev libgtk-3-dev
 
       - name: Setup SSH key and Install submodules
         env:
