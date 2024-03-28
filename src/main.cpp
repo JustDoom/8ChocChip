@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <filesystem>
+#include <future>
 #include <iostream>
 
 #include "emulator/Cpu.h"
@@ -11,6 +12,69 @@
 #include "ui/TextButton.h"
 #include "util/MiscUtil.h"
 
+#include "nfd.h"
+
+int launch(const std::string& rom, const std::string& executable) {
+    if (rom.empty()) {
+        std::cerr << "Usage: " << executable << " <ROM file>" << std::endl;
+        return 1;
+    }
+
+    std::ifstream file(rom, std::ios::binary | std::ios::ate);
+    if (file.good()) {
+        std::cout << rom << std::endl;
+    } else {
+        std::cerr << "Can not find file " << rom << std::endl;
+        return 1;
+    }
+
+    Renderer renderer;
+    Speaker speaker;
+    Keyboard keyboard;
+    Cpu cpu(&renderer, &keyboard, &speaker);
+
+    cpu.loadSpritesIntoMemory();
+
+    cpu.loadProgramIntoMemory(&file);
+
+    sf::RenderWindow window(sf::VideoMode(renderer.getColumns() * renderer.getScale(), renderer.getRows() *
+    renderer.getScale()), "8ChocChip - CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
+    // TODO: Add icon - window.setIcon();
+
+    sf::Clock clock;
+
+    while (window.isOpen()) {
+        sf::Event event{};
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+
+            // Handle keyboard inputs
+            keyboard.handleEvent(event);
+        }
+
+        // Run a cycle of the emulator
+        cpu.cycle();
+
+        // Clear the window
+        window.clear(sf::Color::Black);
+
+        // Render the window
+        renderer.render(&window);
+        window.display();
+
+        // Keep it at 60fps
+        sf::Time elapsed = clock.restart();
+        sf::Time targetFrameTime = sf::seconds(1.0f / 60.0f);
+        if (elapsed < targetFrameTime) {
+            sleep(targetFrameTime - elapsed);
+        }
+    }
+
+     return 0;
+}
+
 int main(int argc, char **argv) {
     bool quickRom = false;
     std::string rom;
@@ -21,7 +85,6 @@ int main(int argc, char **argv) {
 
         std::string command = MiscUtil::toLowerCase(arg);
         if (command == "--rom") {
-            std::cout << argc << " - " << i << std::endl;
             if (argc - 1 <= i) {
                 std::cerr << "Please include the path to the file" << std::endl;
             } else {
@@ -32,66 +95,11 @@ int main(int argc, char **argv) {
     }
 
     if (quickRom) {
-        if (rom.empty()) {
-            std::cerr << "Usage: " << argv[0] << " <ROM file>" << std::endl;
-            return 1;
-        }
-
-        std::ifstream file(rom, std::ios::binary | std::ios::ate);
-        if (file.good()) {
-            std::cout << rom << std::endl;
-        } else {
-            std::cerr << "Can not find file " << rom << std::endl;
-            return 1;
-        }
-
-        Renderer renderer;
-        Speaker speaker;
-        Keyboard keyboard;
-        Cpu cpu(&renderer, &keyboard, &speaker);
-
-        cpu.loadSpritesIntoMemory();
-
-        cpu.loadProgramIntoMemory(&file);
-
-        sf::RenderWindow window(sf::VideoMode(renderer.getColumns() * renderer.getScale(), renderer.getRows() *
-        renderer.getScale()), "8ChocChip - CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
-        // TODO: Add icon - window.setIcon();
-
-        sf::Clock clock;
-
-        while (window.isOpen()) {
-            sf::Event event{};
-            while (window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
-                    window.close();
-                }
-
-                // Handle keyboard inputs
-                keyboard.handleEvent(event);
-            }
-
-            // Run a cycle of the emulator
-            cpu.cycle();
-
-            // Clear the window
-            window.clear(sf::Color::Black);
-
-            // Render the window
-            renderer.render(&window);
-            window.display();
-
-            // Keep it at 60fps
-            sf::Time elapsed = clock.restart();
-            sf::Time targetFrameTime = sf::seconds(1.0f / 60.0f);
-            if (elapsed < targetFrameTime) {
-                sleep(targetFrameTime - elapsed);
-            }
-        }
+        return launch(rom, argv[0]);
     } else {
         sf::RenderWindow window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator");
 
-        TextButton button(300, 200, 200, 80, "Click!");
+        TextButton button(300, 200, 200, 80, "Select ROM");
 
         while (window.isOpen()) {
             sf::Event event;
@@ -109,6 +117,20 @@ int main(int argc, char **argv) {
             }
 
             button.update(window);
+
+            if (button.isClicked()) {
+                nfdchar_t *outPath = nullptr;
+                nfdresult_t result = NFD_OpenDialog(nullptr, nullptr, &outPath);
+
+                if (result == NFD_OKAY) {
+                    return launch(outPath, argv[0]);
+                    // free(outPath);
+                } else if (result == NFD_CANCEL) {
+                    puts("User pressed cancel.");
+                } else {
+                    printf("Error: %s\n", NFD_GetError());
+                }
+            }
 
             window.clear(sf::Color::White);
             button.draw(window);

@@ -1,3 +1,6 @@
 [submodule "dependencies/sfml"]
 	path = dependencies/sfml
 	url = git@github.com:SFML/SFML.git
+[submodule "dependencies/nativefiledialog"]
+	path = dependencies/nativefiledialog
+	url = git@github.com:AlvaroBarua/nativefiledialog.git

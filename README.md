@@ -4,10 +4,6 @@
 
 The graphics and only library used in this is SFML which handles the window, inputs and sounds.
 
-Thanks to these two blogs that helped me through creating this emulator
-[How to Create Your Very Own Chip-8 Emulator](https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/)
-[Guide to making a CHIP-8 emulator ](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/)
-
 ## TODO
 
 There are a couple of things left to do until I would say it works well enough
@@ -27,3 +23,15 @@ I'll never tell ;)
 ### Requirements
 
 To build this it requires C++, CMake and whatever SFML and SFML Audio requires on your platform
+
+# Credits
+
+Thanks to these two blogs that helped me through creating this emulator
+[How to Create Your Very Own Chip-8 Emulator](https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/)
+[Guide to making a CHIP-8 emulator ](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/)
+
+## Libraries
+
+Currently, two libraries are being used
+- [SFML](https://github.com/SFML/SFML) - UI
+- [NativeFileDialog](https://github.com/mlabbe/nativefiledialog) - A fork of this is used for the CMakeLists files (https://github.com/AlvaroBarua/nativefiledialog/tree/CMakeLists)
