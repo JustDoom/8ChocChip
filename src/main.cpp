@@ -105,12 +105,12 @@ int main(int argc, char **argv) {
         icon.loadFromFile("../assets/icon.png");
         window.setIcon(64, 64, icon.getPixelsPtr());
 
-        std::vector<sf::Text> roms;
-
-        TextButton button(0, 400, 640, 80, "Select ROM");
-
         sf::Font font;
         font.loadFromFile("../assets/font.ttf");
+
+        std::unordered_map<std::string, TextButton> roms;
+
+        TextButton button(0, 400, 640, 80, "Select ROM", &font);
 
         while (window.isOpen()) {
             sf::Event event;
@@ -122,13 +122,28 @@ int main(int argc, char **argv) {
                 if (event.type == sf::Event::Resized) {
                     sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
                     window.setView(sf::View(visibleArea));
-                    button.updateSize(window.getSize(), originalWindowSize);
+
+                    for (auto& romButton : roms) {
+                        romButton.second.updateSize(originalWindowSize, window.getSize());
+                        romButton.second.update(window);
+                    }
+
+                    button.updateSize(originalWindowSize, window.getSize());
                     button.update(window);
                 }
             }
 
+            std::cout << roms.size() << std::endl;
+            for (auto& romButton : roms) {
+                romButton.second.update(window);
+            }
             button.update(window);
 
+            for (auto& romButton : roms) {
+                if (!romButton.second.isClicked()) continue;
+
+                return launch(romButton.first, argv[0]);
+            }
             if (button.isClicked()) {
                 nfdchar_t* outPath = nullptr;
                 nfdresult_t result = NFD_PickFolder(nullptr, &outPath); //NFD_OpenDialog(nullptr, nullptr, &outPath);
@@ -139,22 +154,16 @@ int main(int argc, char **argv) {
 
                     int count = 0;
                     for (const auto& file : std::filesystem::directory_iterator(outPath)) {
-                        sf::Text text;
-                        text.setPosition(10, 10 + 25 * count++);
-                        text.setFont(font);
-                        text.setString(file.path().filename().string());
-                        text.setCharacterSize(20);
-                        text.setFillColor(sf::Color::Black);
-                        roms.emplace_back(text);
+                        if (file.is_directory()) continue;
+                        TextButton romButton(0, 25 * count++, window.getSize().x, 25, file.path().filename().string(), &font);
+                        roms.emplace(file.path().string(), romButton);
                     }
-
-                    std::cout << roms.size() << std::endl;
                 }
             }
 
             window.clear(sf::Color::White);
-            for (sf::Text rom : roms) {
-                window.draw(rom);
+            for (auto& romButton : roms) {
+                romButton.second.draw(window);
             }
             button.draw(window);
 

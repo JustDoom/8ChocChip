@@ -14,16 +14,15 @@ private:
     sf::Vector2f originalSize;
     sf::Vector2f originalPosition;
     sf::Text text;
-    sf::Font font;
+    sf::Font* font;
     sf::Color idleColor;
     sf::Color hoverColor;
     sf::Color activeColor;
     bool isPressed;
     bool isHovered;
-    bool lastPressed;
 
 public:
-    TextButton(float x, float y, float width, float height, std::string buttonText);
+    TextButton(float x, float y, float width, float height, std::string buttonText, sf::Font* font);
 
     void updateSize(const sf::Vector2u originalSize, const sf::Vector2u updatedSize);
 
