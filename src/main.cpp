@@ -13,6 +13,8 @@
 #include "util/MiscUtil.h"
 
 #include "nfd.h"
+#include "libconfig.h"
+#include "libconfig.hh"
 
 int launch(const std::string& rom, const std::string& executable) {
     if (rom.empty()) {
@@ -77,6 +79,16 @@ int launch(const std::string& rom, const std::string& executable) {
      return 0;
 }
 
+std::string getFileFromPath(std::string path) {
+    size_t lastSlashPos = path.find_last_of('/');
+
+    if (lastSlashPos != std::string::npos) {
+        return path.substr(lastSlashPos + 1);
+    }
+
+    return path;
+}
+
 int main(int argc, char **argv) {
     bool quickRom = false;
     std::string rom;
@@ -96,6 +108,64 @@ int main(int argc, char **argv) {
         }
     }
 
+    std::string home = std::filesystem::path(getenv("HOME")).string();
+    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
+
+    std::vector<std::string> romDirectories;
+    std::unordered_map<std::string*, std::vector<std::string>> romFiles;
+
+    std::ifstream file(configFilePath, std::ios::binary | std::ios::ate);
+    if (file.good()) {
+        libconfig::Config config;
+        config.readFile(configFilePath);
+
+        libconfig::Setting &settings = config.getRoot();
+
+        if (!settings.exists("directories")) {
+            settings.add("directories", libconfig::Setting::TypeArray);
+        }
+
+        libconfig::Setting &directories = settings["directories"];
+        for (int i = 0; i < directories.getLength(); i++) {
+            libconfig::Setting &string = directories[i];
+            std::string directoryPath = string.c_str();
+
+            romDirectories.emplace_back(directoryPath);
+
+            for (const auto& file: std::filesystem::directory_iterator(directoryPath)) {
+                if (file.is_directory())
+                    continue; // Skip directories
+
+                printf("Processing file: %s\n", file.path().c_str());
+
+                // Check if the rom directory doesn't exist in romFiles, then add it
+                if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+                    romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                }
+
+                // Add the file path to the romFiles entry
+                romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+            }
+        }
+
+    } else {
+        config_t cfg;
+        config_init(&cfg);
+
+        config_setting_t *root = config_root_setting(&cfg);
+        config_setting_t *list = config_setting_add(root, "directories", CONFIG_TYPE_LIST);
+
+        if (config_write_file(&cfg, configFilePath.c_str()) == CONFIG_FALSE) {
+            std::cerr << "Error creating configuration file." << std::endl;
+            config_destroy(&cfg);
+            return 1;
+        }
+
+        std::cout << "Configuration file created successfully." << std::endl;
+
+        config_destroy(&cfg);
+    }
+
     if (quickRom) {
         return launch(rom, argv[0]);
     } else {
@@ -109,6 +179,15 @@ int main(int argc, char **argv) {
         font.loadFromFile("../assets/font.ttf");
 
         std::unordered_map<std::string, TextButton> roms;
+
+        for (auto& thing : romFiles) {
+            for (std::string& file : thing.second) {
+
+                TextButton romButton(0, 25 * roms.size(), window.getSize().x, 25, getFileFromPath(file), &font);
+
+                roms.emplace(file, romButton);
+            }
+        }
 
         TextButton button(0, 400, 640, 80, "Select ROM", &font);
 
@@ -133,7 +212,6 @@ int main(int argc, char **argv) {
                 }
             }
 
-            std::cout << roms.size() << std::endl;
             for (auto& romButton : roms) {
                 romButton.second.update(window);
             }
@@ -146,18 +224,41 @@ int main(int argc, char **argv) {
             }
             if (button.isClicked()) {
                 nfdchar_t* outPath = nullptr;
-                nfdresult_t result = NFD_PickFolder(nullptr, &outPath); //NFD_OpenDialog(nullptr, nullptr, &outPath);
+                nfdresult_t result = NFD_PickFolder(nullptr, &outPath);
 
                 if (result == NFD_OKAY) {
-                    // return launch(outPath, argv[0]);
-                    // free(outPath);
+                    libconfig::Config config;
+                    config.readFile(configFilePath);
 
-                    int count = 0;
+                    libconfig::Setting& settings = config.getRoot();
+
+                    if (!settings.exists("directories")) {
+                        settings.add("directories", libconfig::Setting::TypeArray);
+                    }
+
+                    libconfig::Setting& directories = settings["directories"];
+                    directories.add(libconfig::Setting::TypeString) = outPath;
+
+                    romDirectories.emplace_back(outPath);
+
                     for (const auto& file : std::filesystem::directory_iterator(outPath)) {
-                        if (file.is_directory()) continue;
-                        TextButton romButton(0, 25 * count++, window.getSize().x, 25, file.path().filename().string(), &font);
+                        if (file.is_directory()) continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
+
+                        printf("Processing file - : %s\n", file.path().c_str());
+
+                        // Check if the rom directory doesn't exist in romFiles, then add it
+                        if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+                            romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                        }
+
+                        // Add the file path to the romFiles entry
+                        romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+
+                        TextButton romButton(0, 25 * roms.size(), window.getSize().x, 25, file.path().filename().string(), &font);
                         roms.emplace(file.path().string(), romButton);
                     }
+;
+                    config.writeFile(configFilePath);
                 }
             }
 

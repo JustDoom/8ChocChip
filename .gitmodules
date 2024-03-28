@@ -4,3 +4,6 @@
 [submodule "dependencies/nativefiledialog"]
 	path = dependencies/nativefiledialog
 	url = git@github.com:AlvaroBarua/nativefiledialog.git
+[submodule "dependencies/libconfig"]
+	path = dependencies/libconfig
+	url = git@github.com:hyperrealm/libconfig.git

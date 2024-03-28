@@ -5,3 +5,4 @@ endif()
 
 add_subdirectory(sfml)
 add_subdirectory(nativefiledialog)
+add_subdirectory(libconfig)
