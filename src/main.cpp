@@ -39,7 +39,9 @@ int launch(const std::string& rom, const std::string& executable) {
 
     sf::RenderWindow window(sf::VideoMode(renderer.getColumns() * renderer.getScale(), renderer.getRows() *
     renderer.getScale()), "8ChocChip - CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
-    // TODO: Add icon - window.setIcon();
+    sf::Image icon;
+    icon.loadFromFile("../assets/icon.png");
+    window.setIcon(64, 64, icon.getPixelsPtr());
 
     sf::Clock clock;
 
