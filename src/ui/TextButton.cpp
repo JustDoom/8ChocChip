@@ -5,49 +5,55 @@
 #include "TextButton.h"
 
 TextButton::TextButton(float x, float y, float width, float height, std::string buttonText) {
-    button.setSize(sf::Vector2f(width, height));
-    button.setPosition(sf::Vector2f(x, y));
+    this->button.setSize(sf::Vector2f(width, height));
+    this->button.setPosition(sf::Vector2f(x, y));
 
-    font.loadFromFile("../assets/font.ttf"); // Load your font here
-    text.setFont(font);
-    text.setString(buttonText);
-    text.setCharacterSize(24); // Set your text size
-    text.setFillColor(sf::Color::Black);
-    text.setPosition(x + width / 4, y + height / 4); // Adjust text position
+    this->originalPosition = this->button.getPosition();
+    this->originalSize = this->button.getSize();
 
-    idleColor = sf::Color(192, 192, 192); // Grey
-    hoverColor = sf::Color(128, 128, 128); // Dark Grey
-    activeColor = sf::Color(64, 64, 64); // Darker Grey
+    this->font.loadFromFile("../assets/font.ttf");
+    this->text.setFont(this->font);
+    this->text.setString(buttonText);
+    this->text.setCharacterSize(20);
+    this->text.setFillColor(sf::Color::Black);
+    this->text.setPosition(x + width / 2 - this->text.getGlobalBounds().width / 2, y + height / 2 - this->text.getGlobalBounds().height / 2);
 
-    button.setFillColor(idleColor);
+    this->idleColor = sf::Color(192, 192, 192);
+    this->hoverColor = sf::Color(128, 128, 128);
+    this->activeColor = sf::Color(64, 64, 64);
 
-    isPressed = false;
-    isHovered = false;
+    this->button.setFillColor(this->idleColor);
+
+    this->isPressed = false;
+    this->isHovered = false;
 }
 
-void TextButton::updateSize(float width, float height) {
-    button.setSize(sf::Vector2f(width, height));
+void TextButton::updateSize(const sf::Vector2u originalSize, const sf::Vector2u updatedSize) {
+    this->button.setSize(sf::Vector2f(this->originalSize.x * originalSize.x / updatedSize.x, this->originalSize.y * originalSize.y / updatedSize.y));
+    this->button.setPosition(this->originalPosition.x * originalSize.x / updatedSize.x, this->originalPosition.y * originalSize.y / updatedSize.y);
+
+    this->text.setPosition(this->button.getPosition().x + this->button.getSize().x / 2 - this->text.getGlobalBounds().width / 2, this->button.getPosition().y + this->button.getSize().y / 2 - this->text.getGlobalBounds().height / 2);
 }
 
-void TextButton::update(sf::RenderWindow &window) {
-    isHovered = button.getGlobalBounds().contains(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
+void TextButton::update(sf::RenderWindow& window) {
+    this->isHovered = this->button.getGlobalBounds().contains(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
 
-    if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-        isPressed = true;
-        button.setFillColor(activeColor);
-    } else if (isHovered) {
-        button.setFillColor(hoverColor);
+    if (this->isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        this->isPressed = true;
+        this->button.setFillColor(this->activeColor);
+    } else if (this->isHovered) {
+        this->button.setFillColor(this->hoverColor);
     } else {
-        isPressed = false;
-        button.setFillColor(idleColor);
+        this->isPressed = false;
+        this->button.setFillColor(this->idleColor);
     }
 }
 
 void TextButton::draw(sf::RenderWindow &window) {
-    window.draw(button);
-    window.draw(text);
+    window.draw(this->button);
+    window.draw(this->text);
 }
 
 bool TextButton::isClicked() {
-    return isPressed;
+    return this->isPressed;
 }

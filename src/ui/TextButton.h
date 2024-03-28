@@ -11,6 +11,8 @@
 class TextButton {
 private:
     sf::RectangleShape button;
+    sf::Vector2f originalSize;
+    sf::Vector2f originalPosition;
     sf::Text text;
     sf::Font font;
     sf::Color idleColor;
@@ -18,11 +20,12 @@ private:
     sf::Color activeColor;
     bool isPressed;
     bool isHovered;
+    bool lastPressed;
 
 public:
     TextButton(float x, float y, float width, float height, std::string buttonText);
 
-    void updateSize(float width, float height);
+    void updateSize(const sf::Vector2u originalSize, const sf::Vector2u updatedSize);
 
     void update(sf::RenderWindow& window);
 

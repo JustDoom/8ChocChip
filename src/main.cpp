@@ -14,6 +14,8 @@
 
 #include "nfd.h"
 
+sf::Vector2u originalWindowSize;
+
 int launch(const std::string& rom, const std::string& executable) {
     if (rom.empty()) {
         std::cerr << "Usage: " << executable << " <ROM file>" << std::endl;
@@ -100,11 +102,12 @@ int main(int argc, char **argv) {
         return launch(rom, argv[0]);
     } else {
         sf::RenderWindow window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator");
+        originalWindowSize = window.getSize();
         sf::Image icon;
         icon.loadFromFile("../assets/icon.png");
         window.setIcon(64, 64, icon.getPixelsPtr());
 
-        TextButton button(300, 200, 200, 80, "Select ROM");
+        TextButton button(0, 400, 640, 80, "Select ROM");
 
         while (window.isOpen()) {
             sf::Event event;
@@ -115,9 +118,8 @@ int main(int argc, char **argv) {
                 if (event.type == sf::Event::Resized) {
                     sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
                     window.setView(sf::View(visibleArea));
-                    button.updateSize(event.size.width / 4,
-                                      event.size.height / 3); // Update button size based on window size
-                    button.update(window); // Update button after resizing
+                    button.updateSize(window.getSize(), originalWindowSize);
+                    button.update(window);
                 }
             }
 
@@ -130,10 +132,6 @@ int main(int argc, char **argv) {
                 if (result == NFD_OKAY) {
                     return launch(outPath, argv[0]);
                     // free(outPath);
-                } else if (result == NFD_CANCEL) {
-                    puts("User pressed cancel.");
-                } else {
-                    printf("Error: %s\n", NFD_GetError());
                 }
             }
 
