@@ -8,4 +8,4 @@ add_subdirectory(src)
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
-#install(DIRECTORY assets DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY assets DESTINATION ${CMAKE_INSTALL_PREFIX})

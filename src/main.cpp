@@ -98,6 +98,9 @@ int main(int argc, char **argv) {
         return launch(rom, argv[0]);
     } else {
         sf::RenderWindow window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator");
+        sf::Image icon;
+        icon.loadFromFile("../assets/icon.png");
+        window.setIcon(128, 128, icon.getPixelsPtr());
 
         TextButton button(300, 200, 200, 80, "Select ROM");
 
