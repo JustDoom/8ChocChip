@@ -1,28 +1,39 @@
 # 8ChocChip
 
-8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation. I decided to program it in C++ because I wanted to do more in it.
+8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation. 
+I decided to program this in C++ because I wanted to do more in it and improve my skills.
 
-The graphics and only library used in this is SFML which handles the window, inputs and sounds.
+The graphics and only library used in this is SFML which handles the window, inputs and sounds. 
+libconfig is used to manage config and save data files, and NativeFileDialog is used for basic popup windows like the file/directory selector.
 
 ## TODO
 
 There are a couple of things left to do until I would say it works well enough
-- [ ] Fix issue with score not increasing in the `BLINKY` game
+- [ ] Fix some of the instructions that result in most programs failing except for `BLINKY`
 - [ ] Cleaner/more optimised code
-- [x] Windows Support
+- [x] ~~Windows Support~~ Needs fixing again, GitHub actions just don't like it at the moment, compilable on a local machine though.
 - [ ] MacOS Support
+- [ ] Easily support multiple graphics frameworks for different platform support if the primary one doesn't support them (Desktop, Mobile, Game Consoles etc)
 
 ## Usage
 
-To run 8ChocChip, run it though the command line, and it requires the path to a program file to emulate. Some basic ROMS can be found [here](https://github.com/ericgrandt/chip8-emulator/tree/master/roms).
+To run 8ChocChip you can either launch the executable file with the command line and specify a rom to instantly launch into like this `/path/to/exectable/8ChocChip --rom /path/to/rom.8ch`. 
+Or you can normally launch the executable to open the UI and manage it from there.
+
+Some basic ROMS can be found [here](https://github.com/ericgrandt/chip8-emulator/tree/master/roms).
 
 ## Building
 
-I'll never tell ;)
+Until a proper building section is created, just follow the commands that are used in the GitHub actions workflow for your platform.
+
+https://github.com/JustDoom/8ChocChip/blob/master/.github/workflows/build.yml
+
+Follow the commands but not everything is required to be executed exactly as the file does.
+Some parts are just setting up ssh or installing dependencies which you may have installed already or have different methods to accomplish the task.
 
 ### Requirements
 
-To build this it requires C++, CMake and whatever SFML and SFML Audio requires on your platform
+To build this it requires C++, CMake and whatever SFML and SFML Audio requires on your platform. Check build file above.
 
 # Credits
 
@@ -32,6 +43,7 @@ Thanks to these two blogs that helped me through creating this emulator
 
 ## Libraries
 
-Currently, two libraries are being used
-- [SFML](https://github.com/SFML/SFML) - UI
+Currently, three libraries are being used
+- [SFML](https://github.com/SFML/SFML) - UI, graphics, input and sounds
 - [NativeFileDialog](https://github.com/mlabbe/nativefiledialog) - A fork of this is used for the CMakeLists files (https://github.com/AlvaroBarua/nativefiledialog/tree/CMakeLists)
+- [libconfig](https://github.com/hyperrealm/libconfig) - Library to manage save data (like directories that hold ROMs) and possible future config files
