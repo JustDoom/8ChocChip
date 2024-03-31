@@ -1,21 +1,16 @@
-//
-// Created by doom on 19/03/24.
-//
-
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
 #include <unordered_map>
 #include <vector>
 #include <functional>
-#include <SFML/Graphics.hpp>
 #include <cstdint>
 
 class Keyboard {
 public:
     std::unordered_map<uint8_t, bool> keysPressed;
     std::function<void(unsigned char)> onNextKeyPress;
-    std::unordered_map<int, unsigned char> KEYMAP = {
+    std::unordered_map<uint8_t, unsigned char> KEYMAP = {
         {27, 0x1}, // 1
         {28, 0x2}, // 2
         {29, 0x3}, // 3
@@ -35,7 +30,8 @@ public:
     };
 
     void setOnNextKeyPress(std::function<void(unsigned char)> callback);
-    void handleEvent(sf::Event event);
+    virtual void handleKeyDown(uint8_t keyCode) = 0;
+    virtual void handleKeyUp(uint8_t keyCode) = 0;
     bool isKeyPressed(int keyCode);
 };
 

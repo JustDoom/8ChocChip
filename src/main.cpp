@@ -4,12 +4,12 @@
 #include <iostream>
 
 #include "emulator/Cpu.h"
-#include "emulator/Keyboard.h"
-#include "emulator/Renderer.h"
-#include "emulator/Speaker.h"
+#include "sfml/SfmlKeyboard.h"
+#include "sfml/SfmlRenderer.h"
+#include "sfml/SfmlSpeaker.h"
 #include "fstream"
 
-#include "ui/TextButton.h"
+#include "sfml/ui/TextButton.h"
 #include "util/MiscUtil.h"
 
 #include "nfd.h"
@@ -23,27 +23,25 @@ int launch(const std::string& rom, const std::string& executable) {
     }
 
     std::ifstream file(rom, std::ios::binary | std::ios::ate);
-    if (file.good()) {
-        std::cout << rom << std::endl;
-    } else {
+    if (!file.good()) {
         std::cerr << "Can not find file " << rom << std::endl;
         return 1;
     }
 
-    Renderer renderer;
-    Speaker speaker;
-    Keyboard keyboard;
+    sf::RenderWindow window(sf::VideoMode(64 * 15, 32 * 15), "8ChocChip - CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
+    sf::Image icon;
+    icon.loadFromFile("../assets/icon.png");
+    window.setIcon(64, 64, icon.getPixelsPtr());
+
+    SfmlRenderer renderer(&window);
+
+    SfmlSpeaker speaker;
+    SfmlKeyboard keyboard;
     Cpu cpu(&renderer, &keyboard, &speaker);
 
     cpu.loadSpritesIntoMemory();
 
     cpu.loadProgramIntoMemory(&file);
-
-    sf::RenderWindow window(sf::VideoMode(renderer.getColumns() * renderer.getScale(), renderer.getRows() *
-    renderer.getScale()), "8ChocChip - CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
-    sf::Image icon;
-    icon.loadFromFile("../assets/icon.png");
-    window.setIcon(64, 64, icon.getPixelsPtr());
 
     sf::Clock clock;
 
@@ -55,7 +53,11 @@ int launch(const std::string& rom, const std::string& executable) {
             }
 
             // Handle keyboard inputs
-            keyboard.handleEvent(event);
+            if (event.type == sf::Event::KeyPressed) {
+                keyboard.handleKeyDown(event.key.code);
+            } else if (event.type == sf::Event::KeyReleased) {
+                keyboard.handleKeyUp(event.key.code);
+            }
         }
 
         // Run a cycle of the emulator
@@ -65,7 +67,7 @@ int launch(const std::string& rom, const std::string& executable) {
         window.clear(sf::Color::Black);
 
         // Render the window
-        renderer.render(&window);
+        renderer.render();
         window.display();
 
         // Keep it at 60fps

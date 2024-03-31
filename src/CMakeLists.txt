@@ -1,6 +1,11 @@
-add_executable(8ChocChip)
+add_executable(8ChocChip
+        sfml/SfmlSpeaker.h
+        sfml/SfmlRenderer.cpp
+        sfml/SfmlRenderer.h
+        sfml/SfmlKeyboard.cpp
+        sfml/SfmlKeyboard.h)
 
-add_subdirectory(ui)
+add_subdirectory(sfml)
 add_subdirectory(util)
 add_subdirectory(emulator)
 

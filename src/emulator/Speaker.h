@@ -1,23 +1,10 @@
-//
-// Created by doom on 19/03/24.
-//
-
 #ifndef SPEAKER_H
 #define SPEAKER_H
 
-#include <SFML/Audio.hpp>
-
 class Speaker {
 public:
-    Speaker();
-
-    void play();
-    void stop();
-private:
-    sf::SoundBuffer soundBuffer;
-    sf::Sound sound;
+    virtual void play() = 0;
+    virtual void stop() = 0;
 };
-
-
 
 #endif //SPEAKER_H

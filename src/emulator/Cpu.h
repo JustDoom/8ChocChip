@@ -5,18 +5,18 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include <vector>
-#include <random>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <random>
+#include <vector>
 #include "Keyboard.h"
-#include "Speaker.h"
 #include "Renderer.h"
-#include <cstdint>
+#include "Speaker.h"
 
 class Cpu {
 public:
-    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker);
+    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker);
 
     void loadSpritesIntoMemory();
     void loadProgramIntoMemory(std::ifstream* file);
@@ -38,7 +38,7 @@ private:
 
     Renderer* renderer;
     Keyboard* keyboard;
-    Speaker* speaker;
+    Speaker * speaker;
 };
 
 #endif //CPU_H

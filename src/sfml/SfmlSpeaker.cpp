@@ -1,11 +1,7 @@
-//
-// Created by doom on 19/03/24.
-//
-
-#include "Speaker.h"
+#include "SfmlSpeaker.h"
 #include <cmath>
 
-Speaker::Speaker() {
+SfmlSpeaker::SfmlSpeaker() {
 
     this->sound.setVolume(100.f);
     this->sound.setLoop(true);
@@ -21,11 +17,11 @@ Speaker::Speaker() {
     this->sound.setBuffer(this->soundBuffer);
 }
 
-void Speaker::play() {
+void SfmlSpeaker::play() {
     this->sound.play();
 }
 
-void Speaker::stop() {
+void SfmlSpeaker::stop() {
     this->sound.stop();
 }
 

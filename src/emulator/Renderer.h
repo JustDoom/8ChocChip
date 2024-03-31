@@ -1,11 +1,6 @@
-//
-// Created by doom on 19/03/24.
-//
-
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <SFML/Graphics.hpp>
 #include <vector>
 #include <cstdint>
 
@@ -17,18 +12,17 @@ public:
 
     void clear();
 
-    void render(sf::RenderWindow* window);
+    void render();
 
     uint16_t getColumns() const;
     uint16_t getRows() const;
-    uint8_t getScale() const;
-private:
-    std::vector<bool> display;
-    uint8_t scale;
-    uint16_t columns = 64;
-    uint16_t rows = 32;
 
-    void drawRectangle(sf::RenderWindow& window, int x, int y, int width, int height);
+    virtual void drawPixel(uint16_t x, uint16_t y) = 0;
+private:
+    const uint16_t columns = 64;
+    const uint16_t rows = 32;
+
+    std::vector<bool> display;
 };
 
 #endif //RENDERER_H

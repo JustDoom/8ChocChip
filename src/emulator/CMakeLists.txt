@@ -4,5 +4,5 @@ target_sources(8ChocChip PRIVATE Cpu.cpp
         Keyboard.h
         Renderer.cpp
         Renderer.h
-        Speaker.cpp
+        ../sfml/SfmlSpeaker.cpp
         Speaker.h)

@@ -4,7 +4,7 @@
 
 #include "Cpu.h"
 
-Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker) {
+Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->memory.resize(4096);
     this->registers.resize(16);
     this->address = 0;
