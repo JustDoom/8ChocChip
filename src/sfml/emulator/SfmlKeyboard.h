@@ -1,7 +1,7 @@
 #ifndef INC_8CHOCCHIP_SFMLKEYBOARD_H
 #define INC_8CHOCCHIP_SFMLKEYBOARD_H
 
-#include "../emulator/Keyboard.h"
+#include "../../emulator/Keyboard.h"
 
 class SfmlKeyboard : public Keyboard {
 public:

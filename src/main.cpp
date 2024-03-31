@@ -4,10 +4,10 @@
 #include <iostream>
 
 #include "emulator/Cpu.h"
-#include "sfml/SfmlKeyboard.h"
-#include "sfml/SfmlRenderer.h"
-#include "sfml/SfmlSpeaker.h"
 #include "fstream"
+#include "sfml/emulator/SfmlKeyboard.h"
+#include "sfml/emulator/SfmlRenderer.h"
+#include "sfml/emulator/SfmlSpeaker.h"
 
 #include "sfml/ui/TextButton.h"
 #include "util/MiscUtil.h"

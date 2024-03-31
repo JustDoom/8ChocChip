@@ -1,9 +1,9 @@
 #ifndef INC_8CHOCCHIP_SFMLRENDERER_H
 #define INC_8CHOCCHIP_SFMLRENDERER_H
 
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics.hpp"
 
-#include "../emulator/Renderer.h"
+#include "../../emulator/Renderer.h"
 
 class SfmlRenderer : public Renderer {
 private:
