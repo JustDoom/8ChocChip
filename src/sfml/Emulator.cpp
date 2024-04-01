@@ -37,12 +37,21 @@ int Emulator::launch(const std::string &rom) {
 
     sf::Clock clock;
 
+    bool focus;
+
     while (window.isOpen()) {
         sf::Event event{};
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+
+            if (event.type == sf::Event::LostFocus)
+                focus = false;
+            else if (event.type == sf::Event::GainedFocus)
+                focus = true;
+
+            if (!focus) continue;
 
             // Handle keyboard inputs
             if (event.type == sf::Event::KeyPressed) {

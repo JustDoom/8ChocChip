@@ -38,12 +38,19 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
 
     TextButton button(0, 400, 640, 80, "Select ROM", &font);
 
+    bool focus;
+
     while (this->window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+
+            if (event.type == sf::Event::LostFocus)
+                focus = false;
+            else if (event.type == sf::Event::GainedFocus)
+                focus = true;
 
             if (event.type == sf::Event::Resized) {
                 sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
@@ -59,10 +66,12 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
             }
         }
 
-        for (auto& romButton : roms) {
-            romButton.second.update(window);
+        if (focus) {
+            for (auto &romButton: roms) {
+                romButton.second.update(window);
+            }
+            button.update(this->window);
         }
-        button.update(this->window);
 
         for (auto& romButton : roms) {
             if (!romButton.second.isJustClicked()) continue;
