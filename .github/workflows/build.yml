@@ -1,14 +1,95 @@
-name: Build
+name: Build (MACOS TEST BRANCH)
 
 on:
   push:
     branches:
-      - master
+      - macos
   workflow_dispatch:
 
 jobs:
-  build-ubuntu:
-    runs-on: ubuntu-latest
+#  build-ubuntu:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: Install dependencies
+#        run: |
+#          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev libgtk-3-dev
+#
+#      - name: Setup SSH key and Install submodules
+#        env:
+#          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#        run: |
+#          mkdir -p ~/.ssh
+#          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+#          chmod 600 ~/.ssh/id_rsa
+#          ssh-keyscan github.com >> ~/.ssh/known_hosts
+#          git submodule update --init --recursive
+#
+#      - name: Configure and build
+#        run: |
+#          mkdir build && cd build
+#          cmake ..
+#          cmake --build .
+#
+#      - name: Upload executable
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: ubuntu-executable
+#          path: build/src/8ChocChip
+#
+#
+#  build-windows:
+#    runs-on: windows-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: Install CMake
+#        run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
+#
+#      - name: Install vcpkg
+#        run: |
+#          git clone https://github.com/microsoft/vcpkg.git
+#          cd vcpkg
+#          .\bootstrap-vcpkg.bat
+#        working-directory: ${{ github.workspace }}
+#
+#      - name: Set VCPKG_ROOT environment variable
+#        run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
+#
+#      - name: Install SFML with vcpkg
+#        run: vcpkg install sfml
+#
+#      - name: Setup SSH key and Install submodules
+#        run: |
+#          mkdir -p $HOME/.ssh
+#          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_rsa
+#          echo "StrictHostKeyChecking no" > $HOME/.ssh/config
+#          chmod 600 $HOME/.ssh/id_rsa
+#          ssh-keyscan github.com >> $HOME/.ssh/known_hosts
+#          git submodule update --init --recursive
+#
+#      - name: Configure and build
+#        run: |
+#          mkdir build && cd build
+#          cmake -DBUILD_SHARED_LIBS=OFF ..
+#          cmake --build . --config Release
+#
+#      - name: Upload executable
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: windows-executable
+#          path: |
+#            build/src/Release/*.exe
+#            build/src/Release/*.dll
+
+
+  build-macos:
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -16,7 +97,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev libgtk-3-dev
+          brew update
+          brew install cmake sfml udev openal-soft libvorbis flac gtk+3
 
       - name: Setup SSH key and Install submodules
         env:
@@ -37,117 +119,5 @@ jobs:
       - name: Upload executable
         uses: actions/upload-artifact@v2
         with:
-          name: ubuntu-executable
+          name: macos-executable
           path: build/src/8ChocChip
-
-
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install CMake
-        run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
-
-      - name: Install vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          .\bootstrap-vcpkg.bat
-        working-directory: ${{ github.workspace }}
-
-      - name: Set VCPKG_ROOT environment variable
-        run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
-
-      - name: Install SFML with vcpkg
-        run: vcpkg install sfml
-
-      - name: Setup SSH key and Install submodules
-        run: |
-          mkdir -p $HOME/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_rsa
-          echo "StrictHostKeyChecking no" > $HOME/.ssh/config
-          chmod 600 $HOME/.ssh/id_rsa
-          ssh-keyscan github.com >> $HOME/.ssh/known_hosts
-          git submodule update --init --recursive
-
-      - name: Configure and build
-        run: |
-          mkdir build && cd build
-          cmake -DBUILD_SHARED_LIBS=OFF ..
-          cmake --build . --config Release
-
-      - name: Upload executable
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows-executable
-          path: |
-            build/src/Release/*.exe
-            build/src/Release/*.dll
-
-
-  #     - name: Configure build environment for target architecture
-  #       run: |
-  #         export TARGET_ARCH=${{ matrix.arch }}
-  #         case $TARGET_ARCH in
-  #           x64)
-  #             # Set compiler and linker for 64-bit Windows target
-  #             export TOOLCHAIN=$(command -v x86_64-w64-mingw32-g++-posix)
-  #             ;;
-  #           x86)
-  #             # Set compiler and linker for 32-bit Windows target
-  #             export TOOLCHAIN=$(command -v i686-w64-mingw32-g++-posix)
-  #             ;;
-  #           *)
-  #             echo "Unsupported architecture: $TARGET_ARCH"
-  #             exit 1
-  #             ;;
-  #         esac
-  #         echo "Using compiler: $TOOLCHAIN"
-
-  #     - name: Create build directory
-  #       run: mkdir build
-
-  #     - name: Configure CMake (cross-compiling)
-  #       env:
-  #         CMAKE_C_COMPILER: $TOOLCHAIN
-  #         CMAKE_CXX_COMPILER: $TOOLCHAIN
-  #       working-directory: build
-  #       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DSFML_DIR=/usr/lib/x86_64-linux-gnu/pkgconfig/SFML.pc # (or adjust for your SFML installation path)
-
-  #     - name: Build
-  #       working-directory: build
-  #       run: cmake --build . --config Release
-  
-  #     - name: Archive Windows EXEs (recursive)
-  #       if: success()  # Only run if previous steps succeed
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: windows-exe  # Generic name (you can customize)
-  #         path: build/**/*.exe  # Capture all .exe files recursively
-
-
-
-  # build-macos:
-  #   runs-on: macos-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-
-  #     - name: Install dependencies
-  #       run: brew update && brew install cmake sfml
-
-  #     - name: Configure and build
-  #       run: |
-  #         mkdir build && cd build
-  #         cmake ..
-  #         cmake --build .
-
-  #     - name: Upload executable
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: macos-executable
-  #         path: build/src/8ChocChip
