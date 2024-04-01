@@ -98,7 +98,17 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install cmake sfml openal-soft libvorbis flac gtk+3 curl
+          brew install cmake sfml openal-soft libvorbis flac gtk+3 curl || echo "Dependency installation failed"
+
+      - name: Fix Python symlink conflicts
+        if: failure()
+        run: |
+          brew link --overwrite python@3.11
+
+      - name: Reinstall Azure CLI
+        if: failure()
+        run: |
+          brew reinstall azure-cli
 
       - name: Link OpenAL-Soft
         run: |
