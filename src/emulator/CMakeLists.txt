@@ -1,8 +1,8 @@
-target_sources(8ChocChip PRIVATE Cpu.cpp
+target_sources(8ChocChip PRIVATE
+        Cpu.cpp
         Cpu.h
         Keyboard.cpp
         Keyboard.h
         Renderer.cpp
         Renderer.h
-        ../sfml/emulator/SfmlSpeaker.cpp
         Speaker.h)
