@@ -137,8 +137,9 @@ jobs:
       - name: Configure and build
         run: |
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_OSX_ARCHITECTURES=x86_64
           cmake --build .
+      
 
       - name: Upload executable
         uses: actions/upload-artifact@v2
