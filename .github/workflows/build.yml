@@ -98,7 +98,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install cmake sfml udev openal-soft libvorbis flac gtk+3
+          brew install cmake sfml libusb openal-soft libvorbis flac gtk+3
 
       - name: Setup SSH key and Install submodules
         env:
