@@ -98,7 +98,21 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install cmake sfml libusb openal-soft libvorbis flac gtk+3
+          brew install cmake sfml openal-soft libvorbis flac gtk+3 curl
+
+      - name: Link OpenAL-Soft
+        run: |
+          echo 'export PATH="/usr/local/opt/openal-soft/bin:$PATH"' >> ~/.bash_profile
+          export LDFLAGS="-L/usr/local/opt/openal-soft/lib"
+          export CPPFLAGS="-I/usr/local/opt/openal-soft/include"
+          export PKG_CONFIG_PATH="/usr/local/opt/openal-soft/lib/pkgconfig"
+
+      - name: Link cURL
+        run: |
+          echo 'export PATH="/usr/local/opt/curl/bin:$PATH"' >> ~/.bash_profile
+          export LDFLAGS="-L/usr/local/opt/curl/lib"
+          export CPPFLAGS="-I/usr/local/opt/curl/include"
+          export PKG_CONFIG_PATH="/usr/local/opt/curl/lib/pkgconfig"
 
       - name: Setup SSH key and Install submodules
         env:
