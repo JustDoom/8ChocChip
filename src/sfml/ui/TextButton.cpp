@@ -35,6 +35,7 @@ void TextButton::updateSize(const sf::Vector2u originalSize, const sf::Vector2u 
 }
 
 void TextButton::update(sf::RenderWindow& window) {
+    this->lastPressed = this->isPressed;
     this->isHovered = this->button.getGlobalBounds().contains(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
 
     if (this->isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
@@ -55,4 +56,8 @@ void TextButton::draw(sf::RenderWindow &window) {
 
 bool TextButton::isClicked() {
     return this->isPressed;
+}
+
+bool TextButton::isJustClicked() {
+    return !this->lastPressed && this->isPressed;
 }

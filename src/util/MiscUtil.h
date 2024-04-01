@@ -10,6 +10,8 @@
 class MiscUtil {
 public:
     static std::string toLowerCase(const std::string& string);
+
+    static std::string getFileFromPath(std::string path);
 };
 
 

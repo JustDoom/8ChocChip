@@ -19,6 +19,7 @@ private:
     sf::Color hoverColor;
     sf::Color activeColor;
     bool isPressed;
+    bool lastPressed;
     bool isHovered;
 
 public:
@@ -31,6 +32,8 @@ public:
     void draw(sf::RenderWindow& window);
 
     bool isClicked();
+
+    bool isJustClicked();
 };
 
 
