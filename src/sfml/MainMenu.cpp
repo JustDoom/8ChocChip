@@ -11,6 +11,8 @@
 #include "libconfig.h"
 #include "libconfig.hh"
 
+#include <iostream>
+
 MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& romFiles,
                    std::vector<std::string>& romDirectories, std::vector<std::thread *>& windows,
                    std::string configFilePath) :
@@ -21,6 +23,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
     sf::Image icon;
     icon.loadFromFile("../../assets/icon.png");
     this->window.setIcon(64, 64, icon.getPixelsPtr());
+//    this->window.setVerticalSyncEnabled(true);
 
     sf::Font font;
     font.loadFromFile("../../assets/font.ttf");
@@ -30,7 +33,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
     for (auto& thing : romFiles) {
         for (std::string& file : thing.second) {
 
-            TextButton romButton(0, 25 * roms.size(), window.getSize().x, 25, MiscUtil::getFileFromPath(file), &font);
+            TextButton romButton(0, 25 * roms.size(), this->window.getSize().x, 25, MiscUtil::getFileFromPath(file), &font);
 
             roms.emplace(file, romButton);
         }
@@ -39,9 +42,19 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
     TextButton button(0, 400, 640, 80, "Select ROM", &font);
 
     bool focus;
+    bool debug = false;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed_seconds;
+
+    // Variables to count frames
+    int frames = 0;
+    double fps;
 
     while (this->window.isOpen()) {
         sf::Event event;
+        sf::Vector2i pos = sf::Mouse::getPosition(this->window);
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
@@ -58,19 +71,23 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
 
                 for (auto& romButton : roms) {
                     romButton.second.updateSize(originalWindowSize, this->window.getSize());
-                    romButton.second.update(this->window);
+                    romButton.second.update(this->window, pos);
                 }
 
                 button.updateSize(originalWindowSize, this->window.getSize());
-                button.update(this->window);
+                button.update(this->window, pos);
+            }
+
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::L) {
+                debug = !debug;
             }
         }
 
         if (focus) {
             for (auto &romButton: roms) {
-                romButton.second.update(window);
+                romButton.second.update(this->window, pos);
             }
-            button.update(this->window);
+            button.update(this->window, pos);
         }
 
         for (auto& romButton : roms) {
@@ -128,5 +145,23 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
         button.draw(this->window);
 
         this->window.display();
+
+        frames++;
+
+        end = std::chrono::high_resolution_clock::now();
+        elapsed_seconds = end - start;
+
+        // If elapsed time is greater than or equal to 1 second
+        if (debug && elapsed_seconds.count() >= 1.0) {
+            // Calculate FPS
+            fps = frames / elapsed_seconds.count();
+
+            // Output FPS
+            std::cout << "FPS: " << fps << std::endl;
+
+            // Reset frame count and start time
+            frames = 0;
+            start = std::chrono::high_resolution_clock::now();
+        }
     }
 }

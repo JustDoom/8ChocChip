@@ -27,7 +27,7 @@ public:
 
     void updateSize(const sf::Vector2u originalSize, const sf::Vector2u updatedSize);
 
-    void update(sf::RenderWindow& window);
+    void update(sf::RenderWindow& window, sf::Vector2i pos);
 
     void draw(sf::RenderWindow& window);
 
