@@ -1,7 +1,3 @@
-//
-// Created by doom on 19/03/24.
-//
-
 #include "Cpu.h"
 
 Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {

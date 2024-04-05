@@ -1,7 +1,3 @@
-//
-// Created by doom on 3/27/24.
-//
-
 #include "TextButton.h"
 
 TextButton::TextButton(float x, float y, float width, float height, std::string buttonText, sf::Font* font) {
@@ -40,13 +36,20 @@ void TextButton::update(sf::RenderWindow& window, sf::Vector2i pos) {
 
     if (this->isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
         this->isPressed = true;
-        this->button.setFillColor(this->activeColor);
+        updateColour(this->activeColor);
     } else if (this->isHovered) {
-        this->button.setFillColor(this->hoverColor);
+        updateColour(this->hoverColor);
     } else {
         this->isPressed = false;
-        this->button.setFillColor(this->idleColor);
+        updateColour(this->idleColor);
     }
+}
+
+void TextButton::updateColour(sf::Color color) {
+    if (this->color == color)
+        return;
+
+    this->button.setFillColor(color);
 }
 
 void TextButton::draw(sf::RenderWindow &window) {

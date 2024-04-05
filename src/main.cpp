@@ -73,7 +73,6 @@ int main(int argc, char **argv) {
                 romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
             }
         }
-
     } else {
         config_t cfg;
         config_init(&cfg);

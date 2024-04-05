@@ -15,6 +15,7 @@ private:
     sf::Vector2f originalPosition;
     sf::Text text;
     sf::Font* font;
+    sf::Color color;
     sf::Color idleColor;
     sf::Color hoverColor;
     sf::Color activeColor;
@@ -34,6 +35,8 @@ public:
     bool isClicked();
 
     bool isJustClicked();
+
+    void updateColour(sf::Color color);
 };
 
 

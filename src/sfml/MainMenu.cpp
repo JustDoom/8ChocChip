@@ -55,17 +55,14 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
     while (this->window.isOpen()) {
         sf::Event event;
         sf::Vector2i pos = sf::Mouse::getPosition(this->window);
-        while (window.pollEvent(event)) {
+        while (this->window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-
-            if (event.type == sf::Event::LostFocus)
+                this->window.close();
+            } else if (event.type == sf::Event::LostFocus) {
                 focus = false;
-            else if (event.type == sf::Event::GainedFocus)
+            } else if (event.type == sf::Event::GainedFocus) {
                 focus = true;
-
-            if (event.type == sf::Event::Resized) {
+            } else if (event.type == sf::Event::Resized) {
                 sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
                 this->window.setView(sf::View(visibleArea));
 
@@ -76,65 +73,63 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
 
                 button.updateSize(originalWindowSize, this->window.getSize());
                 button.update(this->window, pos);
-            }
-
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Key::L) {
-                debug = !debug;
+            } else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Key::L) {
+                    debug = !debug;
+                }
             }
         }
 
         if (focus) {
-            for (auto &romButton: roms) {
+            for (auto& romButton : roms) {
                 romButton.second.update(this->window, pos);
+
+                if (!romButton.second.isJustClicked()) continue;
+
+                Emulator emulator;
+                std::thread newWindow(&Emulator::launch, &emulator, romButton.first);
+                newWindow.detach();
+                windows.emplace_back(&newWindow);
             }
             button.update(this->window, pos);
-        }
 
-        for (auto& romButton : roms) {
-            if (!romButton.second.isJustClicked()) continue;
+            if (button.isClicked()) {
+                nfdchar_t* outPath = nullptr;
+                nfdresult_t result = NFD_PickFolder(nullptr, &outPath);
 
-            Emulator emulator;
-            std::thread newWindow(&Emulator::launch, &emulator, romButton.first);
-            newWindow.detach();
-            windows.emplace_back(&newWindow);
-        }
-        if (button.isClicked()) {
-            nfdchar_t* outPath = nullptr;
-            nfdresult_t result = NFD_PickFolder(nullptr, &outPath);
+                if (result == NFD_OKAY) {
+                    libconfig::Config config;
+                    config.readFile(configFilePath);
 
-            if (result == NFD_OKAY) {
-                libconfig::Config config;
-                config.readFile(configFilePath);
+                    libconfig::Setting& settings = config.getRoot();
 
-                libconfig::Setting& settings = config.getRoot();
-
-                if (!settings.exists("directories")) {
-                    settings.add("directories", libconfig::Setting::TypeArray);
-                }
-
-                libconfig::Setting& directories = settings["directories"];
-                directories.add(libconfig::Setting::TypeString) = outPath;
-
-                romDirectories.emplace_back(outPath);
-
-                for (const auto& file : std::filesystem::directory_iterator(outPath)) {
-                    if (file.is_directory()) continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
-
-                    printf("Processing file - : %s\n", file.path().c_str());
-
-                    // Check if the rom directory doesn't exist in romFiles, then add it
-                    if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
-                        romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                    if (!settings.exists("directories")) {
+                        settings.add("directories", libconfig::Setting::TypeArray);
                     }
 
-                    // Add the file path to the romFiles entry
-                    romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+                    libconfig::Setting& directories = settings["directories"];
+                    directories.add(libconfig::Setting::TypeString) = outPath;
 
-                    TextButton romButton(0, 25 * roms.size(), this->window.getSize().x, 25, file.path().filename().string(), &font);
-                    roms.emplace(file.path().string(), romButton);
+                    romDirectories.emplace_back(outPath);
+
+                    for (const auto& file : std::filesystem::directory_iterator(outPath)) {
+                        if (file.is_directory()) continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
+
+                        printf("Processing file - : %s\n", file.path().c_str());
+
+                        // Check if the rom directory doesn't exist in romFiles, then add it
+                        if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+                            romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                        }
+
+                        // Add the file path to the romFiles entry
+                        romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+
+                        TextButton romButton(0, 25 * roms.size(), this->window.getSize().x, 25, file.path().filename().string(), &font);
+                        roms.emplace(file.path().string(), romButton);
+                    }
+                    config.writeFile(configFilePath);
                 }
-                ;
-                config.writeFile(configFilePath);
             }
         }
 
