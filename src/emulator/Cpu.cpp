@@ -12,7 +12,7 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->soundTimer = 0;
     this->pc = 0x200; // Starting position for reading instructions. At least for most programs
     this->paused = false;
-    this->speed = 10; // Game speed
+    this->speed = 20; // Game speed
 
     this->renderer = renderer;
     this->keyboard = keyboard;

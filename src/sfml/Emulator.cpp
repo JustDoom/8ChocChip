@@ -24,6 +24,7 @@ int Emulator::launch(const std::string &rom) {
     sf::Image icon;
     icon.loadFromFile("../assets/icon.png");
     window.setIcon(64, 64, icon.getPixelsPtr());
+    window.setFramerateLimit(60);
 
     SfmlRenderer renderer(&window);
 
@@ -34,8 +35,6 @@ int Emulator::launch(const std::string &rom) {
     cpu.loadSpritesIntoMemory();
 
     cpu.loadProgramIntoMemory(&file);
-
-    sf::Clock clock;
 
     bool focus;
 
@@ -70,13 +69,6 @@ int Emulator::launch(const std::string &rom) {
         // Render the window
         renderer.render();
         window.display();
-
-        // Keep it at 60fps
-        sf::Time elapsed = clock.restart();
-        sf::Time targetFrameTime = sf::seconds(1.0f / 60.0f);
-        if (elapsed < targetFrameTime) {
-            sleep(targetFrameTime - elapsed);
-        }
     }
 
     return 0;
