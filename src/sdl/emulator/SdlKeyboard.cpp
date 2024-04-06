@@ -1,6 +1,7 @@
-#include "SfmlKeyboard.h"
+#include "SdlKeyboard.h"
 
-void SfmlKeyboard::handleKeyDown(uint8_t keyCode) {
+void SdlKeyboard::handleKeyDown(uint8_t keyCode) {
+    std::cout << +keyCode << std::endl;
     auto keyMapIter = this->KEYMAP.find(keyCode);
     if (keyMapIter != this->KEYMAP.end()) {
         uint8_t key = keyMapIter->second;
@@ -12,7 +13,7 @@ void SfmlKeyboard::handleKeyDown(uint8_t keyCode) {
     }
 }
 
-void SfmlKeyboard::handleKeyUp(uint8_t keyCode) {
+void SdlKeyboard::handleKeyUp(uint8_t keyCode) {
     auto keyMapIter = this->KEYMAP.find(keyCode);
     if (keyMapIter != this->KEYMAP.end()) {
         uint8_t key = keyMapIter->second;

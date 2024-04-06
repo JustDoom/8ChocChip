@@ -13,7 +13,15 @@
 #include "libconfig.h"
 #include "libconfig.hh"
 
+#include "sdl/sdl.h"
+
 int main(int argc, char **argv) {
+
+    sdl sdl;
+    sdl.launch("/home/doom/Documents/8ChipRoms/BLINKY");
+
+    return 5;
+
     bool quickRom = false;
     std::string rom;
 
