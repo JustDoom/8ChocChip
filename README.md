@@ -1,5 +1,7 @@
 # 8ChocChip
 
+**This is a basic SDL port of the emulator. The menu and sound is not yet implementated. Gameplay frame rate increased from SFML 650 or so to about 5000 with SDL so may finish this once it is more stable**
+
 8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation. 
 I decided to program this in C++ because I wanted to do more in it and improve my skills.
 
