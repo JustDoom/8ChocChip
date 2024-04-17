@@ -22,7 +22,7 @@ int Emulator::launch(const std::string &rom) {
 
     sf::RenderWindow window(sf::VideoMode(64 * 15, 32 * 15), "8ChocChip - CHIP-8 Emulator", sf::Style::Titlebar | sf::Style::Close);
     sf::Image icon;
-    icon.loadFromFile("../assets/icon.png");
+    icon.loadFromFile("../../assets/icon.png");
     window.setIcon(64, 64, icon.getPixelsPtr());
     window.setFramerateLimit(60);
 
@@ -43,12 +43,11 @@ int Emulator::launch(const std::string &rom) {
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
-            }
-
-            if (event.type == sf::Event::LostFocus)
+            } else if (event.type == sf::Event::LostFocus) {
                 focus = false;
-            else if (event.type == sf::Event::GainedFocus)
+            } else if (event.type == sf::Event::GainedFocus) {
                 focus = true;
+            }
 
             if (!focus) continue;
 

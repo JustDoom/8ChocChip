@@ -1,7 +1,3 @@
-//
-// Created by doom on 19/03/24.
-//
-
 #ifndef CPU_H
 #define CPU_H
 
@@ -10,6 +6,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+
 #include "Keyboard.h"
 #include "Renderer.h"
 #include "Speaker.h"
