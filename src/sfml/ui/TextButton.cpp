@@ -1,5 +1,7 @@
 #include "TextButton.h"
 
+#include "../../util/MiscUtil.h"
+
 TextButton::TextButton(float x, float y, float width, float height, std::string buttonText, sf::Font* font) {
     this->button.setSize(sf::Vector2f(width, height));
     this->button.setPosition(sf::Vector2f(x, y));
@@ -34,9 +36,11 @@ void TextButton::update(sf::RenderWindow& window, sf::Vector2i pos) {
     this->lastPressed = this->isPressed;
     this->isHovered = this->button.getGlobalBounds().contains(pos.x, pos.y);
 
-    if (this->isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+    if (this->isHovered && MiscUtil::isClicked(sf::Mouse::Left)) {
         this->isPressed = true;
         updateColour(this->activeColor);
+    } else if (this->isHovered && MiscUtil::isPressed(sf::Keyboard::Key::LShift)) {
+        updateColour( sf::Color(255, 0, 0));
     } else if (this->isHovered) {
         updateColour(this->hoverColor);
     } else {
@@ -46,8 +50,9 @@ void TextButton::update(sf::RenderWindow& window, sf::Vector2i pos) {
 }
 
 void TextButton::updateColour(sf::Color color) {
-    if (this->color == color)
+    if (this->color == color) {
         return;
+    }
 
     this->button.setFillColor(color);
 }
