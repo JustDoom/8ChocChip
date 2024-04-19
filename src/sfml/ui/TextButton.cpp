@@ -32,14 +32,14 @@ void TextButton::updateSize(const sf::Vector2u originalSize, const sf::Vector2u 
     this->text.setPosition(this->button.getPosition().x + this->button.getSize().x / 2 - this->text.getGlobalBounds().width / 2, this->button.getPosition().y + this->button.getSize().y / 2 - this->text.getGlobalBounds().height / 2);
 }
 
-void TextButton::update(sf::RenderWindow& window, sf::Vector2i pos) {
+void TextButton::update(InputHandler* inputHandler, sf::Vector2i pos) {
     this->lastPressed = this->isPressed;
     this->isHovered = this->button.getGlobalBounds().contains(pos.x, pos.y);
 
-    if (this->isHovered && MiscUtil::isClicked(sf::Mouse::Left)) {
+    if (this->isHovered && inputHandler->isClicked(sf::Mouse::Left)) {
         this->isPressed = true;
         updateColour(this->activeColor);
-    } else if (this->isHovered && MiscUtil::isPressed(sf::Keyboard::Key::LShift)) {
+    } else if (this->isHovered && inputHandler->isPressed(sf::Keyboard::Key::LShift)) {
         updateColour( sf::Color(255, 0, 0));
     } else if (this->isHovered) {
         updateColour(this->hoverColor);

@@ -1,12 +1,9 @@
-//
-// Created by doom on 3/27/24.
-//
-
 #ifndef TEXTBUTTON_H
 #define TEXTBUTTON_H
 
 #include "SFML/Graphics.hpp"
 
+#include "../InputHandler.h"
 
 class TextButton {
 private:
@@ -28,7 +25,7 @@ public:
 
     void updateSize(const sf::Vector2u originalSize, const sf::Vector2u updatedSize);
 
-    void update(sf::RenderWindow& window, sf::Vector2i pos);
+    void update(InputHandler* inputHandler, sf::Vector2i pos);
 
     void draw(sf::RenderWindow& window);
 

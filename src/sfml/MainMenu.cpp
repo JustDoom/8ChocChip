@@ -1,23 +1,22 @@
 #include "MainMenu.h"
 
 #include <filesystem>
+#include <iostream>
 
-#include "ui/TextButton.h"
-
-#include "Emulator.h"
-#include "../util/MiscUtil.h"
-
-#include "nfd.h"
 #include "libconfig.h"
 #include "libconfig.hh"
+#include "nfd.h"
 
-#include <iostream>
+#include "Emulator.h"
+#include "ui/TextButton.h"
+#include "../util/MiscUtil.h"
 
 MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& romFiles,
                    std::vector<std::string>& romDirectories, std::vector<std::thread *>& windows,
                    std::string configFilePath) :
     romDirectories(romDirectories), romFiles(romFiles), windows(windows),
-    window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator") {
+    window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator"),
+    inputHandler() {
 
     sf::Vector2u originalWindowSize = this->window.getSize();
     sf::Image icon;
@@ -69,29 +68,29 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
 
                 for (auto& romButton : roms) {
                     romButton.second.updateSize(originalWindowSize, this->window.getSize());
-                    romButton.second.update(this->window, pos);
+                    romButton.second.update(&this->inputHandler, pos);
                 }
 
                 button.updateSize(originalWindowSize, this->window.getSize());
-                button.update(this->window, pos);
+                button.update(&this->inputHandler, pos);
             } else if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Key::L) {
-                    debug = !debug;
-                }
-
-                MiscUtil::addKey(event.key.code);
+                this->inputHandler.addKey(event.key.code);
             } else if (event.type == sf::Event::KeyReleased) {
-                MiscUtil::removeKey(event.key.code);
+                this->inputHandler.removeKey(event.key.code);
             } else if (event.type == sf::Event::MouseButtonPressed) {
-                MiscUtil::addButton(event.mouseButton.button);
+                this->inputHandler.addButton(event.mouseButton.button);
             } else if (event.type == sf::Event::MouseButtonReleased) {
-                MiscUtil::removeButon(event.mouseButton.button);
+                this->inputHandler.removeButton(event.mouseButton.button);
             }
         }
 
         if (focus) {
+            if (this->inputHandler.isPressed(sf::Keyboard::F3)) {
+                debug = !debug;
+            }
+
             for (auto& romButton : roms) {
-                romButton.second.update(this->window, pos);
+                romButton.second.update(&this->inputHandler, pos);
 
                 if (!romButton.second.isJustClicked()) continue;
 
@@ -100,7 +99,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
                 newWindow.detach();
                 windows.emplace_back(&newWindow);
             }
-            button.update(this->window, pos);
+            button.update(&this->inputHandler, pos);
 
             if (button.isClicked()) {
                 nfdchar_t* outPath = nullptr;
