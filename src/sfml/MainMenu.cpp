@@ -55,6 +55,9 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
         sf::Event event;
         sf::Vector2i pos = sf::Mouse::getPosition(this->window);
 
+        this->inputHandler.updateLastKeys();
+        this->inputHandler.updateLastMouse();
+
         while (this->window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 this->window.close();
@@ -85,7 +88,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
         }
 
         if (focus) {
-            if (this->inputHandler.isPressed(sf::Keyboard::F3)) {
+            if (this->inputHandler.isJustPressed(sf::Keyboard::F3)) {
                 debug = !debug;
             }
 

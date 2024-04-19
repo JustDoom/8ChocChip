@@ -11,15 +11,22 @@ class InputHandler {
 private:
     std::vector<sf::Keyboard::Key> keys;
     std::vector<sf::Mouse::Button> mouse;
+
+    std::vector<sf::Keyboard::Key> lastKeys;
+    std::vector<sf::Mouse::Button> lastMouse;
 public:
     InputHandler() = default;
 
     void addKey(sf::Keyboard::Key key);
     void removeKey(sf::Keyboard::Key key);
+    void updateLastKeys();
+    bool isJustPressed(sf::Keyboard::Key key);
     bool isPressed(sf::Keyboard::Key key);
 
     void addButton(sf::Mouse::Button button);
     void removeButton(sf::Mouse::Button button);
+    void updateLastMouse();
+    bool isJustClicked(sf::Mouse::Button button);
     bool isClicked(sf::Mouse::Button button);
 };
 

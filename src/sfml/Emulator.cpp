@@ -51,6 +51,8 @@ int Emulator::launch(const std::string &rom) {
 
             if (!focus) continue;
 
+            // TODO: You can hold down the button and it will run at the next possible point
+            // fix this but make it a little easier to time because otherwise you need to time it perfectly which doesnt feel good
             // Handle keyboard inputs
             if (event.type == sf::Event::KeyPressed) {
                 keyboard.handleKeyDown(event.key.code);
