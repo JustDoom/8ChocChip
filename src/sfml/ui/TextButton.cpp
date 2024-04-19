@@ -36,7 +36,7 @@ void TextButton::update(InputHandler* inputHandler, sf::Vector2i pos) {
     this->lastPressed = this->isPressed;
     this->isHovered = this->button.getGlobalBounds().contains(pos.x, pos.y);
 
-    if (this->isHovered && inputHandler->isClicked(sf::Mouse::Left)) {
+    if (this->isHovered && inputHandler->isJustClicked(sf::Mouse::Left)) {
         this->isPressed = true;
         updateColour(this->activeColor);
     } else if (this->isHovered && inputHandler->isPressed(sf::Keyboard::Key::LShift)) {

@@ -104,7 +104,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
             }
             button.update(&this->inputHandler, pos);
 
-            if (button.isClicked()) {
+            if (button.isJustClicked()) {
                 nfdchar_t* outPath = nullptr;
                 nfdresult_t result = NFD_PickFolder(nullptr, &outPath);
 
