@@ -1,8 +1,9 @@
 #ifndef INC_8CHOCCHIP_EMULATOR_H
 #define INC_8CHOCCHIP_EMULATOR_H
 
-#include "SFML/Graphics.hpp"
 #include <string>
+
+#include "SFML/Graphics.hpp"
 
 class Emulator {
 private:

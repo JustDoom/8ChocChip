@@ -1,10 +1,10 @@
 #include "Emulator.h"
 
-#include "fstream"
-#include "iostream"
+#include <fstream>
+#include <iostream>
 
 #include "../emulator/Cpu.h"
-#include "emulator/SfmlKeyboard.h"
+#include "../emulator/Keyboard.h"
 #include "emulator/SfmlRenderer.h"
 #include "emulator/SfmlSpeaker.h"
 
@@ -29,7 +29,7 @@ int Emulator::launch(const std::string &rom) {
     SfmlRenderer renderer(&window);
 
     SfmlSpeaker speaker;
-    SfmlKeyboard keyboard;
+    Keyboard keyboard;
     Cpu cpu(&renderer, &keyboard, &speaker);
 
     cpu.loadSpritesIntoMemory();

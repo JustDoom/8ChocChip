@@ -30,8 +30,8 @@ public:
     };
 
     void setOnNextKeyPress(std::function<void(unsigned char)> callback);
-    virtual void handleKeyDown(uint8_t keyCode) = 0;
-    virtual void handleKeyUp(uint8_t keyCode) = 0;
+    void handleKeyDown(uint8_t keyCode);
+    void handleKeyUp(uint8_t keyCode);
     bool isKeyPressed(int keyCode);
 };
 
