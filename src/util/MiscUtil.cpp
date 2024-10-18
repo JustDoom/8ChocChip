@@ -1,13 +1,9 @@
 #include "MiscUtil.h"
 
-std::string MiscUtil::toLowerCase(const std::string& string) {
-    std::string result;
-
-    for (char ch: string) {
-        // Convert each character to lowercase using tolower
-        result += tolower(ch);
-    }
-
+std::string MiscUtil::toLowerCase(const std::string_view string) {
+    std::string result(string); // Create a mutable string from the string_view
+    std::transform(result.begin(), result.end(), result.begin(),
+        [](unsigned char c) { return std::tolower(c); });
     return result;
 }
 

@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     std::string rom;
 
     for (int i = 0; i < argc; i++) {
-        std::string arg = argv[i];
+        std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
 
         std::string command = MiscUtil::toLowerCase(arg);
@@ -40,8 +40,7 @@ int main(int argc, char **argv) {
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
 
-    std::ifstream file(configFilePath, std::ios::binary | std::ios::ate);
-    if (file.good()) {
+    if (std::ifstream file(configFilePath, std::ios::binary | std::ios::ate); file.good()) {
         libconfig::Config config;
         config.readFile(configFilePath);
 
@@ -52,17 +51,18 @@ int main(int argc, char **argv) {
         }
 
         libconfig::Setting &directories = settings["directories"];
+        romDirectories.reserve(directories.getLength());
         for (int i = 0; i < directories.getLength(); i++) {
             libconfig::Setting &string = directories[i];
             std::string directoryPath = string.c_str();
 
             romDirectories.emplace_back(directoryPath);
 
-            for (const auto& file: std::filesystem::directory_iterator(directoryPath)) {
-                if (file.is_directory())
+            for (const auto& romFile: std::filesystem::directory_iterator(directoryPath)) {
+                if (romFile.is_directory())
                     continue; // Skip directories
 
-                printf("Processing file: %s\n", file.path().c_str());
+                printf("Processing file: %s\n", romFile.path().c_str());
 
                 // Check if the rom directory doesn't exist in romFiles, then add it
                 if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
                 }
 
                 // Add the file path to the romFiles entry
-                romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path());
             }
         }
     } else {
