@@ -12,7 +12,7 @@
 #include "../util/MiscUtil.h"
 
 MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& romFiles,
-                   std::vector<std::string>& romDirectories, std::vector<std::thread *>& windows,
+                   std::vector<std::string>& romDirectories, std::vector<std::unique_ptr<std::thread>>& windows,
                    std::string configFilePath) :
     romDirectories(romDirectories), romFiles(romFiles), windows(windows),
     window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator"),

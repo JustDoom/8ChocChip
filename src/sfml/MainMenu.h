@@ -12,7 +12,7 @@
 class MainMenu {
 private:
     sf::RenderWindow window;
-    std::vector<std::thread*>& windows;
+    std::vector<std::unique_ptr<std::thread>>& windows;
 
     std::vector<std::string>& romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>>& romFiles;
@@ -20,7 +20,7 @@ private:
     InputHandler inputHandler;
 public:
     MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& romFiles,
-             std::vector<std::string>& romDirectories, std::vector<std::thread *>& windows,
+             std::vector<std::string>& romDirectories, std::vector<std::unique_ptr<std::thread>>& windows,
              std::string configFilePath);
 };
 

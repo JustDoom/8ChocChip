@@ -36,10 +36,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::string homePath = std::filesystem::path(getenv("HOME")).string();
-    std::string configFilePath = (std::filesystem::path(homePath) / ".8chocchip.cfg").string();
+    std::string configFilePath = (std::filesystem::path(std::filesystem::path(getenv("HOME")).string()) / ".8chocchip.cfg").string();
 
-    std::vector<std::thread*> windows;
+    std::vector<std::unique_ptr<std::thread>> windows;
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
