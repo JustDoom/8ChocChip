@@ -63,11 +63,20 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git submodule update --init --recursive
 
+      - name: Create MinGW Toolchain File
+        run: |
+          echo "set(CMAKE_SYSTEM_NAME Windows)" > mingw-toolchain.cmake
+          echo "set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)" >> mingw-toolchain.cmake
+          echo "set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)" >> mingw-toolchain.cmake
+          echo "set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)" >> mingw-toolchain.cmake
+          echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> mingw-toolchain.cmake
+          echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> mingw-toolchain.cmake
+          echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> mingw-toolchain.cmake
+
       - name: Configure and build for Windows
         run: |
           mkdir build && cd build
-          # Set MinGW as the compiler directly
-          cmake -G Ninja -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ ..
+          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=../mingw-toolchain.cmake ..
           cmake --build . --config Release
 
       - name: Upload executable
