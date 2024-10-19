@@ -40,45 +40,44 @@ jobs:
           name: ubuntu-executable
           path: build/src/8ChocChip
 
-
   build-windows:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install CMake
-        run: choco install cmake --installargs '"ADD_CMAKE_TO_PATH=System"'
-
-      - name: Install vcpkg
+      - name: Install MinGW-w64
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          cd vcpkg
-          .\bootstrap-vcpkg.bat
-        working-directory: ${{ github.workspace }}
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64
 
-      - name: Set VCPKG_ROOT environment variable
-        run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
-
-      - name: Clone Dependencies
+      - name: Install dependencies
         run: |
+          sudo apt-get install -y cmake libopenal-dev libvorbis-dev libflac-dev
+
+      - name: Setup SSH key and Install submodules
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
           git submodule update --init --recursive
 
-      - name: Configure and build
+      - name: Configure and build for Windows
         run: |
           mkdir build && cd build
-          cmake -G "Visual Studio 17 2022" -DBUILD_SHARED_LIBS=OFF ..
+          # Use the MinGW generator for cross-compiling
+          cmake -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw-w64/toolchain-mingw32.cmake ..
           cmake --build . --config Release
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
           name: windows-executable
-          path: |
-            build/src/Release/*.exe
-            build/src/Release/*.dll
-
+          path: build/src/8ChocChip.exe
 
   #     - name: Configure build environment for target architecture
   #       run: |
