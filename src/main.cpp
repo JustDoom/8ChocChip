@@ -10,11 +10,9 @@
 
 #include "sfml/MainMenu.h"
 
-#include "libconfig.h"
 #include "libconfig.hh"
 
 int main(int argc, char **argv) {
-    bool quickRom = false;
     std::string rom;
 
     for (int i = 0; i < argc; i++) {
@@ -24,8 +22,7 @@ int main(int argc, char **argv) {
         std::string command = MiscUtil::toLowerCase(arg);
         if (command == "--rom") {
             if (i + 1 < argc) {
-                quickRom = true;
-                rom = argv[++i]; // TODO: Only launch this rom
+                return Emulator().launch(argv[++i]);
             } else {
                 std::cerr << "Please include the path to the file" << std::endl;
                 return 0;
@@ -43,8 +40,8 @@ int main(int argc, char **argv) {
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
 
+    libconfig::Config config;
     if (std::ifstream file(configFilePath, std::ios::binary | std::ios::ate); file.good()) {
-        libconfig::Config config;
         config.readFile(configFilePath);
 
         libconfig::Setting &settings = config.getRoot();
@@ -53,7 +50,7 @@ int main(int argc, char **argv) {
             settings.add("directories", libconfig::Setting::TypeArray);
         }
 
-        libconfig::Setting &directories = settings["directories"];
+        libconfig::Setting& directories = settings["directories"];
         romDirectories.reserve(directories.getLength());
         for (int i = 0; i < directories.getLength(); i++) {
             libconfig::Setting &string = directories[i];
@@ -62,10 +59,11 @@ int main(int argc, char **argv) {
             romDirectories.emplace_back(directoryPath);
 
             for (const auto& romFile: std::filesystem::directory_iterator(directoryPath)) {
-                if (romFile.is_directory())
-                    continue; // Skip directories
+                if (romFile.is_directory()) {
+                    continue;
+                }
 
-                printf("Processing file: %s\n", romFile.path().c_str());
+                std::cout << "Processing file: " << romFile.path().c_str() << std::endl;
 
                 // Check if the rom directory doesn't exist in romFiles, then add it
                 if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
@@ -77,29 +75,21 @@ int main(int argc, char **argv) {
             }
         }
     } else {
-        config_t cfg;
-        config_init(&cfg);
+        try {
+            config.getRoot().add("directories", libconfig::Setting::TypeList);
+            config.writeFile(configFilePath.c_str());
 
-        config_setting_t *root = config_root_setting(&cfg);
-        config_setting_t *list = config_setting_add(root, "directories", CONFIG_TYPE_LIST);
-
-        if (config_write_file(&cfg, configFilePath.c_str()) == CONFIG_FALSE) {
-            std::cerr << "Error creating configuration file." << std::endl;
-            config_destroy(&cfg);
+            std::cout << "Configuration file created successfully." << std::endl;
+        } catch (const libconfig::FileIOException &ioException) {
+            std::cerr << "I/O error while writing the configuration file." << std::endl;
+            return 1;
+        } catch (const libconfig::SettingException &settingException) {
+            std::cerr << "Setting error: " << settingException.what() << std::endl;
             return 1;
         }
-
-        std::cout << "Configuration file created successfully." << std::endl;
-
-        config_destroy(&cfg);
     }
 
-    if (quickRom) {
-        Emulator emulator;
-        return emulator.launch(rom);
-    } else {
-        MainMenu(romFiles, romDirectories, windows, configFilePath);
-    }
+    MainMenu menu(romFiles, romDirectories, windows, configFilePath);
 
     return 0;
 }
