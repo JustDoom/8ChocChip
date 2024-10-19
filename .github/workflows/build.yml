@@ -40,50 +40,50 @@ jobs:
           name: ubuntu-executable
           path: build/src/8ChocChip
 
-  build-windows:
-    runs-on: ubuntu-latest
+  # build-windows:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake mingw-w64 ninja-build
-          sudo apt-get install -y libopenal-dev libvorbis-dev libflac-dev
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y cmake mingw-w64 ninja-build
+  #         sudo apt-get install -y libopenal-dev libvorbis-dev libflac-dev
 
-      - name: Setup SSH key and Install submodules
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git submodule update --init --recursive
+  #     - name: Setup SSH key and Install submodules
+  #       env:
+  #         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+  #         chmod 600 ~/.ssh/id_rsa
+  #         ssh-keyscan github.com >> ~/.ssh/known_hosts
+  #         git submodule update --init --recursive
 
-      - name: Create MinGW Toolchain File
-        run: |
-          echo "set(CMAKE_SYSTEM_NAME Windows)" > mingw-toolchain.cmake
-          echo "set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)" >> mingw-toolchain.cmake
-          echo "set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)" >> mingw-toolchain.cmake
-          echo "set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)" >> mingw-toolchain.cmake
-          echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> mingw-toolchain.cmake
-          echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> mingw-toolchain.cmake
-          echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> mingw-toolchain.cmake
+  #     - name: Create MinGW Toolchain File
+  #       run: |
+  #         echo "set(CMAKE_SYSTEM_NAME Windows)" > mingw-toolchain.cmake
+  #         echo "set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)" >> mingw-toolchain.cmake
+  #         echo "set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)" >> mingw-toolchain.cmake
+  #         echo "set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)" >> mingw-toolchain.cmake
+  #         echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> mingw-toolchain.cmake
+  #         echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> mingw-toolchain.cmake
+  #         echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> mingw-toolchain.cmake
 
-      - name: Configure and build for Windows
-        run: |
-          mkdir build && cd build
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=../mingw-toolchain.cmake ..
-          cmake --build . --config Release
+  #     - name: Configure and build for Windows
+  #       run: |
+  #         mkdir build && cd build
+  #         cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=../mingw-toolchain.cmake ..
+  #         cmake --build . --config Release
 
-      - name: Upload executable
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-executable
-          path: build/src/8ChocChip.exe
+  #     - name: Upload executable
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: windows-executable
+  #         path: build/src/8ChocChip.exe
 
   #     - name: Configure build environment for target architecture
   #       run: |
