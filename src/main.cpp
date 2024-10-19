@@ -23,17 +23,21 @@ int main(int argc, char **argv) {
 
         std::string command = MiscUtil::toLowerCase(arg);
         if (command == "--rom") {
-            if (argc - 1 <= i) {
-                std::cerr << "Please include the path to the file" << std::endl;
-            } else {
+            if (i + 1 < argc) {
                 quickRom = true;
-                rom = argv[i + 1];
+                rom = argv[++i]; // TODO: Only launch this rom
+            } else {
+                std::cerr << "Please include the path to the file" << std::endl;
+                return 0;
             }
+        } else if (command == "--help") {
+            std::cerr << "Usage: 8chocchip --rom <rompath>" << std::endl;
+            return 0;
         }
     }
 
-    std::string home = std::filesystem::path(getenv("HOME")).string();
-    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
+    std::string homePath = std::filesystem::path(getenv("HOME")).string();
+    std::string configFilePath = (std::filesystem::path(homePath) / ".8chocchip.cfg").string();
 
     std::vector<std::thread*> windows;
 
