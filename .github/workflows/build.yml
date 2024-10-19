@@ -66,8 +66,8 @@ jobs:
       - name: Configure and build for Windows
         run: |
           mkdir build && cd build
-          # Use the Ninja generator for cross-compiling
-          cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=/usr/share/mingw-w64/toolchain-mingw32.cmake ..
+          # Set MinGW as the compiler directly
+          cmake -G Ninja -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ ..
           cmake --build . --config Release
 
       - name: Upload executable
