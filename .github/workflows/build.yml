@@ -61,20 +61,8 @@ jobs:
       - name: Set VCPKG_ROOT environment variable
         run: echo "VCPKG_ROOT=$(vcpkg integrate install)" >> $GITHUB_ENV
 
-      - name: Install SFML with vcpkg
-        run: vcpkg install sfml
-
-      - name: Set up SSH
-        shell: pwsh
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Clone Dependencies
         run: |
-          mkdir -p ~/.ssh
-          echo $env:SSH_PRIVATE_KEY | Out-File -Encoding ascii ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan github.com | Out-File -Append ~/.ssh/known_hosts
-          Start-Process ssh-agent -Wait
-          & ssh-add ~/.ssh/id_ed25519
           git submodule update --init --recursive
 
       - name: Configure and build
