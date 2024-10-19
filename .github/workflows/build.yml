@@ -65,12 +65,17 @@ jobs:
         run: vcpkg install sfml
 
       - name: Setup SSH key and Install submodules
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p $HOME/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_rsa
-          echo "StrictHostKeyChecking no" > $HOME/.ssh/config
-          chmod 600 $HOME/.ssh/id_rsa
-          ssh-keyscan github.com >> $HOME/.ssh/known_hosts
+          mkdir C:\Users\runneradmin\.ssh
+          echo "$SSH_PRIVATE_KEY" | Out-File -Encoding ascii C:\Users\runneradmin\.ssh\id_rsa
+          # Adjusting permissions using icacls
+          icacls C:\Users\runneradmin\.ssh\id_rsa /inheritance:r
+          icacls C:\Users\runneradmin\.ssh\id_rsa /grant:r "$($env:USERDOMAIN)\$($env:USERNAME):(R)"
+          icacls C:\Users\runneradmin\.ssh\id_rsa /grant:r "$($env:USERDOMAIN)\Administrators:(R)"
+          echo "StrictHostKeyChecking no" >> C:\Users\runneradmin\.ssh\config
+          ssh-keyscan github.com >> C:\Users\runneradmin\.ssh\known_hosts
           git submodule update --init --recursive
 
       - name: Configure and build
