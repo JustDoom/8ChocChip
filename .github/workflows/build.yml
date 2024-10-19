@@ -65,6 +65,7 @@ jobs:
         run: vcpkg install sfml
 
       - name: Set up SSH
+        shell: pwsh
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
