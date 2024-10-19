@@ -66,12 +66,14 @@ jobs:
 
       - name: Set up SSH
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
+          mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts 
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan github.com >> ~/.ssh/known_host
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          eval $(ssh-agent)
+          ssh-add - <<< "$SSH_PRIVATE_KEY"
           git submodule update --init --recursive
 
       - name: Configure and build
