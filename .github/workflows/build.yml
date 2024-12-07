@@ -96,6 +96,8 @@ jobs:
         run: |
           mkdir -p output
           dir build/src/Release
+          cp build/dependencies/nativefiledialog/src/Release/* output/
+          cp build/out/Release/libconfig++.* output/
           cp build/src/Release/* output/
           cp -r assets output/
     
