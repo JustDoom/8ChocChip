@@ -5,7 +5,7 @@
 
 #include "libconfig.h"
 #include "libconfig.hh"
-#include "nfd.h"
+#include "nfd.hpp"
 
 #include "Emulator.h"
 #include "ui/TextButton.h"
@@ -17,6 +17,11 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
     romDirectories(romDirectories), romFiles(romFiles), windows(windows),
     window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator"),
     inputHandler() {
+
+    NFD::Guard nfdGuard;
+
+    // auto-freeing memory
+    NFD::UniquePath outPath;
 
     sf::Vector2u originalWindowSize = this->window.getSize();
     sf::Image icon;
@@ -105,8 +110,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
             button.update(&this->inputHandler, pos);
 
             if (button.isJustClicked()) {
-                nfdchar_t* outPath = nullptr;
-                nfdresult_t result = NFD_PickFolder(nullptr, &outPath);
+                nfdresult_t result = NFD::PickFolder(outPath);
 
                 if (result == NFD_OKAY) {
                     libconfig::Config config;
@@ -119,11 +123,11 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
                     }
 
                     libconfig::Setting& directories = settings["directories"];
-                    directories.add(libconfig::Setting::TypeString) = outPath;
+                    directories.add(libconfig::Setting::TypeString) = outPath.get();
 
-                    romDirectories.emplace_back(outPath);
+                    romDirectories.emplace_back(outPath.get());
 
-                    for (const auto& file : std::filesystem::directory_iterator(outPath)) {
+                    for (const auto& file : std::filesystem::directory_iterator(outPath.get())) {
                         if (file.is_directory()) continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
 
                         printf("Processing file - : %s\n", file.path().c_str());

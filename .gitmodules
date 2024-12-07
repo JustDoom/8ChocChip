@@ -1,9 +1,9 @@
 [submodule "dependencies/sfml"]
 	path = dependencies/sfml
 	url =  https://github.com/SFML/SFML.git
-[submodule "dependencies/nativefiledialog"]
-	path = dependencies/nativefiledialog
-	url = https://github.com/AlvaroBarua/nativefiledialog.git
 [submodule "dependencies/libconfig"]
 	path = dependencies/libconfig
 	url =  https://github.com/hyperrealm/libconfig.git
+[submodule "dependencies/nativefiledialog"]
+	path = dependencies/nativefiledialog
+	url = git@github.com:btzy/nativefiledialog-extended.git
