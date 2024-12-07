@@ -74,12 +74,23 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+          cmake .. -DCMAKE_BUILD_TYPE=Release
   
       - name: Build CMake
         run: |
           cd build
           cmake --build . --config Release
+
+      - name: Search for .dll and .lib files
+        run: |
+          echo "Searching for .dll and .lib files..."
+          find ./ -type f \( -iname "*.dll" -o -iname "*.lib" \) | tee found_files.txt
+
+      - name: Output Results
+        if: success()
+        run: |
+          echo "Found the following .dll and .lib files:"
+          cat found_files.txt
   
       - name: Collect executable and assets
         run: |
