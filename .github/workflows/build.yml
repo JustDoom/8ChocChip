@@ -84,7 +84,7 @@ jobs:
       - name: Search for .dll and .lib files
         run: |
           echo "Searching for .dll and .lib files..."
-          find ./ -type f \( -iname "*.dll" -o -iname "*.lib" \) | tee found_files.txt
+          Get-ChildItem -Path . -Recurse -Include *.dll,*.lib | ForEach-Object { $_.FullName } | Out-File -FilePath found_files.txt
 
       - name: Output Results
         if: success()
