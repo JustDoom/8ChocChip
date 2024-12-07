@@ -5,4 +5,5 @@ endif()
 
 add_subdirectory(sfml)
 add_subdirectory(nativefiledialog)
+target_link_libraries(8ChocChip PRIVATE nfd)
 add_subdirectory(libconfig)
