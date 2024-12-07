@@ -14,7 +14,14 @@ on:
 
 jobs:
   build-ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latestc
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [ Release ]
+        c_compiler: [ gcc ]
+        cpp_compiler: [ g++ ]
 
     steps:
       - name: Checkout code
@@ -34,11 +41,22 @@ jobs:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git submodule update --init --recursive
 
-      - name: Configure and build
+      - name: Configure CMake
         run: |
-          mkdir build && cd build
+          mkdir -p build
+          cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build CMake
+        run: |
+          cd build
           cmake --build . --config Release
+
+      - name: Collect executable and assets
+        run: |
+          mkdir -p output
+          cp build/8ChocChip output/
+          cp -r build/assets output/
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
