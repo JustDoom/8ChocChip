@@ -12,7 +12,7 @@ else()
     set(libname "config")
 endif()
 
-target_link_libraries(8ChocChip PRIVATE sfml-graphics sfml-audio sfml-window sfml-system nativefiledialog nfd ${libname}++)
+target_link_libraries(8ChocChip PRIVATE nfd sfml-graphics sfml-audio sfml-window sfml-system nativefiledialog ${libname}++)
 # Set the RPATH of the executable to include the directory where SFML libraries are located
 set_target_properties(8ChocChip PROPERTIES
         INSTALL_RPATH "$ORIGIN"
