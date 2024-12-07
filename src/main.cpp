@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
                 }
 
                 // Add the file path to the romFiles entry
-                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path());
+                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
             }
         }
     } else {
