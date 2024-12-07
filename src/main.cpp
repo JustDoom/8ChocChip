@@ -2,14 +2,14 @@
 #include <filesystem>
 #include <iostream>
 #include <thread>
+#include <vector>
+#include <unordered_map>
+#include <string_view>
+#include <fstream>
 
 #include "sfml/Emulator.h"
-#include "fstream"
-
 #include "util/MiscUtil.h"
-
 #include "sfml/MainMenu.h"
-
 #include "libconfig.hh"
 
 int main(int argc, char **argv) {
