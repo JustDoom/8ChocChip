@@ -30,14 +30,6 @@ if(WIN32)
             PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:8ChocChip>
             VERBATIM)
 
-    add_custom_command(
-            TARGET 8ChocChip POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${DEPENDENCY_BUILD_DIR}/nfd.dll
-            ${DEPENDENCY_BUILD_DIR}/libconfig++.dll
-            $<TARGET_FILE_DIR:8ChocChip>
-    )
-
     if (BUILD_SHARED_LIBS)
         add_custom_command(TARGET 8ChocChip POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
