@@ -99,6 +99,7 @@ jobs:
           cp build/dependencies/nativefiledialog/src/Release/* output/
           cp build/out/Release/libconfig++.* output/
           cp build/src/Release/* output/
+          cp build/src/Release/assets/* output/assets
 #          cp -r assets output/
     
       - name: Upload build artifacts
