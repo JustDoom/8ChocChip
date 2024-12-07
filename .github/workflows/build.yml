@@ -83,12 +83,15 @@ jobs:
   
       - name: Collect executable and assets
         run: |
+          dir build
+          dir build/Release
+          dir src
           mkdir -p output
-          cp build/Release/8ChocChip.exe output/
+          cp build/8ChocChip.exe output/
           cp -r build/Release/assets output/
     
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-windows
           path: output/
