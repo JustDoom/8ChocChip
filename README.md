@@ -11,9 +11,9 @@ libconfig is used to manage config and save data files, and NativeFileDialog is 
 There are a couple of things left to do until I would say it works well enough
 - [ ] Fix some of the instructions that result in most programs failing except for `BLINKY`
 - [ ] Cleaner/more optimised code
-- [x] ~~Windows Support~~ Needs fixing again, GitHub actions just don't like it at the moment, compilable on a local machine though.
-- [ ] MacOS Support
-- [ ] Easily support multiple graphics frameworks for different platform support if the primary one doesn't support them (Desktop, Mobile, Game Consoles etc)
+- [x] Windows Support
+- [ ] MacOS Support (Builds, but unable to test)
+- [ ] Switch to SDL from SFML
 
 ## Usage
 
