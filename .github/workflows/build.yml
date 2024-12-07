@@ -40,91 +40,62 @@ jobs:
           name: ubuntu-executable
           path: build/src/8ChocChip
 
-  # build-windows:
-  #   runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release]
+        c_compiler: [gcc]
+        cpp_compiler: [g++]
 
-  #     - name: Install dependencies
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y cmake mingw-w64 ninja-build
-  #         sudo apt-get install -y libopenal-dev libvorbis-dev libflac-dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-  #     - name: Setup SSH key and Install submodules
-  #       env:
-  #         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  #       run: |
-  #         mkdir -p ~/.ssh
-  #         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-  #         chmod 600 ~/.ssh/id_rsa
-  #         ssh-keyscan github.com >> ~/.ssh/known_hosts
-  #         git submodule update --init --recursive
-
-  #     - name: Create MinGW Toolchain File
-  #       run: |
-  #         echo "set(CMAKE_SYSTEM_NAME Windows)" > mingw-toolchain.cmake
-  #         echo "set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)" >> mingw-toolchain.cmake
-  #         echo "set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)" >> mingw-toolchain.cmake
-  #         echo "set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)" >> mingw-toolchain.cmake
-  #         echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> mingw-toolchain.cmake
-  #         echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> mingw-toolchain.cmake
-  #         echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> mingw-toolchain.cmake
-
-  #     - name: Configure and build for Windows
-  #       run: |
-  #         mkdir build && cd build
-  #         cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=../mingw-toolchain.cmake ..
-  #         cmake --build . --config Release
-
-  #     - name: Upload executable
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: windows-executable
-  #         path: build/src/8ChocChip.exe
-
-  #     - name: Configure build environment for target architecture
-  #       run: |
-  #         export TARGET_ARCH=${{ matrix.arch }}
-  #         case $TARGET_ARCH in
-  #           x64)
-  #             # Set compiler and linker for 64-bit Windows target
-  #             export TOOLCHAIN=$(command -v x86_64-w64-mingw32-g++-posix)
-  #             ;;
-  #           x86)
-  #             # Set compiler and linker for 32-bit Windows target
-  #             export TOOLCHAIN=$(command -v i686-w64-mingw32-g++-posix)
-  #             ;;
-  #           *)
-  #             echo "Unsupported architecture: $TARGET_ARCH"
-  #             exit 1
-  #             ;;
-  #         esac
-  #         echo "Using compiler: $TOOLCHAIN"
-
-  #     - name: Create build directory
-  #       run: mkdir build
-
-  #     - name: Configure CMake (cross-compiling)
-  #       env:
-  #         CMAKE_C_COMPILER: $TOOLCHAIN
-  #         CMAKE_CXX_COMPILER: $TOOLCHAIN
-  #       working-directory: build
-  #       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release -DSFML_DIR=/usr/lib/x86_64-linux-gnu/pkgconfig/SFML.pc # (or adjust for your SFML installation path)
-
-  #     - name: Build
-  #       working-directory: build
-  #       run: cmake --build . --config Release
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$env:SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
   
-  #     - name: Archive Windows EXEs (recursive)
-  #       if: success()  # Only run if previous steps succeed
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: windows-exe  # Generic name (you can customize)
-  #         path: build/**/*.exe  # Capture all .exe files recursively
-
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+  
+      - name: Configure CMake
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+  
+      - name: Build CMake
+        run: |
+          cd build
+          cmake --build . --config Release
+  
+      - name: Collect executable and assets
+        run: |
+          mkdir -p output
+          cp build/Release/10SecondIntern.exe output/
+          cp -r build/Release/assets output/
+    
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts-windows
+          path: output/
+  
+      - name: Test
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        run: ctest --build-config ${{ matrix.build_type }}
 
 
   # build-macos:
