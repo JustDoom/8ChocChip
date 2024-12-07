@@ -2,14 +2,14 @@
 #include <filesystem>
 #include <iostream>
 #include <thread>
+#include <vector>
+#include <unordered_map>
+#include <string_view>
+#include <fstream>
 
 #include "sfml/Emulator.h"
-#include "fstream"
-
 #include "util/MiscUtil.h"
-
 #include "sfml/MainMenu.h"
-
 #include "libconfig.hh"
 
 int main(int argc, char **argv) {
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
         std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
 
-        std::string command = MiscUtil::toLowerCase(arg);
+        std::string command = MiscUtil::toLowerCase(std::string(arg));
         if (command == "--rom") {
             if (i + 1 < argc) {
                 return Emulator().launch(argv[++i]);
@@ -33,7 +33,13 @@ int main(int argc, char **argv) {
         }
     }
 
-    std::string configFilePath = (std::filesystem::path(std::filesystem::path(getenv("HOME")).string()) / ".8chocchip.cfg").string();
+    auto home = std::getenv("HOME");
+    if (!home) {
+        std::cerr << "HOME environment variable not set!" << std::endl;
+        return 1;
+    }
+
+    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
 
     std::vector<std::unique_ptr<std::thread>> windows;
 
@@ -45,7 +51,6 @@ int main(int argc, char **argv) {
         config.readFile(configFilePath);
 
         libconfig::Setting &settings = config.getRoot();
-
         if (!settings.exists("directories")) {
             settings.add("directories", libconfig::Setting::TypeArray);
         }
@@ -71,7 +76,7 @@ int main(int argc, char **argv) {
                 }
 
                 // Add the file path to the romFiles entry
-                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path());
+                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
             }
         }
     } else {

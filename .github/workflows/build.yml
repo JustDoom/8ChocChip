@@ -84,7 +84,7 @@ jobs:
       - name: Collect executable and assets
         run: |
           mkdir -p output
-          cp build/Release/10SecondIntern.exe output/
+          cp build/Release/8ChocChip.exe output/
           cp -r build/Release/assets output/
     
       - name: Upload build artifacts

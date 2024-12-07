@@ -138,7 +138,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
                         }
 
                         // Add the file path to the romFiles entry
-                        romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+                        romFiles.find(&romDirectories.back())->second.emplace_back(file.path().string());
 
                         TextButton romButton(0, 25 * roms.size(), this->window.getSize().x, 25, file.path().filename().string(), &font);
                         roms.emplace(file.path().string(), romButton);
