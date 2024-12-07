@@ -25,12 +25,12 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
 
     sf::Vector2u originalWindowSize = this->window.getSize();
     sf::Image icon;
-    icon.loadFromFile("../../assets/icon.png");
+    icon.loadFromFile("assets/icon.png");
     this->window.setIcon(64, 64, icon.getPixelsPtr());
 //    this->window.setVerticalSyncEnabled(true);
 
     sf::Font font;
-    font.loadFromFile("../../assets/font.ttf");
+    font.loadFromFile("assets/font.ttf");
 
     std::unordered_map<std::string, TextButton> roms;
 
