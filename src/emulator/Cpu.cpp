@@ -142,7 +142,7 @@ void Cpu::runInstruction(uint16_t opcode) {
                     this->registers[x] ^= this->registers[y];
                     break;
                 case 0x4: {
-                    const uint16_t sum = this->registers[x] += this->registers[y];
+                    const uint16_t sum = (this->registers[x] += this->registers[y]);
 
                     this->registers[0xF] = 0;
 
@@ -152,7 +152,8 @@ void Cpu::runInstruction(uint16_t opcode) {
 
                     this->registers[x] = sum;
                 }
-                case 0x5: {
+                break;
+                case 0x5:
                     this->registers[0xF] = 0;
 
                     if (this->registers[x] > this->registers[y]) {
@@ -160,7 +161,7 @@ void Cpu::runInstruction(uint16_t opcode) {
                     }
 
                     this->registers[x] -= this->registers[y];
-                }
+                    break;
                 case 0x6:
                     this->registers[0xF] = (this->registers[x] & 0x1);
 
