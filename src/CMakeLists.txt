@@ -5,7 +5,7 @@ add_subdirectory(util)
 add_subdirectory(emulator)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+#option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 target_sources(8ChocChip PUBLIC main.cpp)
 
