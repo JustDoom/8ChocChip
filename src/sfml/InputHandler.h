@@ -1,7 +1,6 @@
 #ifndef INC_8CHOCCHIP_INPUTHANDLER_H
 #define INC_8CHOCCHIP_INPUTHANDLER_H
 
-#include <algorithm>
 #include <vector>
 
 #include "SFML/Window/Keyboard.hpp"

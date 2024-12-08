@@ -1,4 +1,6 @@
 #include "InputHandler.h"
+
+#include <algorithm>
 #include <iostream>
 
 void InputHandler::addKey(sf::Keyboard::Key key) {

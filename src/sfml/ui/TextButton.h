@@ -11,27 +11,27 @@ private:
     sf::Vector2f originalSize;
     sf::Vector2f originalPosition;
     sf::Text text;
-    sf::Font* font;
+    sf::Font* font{};
     sf::Color color;
     sf::Color idleColor;
     sf::Color hoverColor;
     sf::Color activeColor;
     bool isPressed;
-    bool lastPressed;
+    bool lastPressed{};
     bool isHovered;
 
 public:
-    TextButton(float x, float y, float width, float height, std::string buttonText, sf::Font* font);
+    TextButton(float x, float y, float width, float height, const std::string& buttonText, sf::Font *font);
 
-    void updateSize(const sf::Vector2u originalSize, const sf::Vector2u updatedSize);
+    void updateSize(sf::Vector2u originalSize, sf::Vector2u updatedSize);
 
     void update(InputHandler* inputHandler, sf::Vector2i pos);
 
-    void draw(sf::RenderWindow& window);
+    void draw(sf::RenderWindow& window) const;
 
-    bool isClicked();
+    bool isClicked() const;
 
-    bool isJustClicked();
+    bool isJustClicked() const;
 
     void updateColour(sf::Color color);
 };

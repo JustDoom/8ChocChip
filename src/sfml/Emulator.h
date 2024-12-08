@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include "SFML/Graphics.hpp"
-
 class Emulator {
 private:
 public:

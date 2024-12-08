@@ -1,8 +1,6 @@
 #include "TextButton.h"
 
-#include "../../util/MiscUtil.h"
-
-TextButton::TextButton(float x, float y, float width, float height, std::string buttonText, sf::Font* font) {
+TextButton::TextButton(float x, float y, float width, float height, const std::string& buttonText, sf::Font* font) {
     this->button.setSize(sf::Vector2f(width, height));
     this->button.setPosition(sf::Vector2f(x, y));
 
@@ -49,7 +47,7 @@ void TextButton::update(InputHandler* inputHandler, sf::Vector2i pos) {
     }
 }
 
-void TextButton::updateColour(sf::Color color) {
+void TextButton::updateColour(const sf::Color color) {
     if (this->color == color) {
         return;
     }
@@ -57,15 +55,15 @@ void TextButton::updateColour(sf::Color color) {
     this->button.setFillColor(color);
 }
 
-void TextButton::draw(sf::RenderWindow &window) {
+void TextButton::draw(sf::RenderWindow &window) const {
     window.draw(this->button);
     window.draw(this->text);
 }
 
-bool TextButton::isClicked() {
+bool TextButton::isClicked() const {
     return this->isPressed;
 }
 
-bool TextButton::isJustClicked() {
+bool TextButton::isJustClicked() const {
     return !this->lastPressed && this->isPressed;
 }

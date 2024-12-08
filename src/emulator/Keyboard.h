@@ -1,10 +1,9 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include <unordered_map>
-#include <vector>
-#include <functional>
 #include <cstdint>
+#include <functional>
+#include <unordered_map>
 
 class Keyboard {
 public:

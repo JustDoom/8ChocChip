@@ -1,5 +1,9 @@
 #include "Cpu.h"
 
+#include <fstream>
+#include <iostream>
+#include <random>
+
 Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->memory.resize(4096);
     this->registers.resize(16);

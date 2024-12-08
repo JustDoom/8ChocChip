@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+
 #include <filesystem>
 #include <iostream>
 #include <thread>
@@ -23,11 +24,11 @@ int main(int argc, char **argv) {
         if (command == "--rom") {
             if (i + 1 < argc) {
                 return Emulator().launch(argv[++i]);
-            } else {
-                std::cerr << "Please include the path to the file" << std::endl;
-                return 0;
             }
-        } else if (command == "--help") {
+            std::cerr << "Please include the path to the file" << std::endl;
+            return 0;
+        }
+        if (command == "--help") {
             std::cerr << "Usage: 8chocchip --rom <rompath>" << std::endl;
             return 0;
         }

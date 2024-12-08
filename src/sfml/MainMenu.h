@@ -3,10 +3,8 @@
 
 #include <thread>
 #include <unordered_map>
-#include <utility>
 
 #include "SFML/Graphics.hpp"
-
 #include "InputHandler.h"
 
 class MainMenu {

@@ -3,8 +3,7 @@
 #include <filesystem>
 #include <iostream>
 
-#include "libconfig.h"
-#include "libconfig.hh"
+#include "libconfig.h++"
 #include "nfd.hpp"
 
 #include "Emulator.h"
@@ -14,9 +13,8 @@
 MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& romFiles,
                    std::vector<std::string>& romDirectories, std::vector<std::unique_ptr<std::thread>>& windows,
                    std::string configFilePath) :
-    romDirectories(romDirectories), romFiles(romFiles), windows(windows),
-    window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator"),
-    inputHandler() {
+    window(sf::VideoMode(640, 480), "8ChocChip - Chip8 Emulator"), windows(windows),
+    romDirectories(romDirectories), romFiles(romFiles), inputHandler() {
 
     NFD::Guard nfdGuard;
 
@@ -37,7 +35,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
     for (auto& thing : romFiles) {
         for (std::string& file : thing.second) {
 
-            TextButton romButton(0, 25 * roms.size(), this->window.getSize().x, 25, MiscUtil::getFileFromPath(file), &font);
+            TextButton romButton(0, 25.0f * roms.size(), this->window.getSize().x, 25, MiscUtil::getFileFromPath(file), &font);
 
             roms.emplace(file, romButton);
         }
@@ -50,14 +48,14 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
 
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed_seconds;
+    std::chrono::duration<double> elapsed_seconds{};
 
     // Variables to count frames
     int frames = 0;
     double fps;
 
     while (this->window.isOpen()) {
-        sf::Event event;
+        sf::Event event{};
         sf::Vector2i pos = sf::Mouse::getPosition(this->window);
 
         this->inputHandler.updateLastKeys();
@@ -110,9 +108,8 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
             button.update(&this->inputHandler, pos);
 
             if (button.isJustClicked()) {
-                nfdresult_t result = NFD::PickFolder(outPath);
 
-                if (result == NFD_OKAY) {
+                if (nfdresult_t result = PickFolder(outPath); result == NFD_OKAY) {
                     libconfig::Config config;
                     config.readFile(configFilePath);
 
@@ -140,7 +137,7 @@ MainMenu::MainMenu(std::unordered_map<std::string *, std::vector<std::string>>& 
                         // Add the file path to the romFiles entry
                         romFiles.find(&romDirectories.back())->second.emplace_back(file.path().string());
 
-                        TextButton romButton(0, 25 * roms.size(), this->window.getSize().x, 25, file.path().filename().string(), &font);
+                        TextButton romButton(0, 25.0f * roms.size(), this->window.getSize().x, 25, file.path().filename().string(), &font);
                         roms.emplace(file.path().string(), romButton);
                     }
                     config.writeFile(configFilePath);
