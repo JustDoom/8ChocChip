@@ -39,8 +39,8 @@ void Cpu::loadSpritesIntoMemory() {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    for (unsigned char sprite : sprites) {
-        this->memory.push_back(sprite);
+    for (int i = 0; i < sprites.size(); i++) {
+        this->memory[i] = sprites[i];
     }
 }
 
