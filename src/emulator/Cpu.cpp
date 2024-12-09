@@ -59,10 +59,11 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 
 void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
-        if (this->paused) continue;
+        if (this->paused) {
+            continue;
+        }
 
-        uint16_t opcode = (this->memory[this->pc] << 8 | this->memory[this->pc + 1]);
-        runInstruction(opcode);
+        runInstruction((this->memory[this->pc] << 8 | this->memory[this->pc + 1]));
     }
 
     if (!this->paused) {
@@ -77,11 +78,11 @@ void Cpu::cycle() {
     }
 }
 
-void Cpu::runInstruction(uint16_t opcode) {
+void Cpu::runInstruction(const uint16_t opcode) {
     this->pc += 2;
 
-    uint8_t x = (opcode & 0x0F00) >> 8;
-    uint8_t y = (opcode & 0x00F0) >> 4;
+    const uint8_t x = (opcode & 0x0F00) >> 8;
+    const uint8_t y = (opcode & 0x00F0) >> 4;
 
     switch (opcode & 0xF000) {
         case 0x0000:
