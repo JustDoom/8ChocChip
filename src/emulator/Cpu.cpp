@@ -53,7 +53,9 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
         file->close();
 
         // Load ROM into memory
-        std::copy(buffer.begin(), buffer.end(), this->memory.begin() + 0x200);
+        for (size_t loc = 0; loc < buffer.size(); ++loc) {
+            this->memory[0x200 + loc] = buffer[loc];
+        }
     }
 }
 
