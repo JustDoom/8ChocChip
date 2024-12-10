@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <fstream>
+#include <random>
 
 #include "Keyboard.h"
 #include "Renderer.h"
@@ -31,6 +32,8 @@ private:
 
     bool paused;
     uint8_t speed;
+    std::default_random_engine randomEngine;
+    std::uniform_int_distribution<uint8_t> rand;
 
     Renderer* renderer;
     Keyboard* keyboard;
