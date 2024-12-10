@@ -30,7 +30,7 @@ private:
     uint16_t sp{};
     std::array<uint16_t, 16> stack;
     bool paused;
-    int8_t speed;
+    uint8_t speed;
 
     Renderer* renderer;
     Keyboard* keyboard;
