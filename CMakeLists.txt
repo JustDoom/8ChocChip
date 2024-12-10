@@ -32,6 +32,7 @@ target_link_libraries(8ChocChip PRIVATE sfml-graphics sfml-audio sfml-window sfm
 # Set the RPATH of the executable to include the directory where SFML libraries are located
 set_target_properties(8ChocChip PROPERTIES
         INSTALL_RPATH "$ORIGIN"
+        BUILD_RPATH "$ORIGIN"
 )
 
 # Copy DLLs needed for runtime on Windows
@@ -52,6 +53,23 @@ if(WIN32)
                 $<TARGET_FILE_DIR:8ChocChip>)
     endif()
 endif()
+
+# Copy nfd and config++ libraries to the executable directory
+if (UNIX AND NOT APPLE)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:nfd>"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:config++>"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ln -sf "libnfd.so.1.2.1" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/libnfd.so.1"
+            COMMAND ln -sf "libconfig++.so.1.7.4" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/libconfig++.so.1"
+    )
+endif()
+
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
