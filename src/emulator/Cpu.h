@@ -4,7 +4,6 @@
 #include <array>
 #include <cstdint>
 #include <fstream>
-#include <random>
 
 #include "Keyboard.h"
 #include "Renderer.h"
@@ -20,6 +19,8 @@ public:
     void cycle();
     void runInstruction(uint16_t opcode);
     void updateTimers();
+
+    uint8_t random8bit();
 private:
     std::array<uint8_t, 4096> memory;
     std::array<uint8_t, 16> registers;
@@ -32,8 +33,7 @@ private:
 
     bool paused;
     uint8_t speed;
-    std::default_random_engine randomEngine;
-    std::uniform_int_distribution<uint8_t> rand;
+    uint8_t seed;
 
     Renderer* renderer;
     Keyboard* keyboard;

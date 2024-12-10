@@ -1,18 +1,15 @@
 #include "Cpu.h"
 
-#include <chrono>
-#include <fstream>
 #include <iostream>
 #include <random>
 
-Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) : randomEngine(std::chrono::system_clock::now().time_since_epoch().count()) {
+Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
     this->pc = 0x200; // Starting position for reading instructions. At least for most programs
     this->paused = false;
     this->speed = 20; // Game speed
-    this->rand = std::uniform_int_distribution<uint8_t>(0, 255);
 
     this->renderer = renderer;
     this->keyboard = keyboard;
@@ -202,7 +199,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
             this->pc = (opcode & 0xFFF) + this->registers[0];
             break;
         case 0xC000: {
-            this->registers[x] = this->rand(this->randomEngine) & (opcode & 0xFF);
+            this->registers[x] = (random8bit() & 0xFF) & (opcode & 0xFF);
             break;
         }
         case 0xD000: {
@@ -314,4 +311,10 @@ void Cpu::updateTimers() {
     if (this->soundTimer > 0) {
         this->soundTimer -= 1;
     }
+}
+
+uint8_t Cpu::random8bit() {
+    this->seed ^= static_cast<uint8_t>(time(nullptr) & 0xFF);
+    this->seed = (this->seed * 1103515245 + 12345) & 0xFF;
+    return this->seed;
 }
