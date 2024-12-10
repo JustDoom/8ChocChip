@@ -37,8 +37,8 @@ void Cpu::loadSpritesIntoMemory() {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    for (int i = 0; i < sprites.size(); i++) {
-        this->memory[i] = sprites[i];
+    for (unsigned int i = 0; i < sprites.size(); ++i) {
+        this->memory[0x50 + i] = sprites[i];
     }
 }
 
@@ -63,7 +63,7 @@ void Cpu::cycle() {
             continue;
         }
 
-        runInstruction((this->memory[this->pc] << 8 | this->memory[this->pc + 1]));
+        runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
     }
 
     if (!this->paused) {
@@ -93,8 +93,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 case 0x00EE:
                     --this->sp;
-                    this->pc = this->stack[sp];
-                    // this->stack.po();
+                    this->pc = this->stack[this->sp];
                     break;
                 default:
                     break;
@@ -105,8 +104,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
             this->pc = (opcode & 0xFFF);
             break;
         case 0x2000:
-            stack[sp] = pc;
-            ++sp;
+            this->stack[this->sp] = this->pc;
+            ++this->sp;
             this->pc = (opcode & 0xFFF);
             break;
         case 0x3000:
@@ -145,7 +144,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->registers[x] ^= this->registers[y];
                     break;
                 case 0x4: {
-                    const uint16_t sum = (this->registers[x] + this->registers[y]);
+                    const uint16_t sum = this->registers[x] + this->registers[y];
 
                     this->registers[0xF] = 0;
 
@@ -153,7 +152,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                         this->registers[0xF] = 1;
                     }
 
-                    this->registers[x] = sum;
+                    this->registers[x] = sum & 0xFF;
                 }
                 break;
                 case 0x5:
@@ -202,10 +201,10 @@ void Cpu::runInstruction(const uint16_t opcode) {
         case 0xC000: {
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_int_distribution<int> dis(0, 0xFF);
+            std::uniform_int_distribution<uint8_t> dis(0, 0xFF);
 
             int randInt = dis(gen); // Generate a random number
-            uint16_t rand = static_cast<uint16_t>(randInt);
+            uint8_t rand = static_cast<uint8_t>(randInt);
 
             this->registers[x] = rand & (opcode & 0xFF);
             break;
@@ -275,22 +274,27 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->address += this->registers[x];
                     break;
                 case 0x29:
-                    this->address = this->registers[x] * 5;
+                    this->address = 0x50 + this->registers[x] * 5;
                     break;
-                case 0x33:
-                    this->memory[this->address] = this->registers[x] / 100;
+                case 0x33: {
+                    uint8_t value = this->registers[x];
 
-                    this->memory[this->address + 1] = (this->registers[x] % 100) / 10;
+                    this->memory[this->address + 2] = value % 10;
+                    value /= 10;
 
-                    this->memory[this->address + 2] = this->registers[x] % 10;
-                    break;
+                    this->memory[this->address + 1] = (value % 10);
+                    value /= 10;
+
+                    this->memory[this->address] = value % 10;
+                }
+                break;
                 case 0x55:
-                    for (uint8_t registerIndex = 0; registerIndex <= x; registerIndex++) {
+                    for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->memory[this->address + registerIndex] = this->registers[registerIndex];
                     }
                     break;
                 case 0x65:
-                    for (uint8_t registerIndex = 0; registerIndex <= x; registerIndex++) {
+                    for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->registers[registerIndex] = this->memory[this->address + registerIndex];
                     }
                     break;

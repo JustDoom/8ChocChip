@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <fstream>
-#include <vector>
 
 #include "Keyboard.h"
 #include "Renderer.h"
@@ -22,13 +21,13 @@ public:
 private:
     std::array<uint8_t, 4096> memory;
     std::array<uint8_t, 16> registers;
-    uint16_t address;
+    uint16_t address{};
+    uint16_t pc{};
+    uint8_t sp{};
+    std::array<uint16_t, 16> stack;
     uint8_t delay;
     uint8_t soundTimer;
 
-    uint16_t pc;
-    uint16_t sp{};
-    std::array<uint16_t, 16> stack;
     bool paused;
     uint8_t speed;
 
