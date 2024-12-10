@@ -55,8 +55,10 @@ jobs:
       - name: Collect executable and assets
         run: |
           mkdir -p output
-          cp build/src/8ChocChip output/
-          cp -r build/src/assets output/
+          ls build
+          ls build/bin
+          cp build/bin/8ChocChip output/
+          cp -r build/bin/assets output/
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
@@ -119,7 +121,9 @@ jobs:
       - name: Collect executable and assets
         run: |
           mkdir -p output
-          dir build/src/Release
+          dir build
+          dir build/bin
+          dir build/bin/Release
           cp build/dependencies/nativefiledialog/src/Release/* output/
           cp build/out/Release/libconfig++.* output/
           cp build/src/Release/* output/
