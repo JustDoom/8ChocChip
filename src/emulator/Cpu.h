@@ -1,6 +1,7 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include <array>
 #include <cstdint>
 #include <fstream>
 
