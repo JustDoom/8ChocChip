@@ -124,8 +124,8 @@ jobs:
           dir build
           dir build/bin
           dir build/bin/Release
-          cp build/dependencies/nativefiledialog/src/Release/* build/bin/
-          cp build/out/Release/libconfig++.* build/bin/
+          cp build/dependencies/nativefiledialog/src/Release/* build/bin/Release
+          cp build/out/Release/libconfig++.* build/bin/Release
 #          cp build/src/Release/* build/bin/
 #          cp build/src/Release/assets/* build/bin/assets
 #          cp -r assets output/
@@ -134,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-windows
-          path: build/bin/
+          path: build/bin/Release
   
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
