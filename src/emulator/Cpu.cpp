@@ -5,8 +5,6 @@
 #include <random>
 
 Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
-    this->memory.resize(4096);
-    this->registers.resize(16);
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -94,8 +92,9 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->renderer->clear();
                     break;
                 case 0x00EE:
-                    this->pc = this->stack.back();
-                    this->stack.pop_back();
+                    --this->sp;
+                    this->pc = this->stack[sp];
+                    // this->stack.po();
                     break;
                 default:
                     break;
@@ -106,7 +105,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
             this->pc = (opcode & 0xFFF);
             break;
         case 0x2000:
-            this->stack.push_back(this->pc);
+            stack[sp] = pc;
+            ++sp;
             this->pc = (opcode & 0xFFF);
             break;
         case 0x3000:
@@ -145,7 +145,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->registers[x] ^= this->registers[y];
                     break;
                 case 0x4: {
-                    const uint16_t sum = (this->registers[x] += this->registers[y]);
+                    const uint16_t sum = (this->registers[x] + this->registers[y]);
 
                     this->registers[0xF] = 0;
 
@@ -180,7 +180,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->registers[x] = this->registers[y] - this->registers[x];
                     break;
                 case 0xE:
-                    this->registers[0xF] = (this->registers[x] & 0x80);
+                    this->registers[0xF] = (this->registers[x] & 0x80) >> 7;
                     this->registers[x] <<= 1;
                     break;
                 default:
@@ -285,12 +285,12 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->memory[this->address + 2] = this->registers[x] % 10;
                     break;
                 case 0x55:
-                    for (uint16_t registerIndex = 0; registerIndex <= x; registerIndex++) {
+                    for (uint8_t registerIndex = 0; registerIndex <= x; registerIndex++) {
                         this->memory[this->address + registerIndex] = this->registers[registerIndex];
                     }
                     break;
                 case 0x65:
-                    for (uint16_t registerIndex = 0; registerIndex <= x; registerIndex++) {
+                    for (uint8_t registerIndex = 0; registerIndex <= x; registerIndex++) {
                         this->registers[registerIndex] = this->memory[this->address + registerIndex];
                     }
                     break;

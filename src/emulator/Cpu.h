@@ -20,20 +20,21 @@ public:
     void runInstruction(uint16_t opcode);
     void updateTimers();
 private:
-    std::vector<uint8_t> memory;
-    std::vector<uint8_t> registers;
+    std::array<uint8_t, 4096> memory;
+    std::array<uint8_t, 16> registers;
     uint16_t address;
     uint8_t delay;
     uint8_t soundTimer;
 
     uint16_t pc;
-    std::vector<uint16_t> stack;
+    uint16_t sp{};
+    std::array<uint16_t, 16> stack;
     bool paused;
     int8_t speed;
 
     Renderer* renderer;
     Keyboard* keyboard;
-    Speaker * speaker;
+    Speaker* speaker;
 };
 
 #endif //CPU_H
