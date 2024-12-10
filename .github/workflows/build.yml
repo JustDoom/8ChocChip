@@ -57,14 +57,14 @@ jobs:
           mkdir -p output
           ls build
           ls build/bin
-          cp build/bin/8ChocChip output/
-          cp -r build/bin/assets output/
+#          cp build/bin/8ChocChip output/
+#          cp -r build/bin/assets output/
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-linux
-          path: output/
+          path: build/bin/
 
   build-windows:
     runs-on: windows-latest
@@ -124,17 +124,17 @@ jobs:
           dir build
           dir build/bin
           dir build/bin/Release
-          cp build/dependencies/nativefiledialog/src/Release/* output/
-          cp build/out/Release/libconfig++.* output/
-          cp build/src/Release/* output/
-          cp build/src/Release/assets/* output/assets
+          cp build/dependencies/nativefiledialog/src/Release/* build/bin/
+          cp build/out/Release/libconfig++.* build/bin/
+#          cp build/src/Release/* build/bin/
+#          cp build/src/Release/assets/* build/bin/assets
 #          cp -r assets output/
     
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-windows
-          path: output/
+          path: build/bin/
   
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
