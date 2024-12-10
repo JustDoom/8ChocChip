@@ -9,7 +9,7 @@ libconfig is used to manage config and save data files, and NativeFileDialog-ext
 ## TODO
 
 There are a couple of things left to do until I would say it works well enough
-- [ ] Fix some of the instructions that result in most programs failing except for `BLINKY`
+- [x] ~~Fix some of the instructions that result in most programs failing except for `BLINKY`~~ Should be done but the test suite has issues I can not figure out how to fix. But is better than before and should work with most stuff
 - [ ] Cleaner/more optimised code
 - [x] Windows Support
 - [ ] MacOS Support (Builds, but unable to test)
@@ -21,6 +21,8 @@ To run 8ChocChip you can either launch the executable file with the command line
 Or you can normally launch the executable to open the UI and manage it from there.
 
 Some basic ROMS can be found [here](https://github.com/ericgrandt/chip8-emulator/tree/master/roms).
+
+More games are [here](https://github.com/dmatlack/chip8/tree/master/roms/games)
 
 For a proper test suite you can check out https://github.com/Timendus/chip8-test-suite
 
