@@ -1,8 +1,9 @@
 #include "Cpu.h"
 
+#include <iostream>
+#include <random>
+
 Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
-    this->memory.resize(4096);
-    this->registers.resize(16);
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -35,8 +36,8 @@ void Cpu::loadSpritesIntoMemory() {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    for (unsigned char sprite : sprites) {
-        this->memory.push_back(sprite);
+    for (unsigned int i = 0; i < sprites.size(); ++i) {
+        this->memory[0x50 + i] = sprites[i];
     }
 }
 
@@ -49,16 +50,19 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
         file->close();
 
         // Load ROM into memory
-        std::copy(buffer.begin(), buffer.end(), this->memory.begin() + 0x200);
+        for (size_t loc = 0; loc < buffer.size(); ++loc) {
+            this->memory[0x200 + loc] = buffer[loc];
+        }
     }
 }
 
 void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
-        if (this->paused) continue;
+        if (this->paused) {
+            continue;
+        }
 
-        uint16_t opcode = (this->memory[this->pc] << 8 | this->memory[this->pc + 1]);
-        runInstruction(opcode);
+        runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
     }
 
     if (!this->paused) {
@@ -73,11 +77,11 @@ void Cpu::cycle() {
     }
 }
 
-void Cpu::runInstruction(uint16_t opcode) {
+void Cpu::runInstruction(const uint16_t opcode) {
     this->pc += 2;
 
-    uint8_t x = (opcode & 0x0F00) >> 8;
-    uint8_t y = (opcode & 0x00F0) >> 4;
+    const uint8_t x = (opcode & 0x0F00) >> 8;
+    const uint8_t y = (opcode & 0x00F0) >> 4;
 
     switch (opcode & 0xF000) {
         case 0x0000:
@@ -87,8 +91,8 @@ void Cpu::runInstruction(uint16_t opcode) {
                     this->renderer->clear();
                     break;
                 case 0x00EE:
-                    this->pc = this->stack.back();
-                    this->stack.pop_back();
+                    --this->sp;
+                    this->pc = this->stack[this->sp];
                     break;
                 default:
                     break;
@@ -99,7 +103,8 @@ void Cpu::runInstruction(uint16_t opcode) {
             this->pc = (opcode & 0xFFF);
             break;
         case 0x2000:
-            this->stack.push_back(this->pc);
+            this->stack[this->sp] = this->pc;
+            ++this->sp;
             this->pc = (opcode & 0xFFF);
             break;
         case 0x3000:
@@ -138,43 +143,47 @@ void Cpu::runInstruction(uint16_t opcode) {
                     this->registers[x] ^= this->registers[y];
                     break;
                 case 0x4: {
-                    const uint16_t sum = this->registers[x] += this->registers[y];
+                    const uint16_t sum = this->registers[x] + this->registers[y];
 
-                    this->registers[0xF] = 0;
+                    this->registers[x] = sum & 0xFF;
 
                     if (sum > 0xFF) {
                         this->registers[0xF] = 1;
+                    } else {
+                        this->registers[0xF] = 0;
                     }
-
-                    this->registers[x] = sum;
+                    break;
                 }
                 case 0x5: {
-                    this->registers[0xF] = 0;
-
-                    if (this->registers[x] > this->registers[y]) {
-                        this->registers[0xF] = 1;
-                    }
+                    const uint8_t value = this->registers[x] >= this->registers[y] ? 1 : 0;
 
                     this->registers[x] -= this->registers[y];
-                }
-                case 0x6:
-                    this->registers[0xF] = (this->registers[x] & 0x1);
-
-                    this->registers[x] >>= 1;
+                    this->registers[0xF] = value;
                     break;
+                }
+                case 0x6: {
+                    const uint8_t value = (this->registers[x] & 0x1);
+                    this->registers[x] >>= 1;
+                    this->registers[0xF] = value;
+                    break;
+                }
                 case 0x7:
-                    this->registers[0xF] = 0;
-
-                    if (this->registers[y] > this->registers[x]) {
-                        this->registers[0xF] = 1;
-                    }
 
                     this->registers[x] = this->registers[y] - this->registers[x];
+
+                    if (this->registers[y] >= this->registers[x]) {
+                        this->registers[0xF] = 1;
+                    } else {
+                        this->registers[0xF] = 0;
+                    }
+
                     break;
-                case 0xE:
-                    this->registers[0xF] = (this->registers[x] & 0x80);
+                case 0xE: {
+                    const uint8_t value = (this->registers[x] & 0x80) >> 7;
                     this->registers[x] <<= 1;
+                    this->registers[0xF] = value;
                     break;
+                }
                 default:
                     break;
             }
@@ -192,14 +201,7 @@ void Cpu::runInstruction(uint16_t opcode) {
             this->pc = (opcode & 0xFFF) + this->registers[0];
             break;
         case 0xC000: {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<int> dis(0, 0xFF);
-
-            int randInt = dis(gen); // Generate a random number
-            uint16_t rand = static_cast<uint16_t>(randInt);
-
-            this->registers[x] = rand & (opcode & 0xFF);
+            this->registers[x] = (random8bit() & 0xFF) & (opcode & 0xFF);
             break;
         }
         case 0xD000: {
@@ -267,22 +269,27 @@ void Cpu::runInstruction(uint16_t opcode) {
                     this->address += this->registers[x];
                     break;
                 case 0x29:
-                    this->address = this->registers[x] * 5;
+                    this->address = 0x50 + this->registers[x] * 5;
                     break;
-                case 0x33:
-                    this->memory[this->address] = this->registers[x] / 100;
+                case 0x33: {
+                    uint8_t value = this->registers[x];
 
-                    this->memory[this->address + 1] = (this->registers[x] % 100) / 10;
+                    this->memory[this->address + 2] = value % 10;
+                    value /= 10;
 
-                    this->memory[this->address + 2] = this->registers[x] % 10;
+                    this->memory[this->address + 1] = (value % 10);
+                    value /= 10;
+
+                    this->memory[this->address] = value % 10;
                     break;
+                }
                 case 0x55:
-                    for (uint16_t registerIndex = 0; registerIndex <= x; registerIndex++) {
+                    for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->memory[this->address + registerIndex] = this->registers[registerIndex];
                     }
                     break;
                 case 0x65:
-                    for (uint16_t registerIndex = 0; registerIndex <= x; registerIndex++) {
+                    for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->registers[registerIndex] = this->memory[this->address + registerIndex];
                     }
                     break;
@@ -306,4 +313,10 @@ void Cpu::updateTimers() {
     if (this->soundTimer > 0) {
         this->soundTimer -= 1;
     }
+}
+
+uint8_t Cpu::random8bit() {
+    this->seed ^= static_cast<uint8_t>(time(nullptr) & 0xFF);
+    this->seed = (this->seed * 1103515245 + 12345) & 0xFF;
+    return this->seed;
 }

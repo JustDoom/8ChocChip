@@ -2,20 +2,19 @@
 
 **This is a basic SDL port of the emulator. The menu and sound is not yet implementated. Gameplay frame rate increased from SFML 650 or so to about 5000 with SDL so may finish this once it is more stable**
 
-8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation. 
-I decided to program this in C++ because I wanted to do more in it and improve my skills.
+8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation.
 
 The graphics and only library used in this is SFML which handles the window, inputs and sounds. 
-libconfig is used to manage config and save data files, and NativeFileDialog is used for basic popup windows like the file/directory selector.
+libconfig is used to manage config and save data files, and NativeFileDialog-extended is used for basic popup windows like the file/directory selector.
 
 ## TODO
 
 There are a couple of things left to do until I would say it works well enough
-- [ ] Fix some of the instructions that result in most programs failing except for `BLINKY`
+- [x] ~~Fix some of the instructions that result in most programs failing except for `BLINKY`~~ Should be done but the test suite has issues I can not figure out how to fix. But is better than before and should work with most stuff
 - [ ] Cleaner/more optimised code
-- [x] ~~Windows Support~~ Needs fixing again, GitHub actions just don't like it at the moment, compilable on a local machine though.
-- [ ] MacOS Support
-- [ ] Easily support multiple graphics frameworks for different platform support if the primary one doesn't support them (Desktop, Mobile, Game Consoles etc)
+- [x] Windows Support
+- [ ] MacOS Support (Builds, but unable to test)
+- [ ] Switch to SDL from SFML
 
 ## Usage
 
@@ -23,6 +22,10 @@ To run 8ChocChip you can either launch the executable file with the command line
 Or you can normally launch the executable to open the UI and manage it from there.
 
 Some basic ROMS can be found [here](https://github.com/ericgrandt/chip8-emulator/tree/master/roms).
+
+More games are [here](https://github.com/dmatlack/chip8/tree/master/roms/games)
+
+For a proper test suite you can check out https://github.com/Timendus/chip8-test-suite
 
 ## Building
 
@@ -47,5 +50,5 @@ Thanks to these two blogs that helped me through creating this emulator
 
 Currently, three libraries are being used
 - [SFML](https://github.com/SFML/SFML) - UI, graphics, input and sounds
-- [NativeFileDialog](https://github.com/mlabbe/nativefiledialog) - A fork of this is used for the CMakeLists files (https://github.com/AlvaroBarua/nativefiledialog/tree/CMakeLists)
+- [NativeFileDialog-extended](https://github.com/btzy/nativefiledialog-extended) - Handles file dialogs for selecting files/directories. Fork of [nativefiledialog](https://github.com/mlabbe/nativefiledialog) which I used a fork of that added only CMake support, this new one adds that plus new fixes/features
 - [libconfig](https://github.com/hyperrealm/libconfig) - Library to manage save data (like directories that hold ROMs) and possible future config files

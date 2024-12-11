@@ -1,5 +1,3 @@
-add_executable(8ChocChip)
-
 add_subdirectory(sdl)
 add_subdirectory(util)
 add_subdirectory(emulator)
@@ -12,4 +10,4 @@ else()
     set(libname "config")
 endif()
 
-target_link_libraries(8ChocChip PRIVATE nativefiledialog ${libname}++ SDL2)
+target_link_libraries(8ChocChip PRIVATE nfd ${libname}++ SDL2)
