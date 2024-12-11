@@ -145,30 +145,31 @@ void Cpu::runInstruction(const uint16_t opcode) {
                 case 0x4: {
                     const uint16_t sum = this->registers[x] + this->registers[y];
 
+                    this->registers[x] = sum & 0xFF;
+
                     if (sum > 0xFF) {
                         this->registers[0xF] = 1;
                     } else {
                         this->registers[0xF] = 0;
                     }
-
-                    this->registers[x] = sum & 0xFF;
+                    break;
                 }
-                break;
-                case 0x5:
-                    if (this->registers[x] >= this->registers[y]) {
-                        this->registers[0xF] = 1;
-                    } else {
-                        this->registers[0xF] = 0;
-                    }
+                case 0x5: {
+                    const uint8_t value = this->registers[x] >= this->registers[y] ? 1 : 0;
 
                     this->registers[x] -= this->registers[y];
+                    this->registers[0xF] = value;
                     break;
-                case 0x6:
-                    this->registers[0xF] = (this->registers[x] & 0x1);
-
+                }
+                case 0x6: {
+                    const uint8_t value = (this->registers[x] & 0x1);
                     this->registers[x] >>= 1;
+                    this->registers[0xF] = value;
                     break;
+                }
                 case 0x7:
+
+                    this->registers[x] = this->registers[y] - this->registers[x];
 
                     if (this->registers[y] >= this->registers[x]) {
                         this->registers[0xF] = 1;
@@ -176,12 +177,13 @@ void Cpu::runInstruction(const uint16_t opcode) {
                         this->registers[0xF] = 0;
                     }
 
-                    this->registers[x] = this->registers[y] - this->registers[x];
                     break;
-                case 0xE:
-                    this->registers[0xF] = (this->registers[x] & 0x80) >> 7;
+                case 0xE: {
+                    const uint8_t value = (this->registers[x] & 0x80) >> 7;
                     this->registers[x] <<= 1;
+                    this->registers[0xF] = value;
                     break;
+                }
                 default:
                     break;
             }
@@ -279,8 +281,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     value /= 10;
 
                     this->memory[this->address] = value % 10;
+                    break;
                 }
-                break;
                 case 0x55:
                     for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->memory[this->address + registerIndex] = this->registers[registerIndex];
