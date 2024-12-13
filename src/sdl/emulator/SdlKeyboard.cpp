@@ -1,7 +1,6 @@
 #include "SdlKeyboard.h"
 
 void SdlKeyboard::handleKeyDown(uint8_t keyCode) {
-    std::cout << +keyCode << std::endl;
     auto keyMapIter = this->KEYMAP.find(keyCode);
     if (keyMapIter != this->KEYMAP.end()) {
         uint8_t key = keyMapIter->second;

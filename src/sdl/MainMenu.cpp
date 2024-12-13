@@ -71,7 +71,6 @@ void MainMenu::update() {
         }
 
         this->windows.emplace_back(std::make_unique<Emulator>(romButton.first))->init();
-        std::cout << 1 << std::endl;
     }
     this->chooseFolder.update(this->inputHandler, point);
 
@@ -117,8 +116,6 @@ void MainMenu::update() {
 
     this->inputHandler.updateLastKeys();
     this->inputHandler.updateLastMouse();
-
-    std::cout << 2 << std::endl;
 }
 
 void MainMenu::render() {

@@ -97,9 +97,7 @@ int main(int argc, char **argv) {
     }
 
     std::vector<std::unique_ptr<Window>> windows;
-    MainMenu window(configFilePath, romFiles, romDirectories, windows);
-    windows.emplace_back(&window);
-    window.init();
+    windows.emplace_back(std::make_unique<MainMenu>(configFilePath, romFiles, romDirectories, windows))->init();
 
     bool quit = false;
     SDL_Event event;
@@ -115,13 +113,9 @@ int main(int argc, char **argv) {
             }
         }
 
-        for (const auto& windowPtr : windows) {
-            Window* window = windowPtr.get();
-            std::cout << "start " << window << std::endl;
-            window->update();
-            std::cout << "middle" << std::endl;
-            window->render();
-            std::cout << "enmd" << std::endl;
+        for (size_t i = 0; i < windows.size(); ++i) {
+            windows[i]->update();
+            windows[i]->render();
         }
 
         bool allWindowsClosed = true;
@@ -135,8 +129,6 @@ int main(int argc, char **argv) {
         if (allWindowsClosed) {
             quit = true;
         }
-
-        std::cout << "end loop e" << std::endl;
     }
 
     return 0;
