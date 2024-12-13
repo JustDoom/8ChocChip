@@ -71,9 +71,9 @@ void Cpu::cycle() {
 
     // Play sound until timer runs out
     if (this->soundTimer > 0) {
-        this->speaker->play();
+        // this->speaker->play();
     } else {
-        this->speaker->stop();
+        // this->speaker->stop();
     }
 }
 

@@ -1,33 +1,31 @@
 #ifndef INC_8CHOCCHIP_INPUTHANDLER_H
 #define INC_8CHOCCHIP_INPUTHANDLER_H
 
+#include <SDL3/SDL_keycode.h>
 #include <vector>
-
-#include "SFML/Window/Keyboard.hpp"
-#include "SFML/Window/Mouse.hpp"
 
 class InputHandler {
 private:
-    std::vector<sf::Keyboard::Key> keys;
-    std::vector<sf::Mouse::Button> mouse;
+    std::vector<SDL_Keycode> keys;
+    std::vector<SDL_Keycode> mouse;
 
-    std::vector<sf::Keyboard::Key> lastKeys;
-    std::vector<sf::Mouse::Button> lastMouse;
+    std::vector<SDL_Keycode> lastKeys;
+    std::vector<SDL_Keycode> lastMouse;
 public:
     InputHandler() = default;
 
-    void addKey(sf::Keyboard::Key key);
-    void removeKey(sf::Keyboard::Key key);
+    void addKey(SDL_Keycode key);
+    void removeKey(SDL_Keycode key);
     void updateLastKeys();
-    bool isJustPressed(sf::Keyboard::Key key);
-    bool isPressed(sf::Keyboard::Key key);
+    bool isJustPressed(SDL_Keycode key);
+    bool isPressed(SDL_Keycode key);
 
-    void addButton(sf::Mouse::Button button);
-    void removeButton(sf::Mouse::Button button);
+    void addButton(SDL_Keycode button);
+    void removeButton(SDL_Keycode button);
     void updateLastMouse();
-    bool isJustClicked(sf::Mouse::Button button);
-    bool isClicked(sf::Mouse::Button button);
+    bool isJustClicked(SDL_Keycode button);
+    bool isClicked(SDL_Keycode button);
 };
 
 
-#endif // INC_8CHOCCHIP_INPUTHANDLER_H
+#endif

@@ -1,8 +1,9 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <vector>
+#include <SDL3/SDL.h>
 #include <cstdint>
+#include <vector>
 
 class Renderer {
 public:
@@ -12,12 +13,12 @@ public:
 
     void clear();
 
-    void render();
+    void render(SDL_Renderer* renderer);
 
     uint16_t getColumns() const;
     uint16_t getRows() const;
 
-    virtual void drawPixel(uint16_t x, uint16_t y) = 0;
+    virtual void drawPixel(SDL_Renderer* renderer, uint16_t x, uint16_t y) = 0;
 private:
     const uint16_t columns = 64;
     const uint16_t rows = 32;

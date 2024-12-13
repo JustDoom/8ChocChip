@@ -2,67 +2,75 @@
 #include <filesystem>
 #include <iostream>
 #include <thread>
+#include <unordered_map>
+#include "sdl/MainMenu.h"
 
-#include "sfml/Emulator.h"
-#include "fstream"
+#include <fstream>
 
 #include "util/MiscUtil.h"
 
-#include "sfml/MainMenu.h"
-
-#include "libconfig.h"
 #include "libconfig.hh"
 
 int main(int argc, char **argv) {
-    bool quickRom = false;
     std::string rom;
 
     for (int i = 0; i < argc; i++) {
-        std::string arg = argv[i];
+        std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
 
-        std::string command = MiscUtil::toLowerCase(arg);
+        std::string command = MiscUtil::toLowerCase(std::string(arg));
         if (command == "--rom") {
-            if (argc - 1 <= i) {
-                std::cerr << "Please include the path to the file" << std::endl;
-            } else {
-                quickRom = true;
-                rom = argv[i + 1];
+            if (i + 1 < argc) {
+                // return Emulator().launch(argv[++i]);
             }
+            std::cerr << "Please include the path to the file" << std::endl;
+            return 0;
+        }
+        if (command == "--help") {
+            std::cerr << "Usage: 8chocchip --rom <rompath>" << std::endl;
+            return 0;
         }
     }
 
-    std::string home = std::filesystem::path(getenv("HOME")).string();
-    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
+    const char* home = nullptr;
+#ifdef _WIN32
+    home = std::getenv("USERPROFILE");
+#else
+    home = std::getenv("HOME");
+#endif
+    if (!home) {
+        std::cerr << "HOME environment variable not set!" << std::endl;
+        return 1;
+    }
 
-    std::vector<std::thread*> windows;
+    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
 
-    std::ifstream file(configFilePath, std::ios::binary | std::ios::ate);
-    if (file.good()) {
-        libconfig::Config config;
+    libconfig::Config config;
+    if (std::ifstream file(configFilePath, std::ios::binary | std::ios::ate); file.good()) {
         config.readFile(configFilePath);
 
         libconfig::Setting &settings = config.getRoot();
-
         if (!settings.exists("directories")) {
             settings.add("directories", libconfig::Setting::TypeArray);
         }
 
-        libconfig::Setting &directories = settings["directories"];
+        libconfig::Setting& directories = settings["directories"];
+        romDirectories.reserve(directories.getLength());
         for (int i = 0; i < directories.getLength(); i++) {
             libconfig::Setting &string = directories[i];
             std::string directoryPath = string.c_str();
 
             romDirectories.emplace_back(directoryPath);
 
-            for (const auto& file: std::filesystem::directory_iterator(directoryPath)) {
-                if (file.is_directory())
-                    continue; // Skip directories
+            for (const auto& romFile: std::filesystem::directory_iterator(directoryPath)) {
+                if (romFile.is_directory()) {
+                    continue;
+                }
 
-                printf("Processing file: %s\n", file.path().c_str());
+                std::cout << "Processing file: " << romFile.path().c_str() << std::endl;
 
                 // Check if the rom directory doesn't exist in romFiles, then add it
                 if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
@@ -70,32 +78,65 @@ int main(int argc, char **argv) {
                 }
 
                 // Add the file path to the romFiles entry
-                romFiles.find(&romDirectories.back())->second.emplace_back(file.path());
+                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
             }
         }
     } else {
-        config_t cfg;
-        config_init(&cfg);
+        try {
+            config.getRoot().add("directories", libconfig::Setting::TypeList);
+            config.writeFile(configFilePath.c_str());
 
-        config_setting_t *root = config_root_setting(&cfg);
-        config_setting_t *list = config_setting_add(root, "directories", CONFIG_TYPE_LIST);
-
-        if (config_write_file(&cfg, configFilePath.c_str()) == CONFIG_FALSE) {
-            std::cerr << "Error creating configuration file." << std::endl;
-            config_destroy(&cfg);
+            std::cout << "Configuration file created successfully." << std::endl;
+        } catch (const libconfig::FileIOException &ioException) {
+            std::cerr << "I/O error while writing the configuration file." << std::endl;
+            return 1;
+        } catch (const libconfig::SettingException &settingException) {
+            std::cerr << "Setting error: " << settingException.what() << std::endl;
             return 1;
         }
-
-        std::cout << "Configuration file created successfully." << std::endl;
-
-        config_destroy(&cfg);
     }
 
-    if (quickRom) {
-        Emulator emulator;
-        return emulator.launch(rom);
-    } else {
-        MainMenu(romFiles, romDirectories, windows, configFilePath);
+    std::vector<std::unique_ptr<Window>> windows;
+    MainMenu window(configFilePath, romFiles, romDirectories, windows);
+    windows.emplace_back(&window);
+    window.init();
+
+    bool quit = false;
+    SDL_Event event;
+
+    while (!quit) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT) {
+                quit = true;
+            }
+
+            for (const auto& window : windows) {
+                window->handleEvent(event);
+            }
+        }
+
+        for (const auto& windowPtr : windows) {
+            Window* window = windowPtr.get();
+            std::cout << "start " << window << std::endl;
+            window->update();
+            std::cout << "middle" << std::endl;
+            window->render();
+            std::cout << "enmd" << std::endl;
+        }
+
+        bool allWindowsClosed = true;
+        for (const auto& window : windows) {
+            if(window->isShown()){
+                allWindowsClosed = false;
+                break;
+            }
+        }
+
+        if (allWindowsClosed) {
+            quit = true;
+        }
+
+        std::cout << "end loop e" << std::endl;
     }
 
     return 0;

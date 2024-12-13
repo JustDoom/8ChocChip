@@ -1,17 +1,14 @@
 #include "SdlRenderer.h"
 
-SdlRenderer::SdlRenderer(SDL_Renderer* window) {
-    this->window = window;
+#include <iostream>
+#include <ostream>
 
-    this->scale = 15; // Scale up because 64 x 32 would be tiny on our screens now
+void SdlRenderer::drawPixel(SDL_Renderer* renderer, uint16_t x, uint16_t y) {
+    const SDL_FRect rect = {x * scale, y * scale, scale, scale};
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set color to white
+    SDL_RenderFillRect(renderer, &rect);
 }
 
-void SdlRenderer::drawPixel(uint16_t x, uint16_t y) {
-    SDL_Rect rect = {x * scale, y * scale, scale, scale};
-    SDL_SetRenderDrawColor(window, 255, 255, 255, 255); // Set color to white
-    SDL_RenderFillRect(window, &rect);
-}
-
-uint8_t SdlRenderer::getScale() const {
+float SdlRenderer::getScale() const {
     return this->scale;
 }

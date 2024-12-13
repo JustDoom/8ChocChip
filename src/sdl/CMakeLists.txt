@@ -1,5 +1,13 @@
 target_sources(8ChocChip PRIVATE
-        sdl.cpp
-        sdl.h)
+        Emulator.cpp
+        Emulator.h
+        MainMenu.cpp
+        MainMenu.h
+        InputHandler.cpp
+        InputHandler.h
+        Window.cpp
+        Window.h
+)
 
 add_subdirectory(emulator)
+add_subdirectory(ui)

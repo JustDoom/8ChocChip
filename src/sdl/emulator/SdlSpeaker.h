@@ -12,4 +12,4 @@ public:
     void stop() override;
 };
 
-#endif // INC_8CHOCCHIP_SDLSPEAKER_H
+#endif
