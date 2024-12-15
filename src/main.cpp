@@ -1,4 +1,3 @@
-#include <SFML/Graphics.hpp>
 #include <filesystem>
 #include <iostream>
 #include <thread>
@@ -10,6 +9,8 @@
 #include "util/MiscUtil.h"
 
 #include "libconfig.hh"
+
+#include <SDL3_ttf/SDL_ttf.h>
 
 int main(int argc, char **argv) {
     std::string rom;
@@ -96,8 +97,19 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (!TTF_Init()) {
+        SDL_Log("Couldn't initialize TTF: %s\n",SDL_GetError());
+        return 1;
+    }
+
+    TTF_Font *font = TTF_OpenFont("assets/font.ttf", 22);
+    if (!font) {
+        SDL_Log("Failed to load font: %s\n", SDL_GetError());
+        return 1;
+    }
+
     std::vector<std::unique_ptr<Window>> windows;
-    windows.emplace_back(std::make_unique<MainMenu>(configFilePath, romFiles, romDirectories, windows))->init();
+    windows.emplace_back(std::make_unique<MainMenu>(font, configFilePath, romFiles, romDirectories, windows))->init();
 
     bool quit = false;
     SDL_Event event;

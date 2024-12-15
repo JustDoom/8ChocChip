@@ -6,6 +6,7 @@
 #include <thread>
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <libconfig.h++>
 
 #include "../util/MiscUtil.h"
@@ -14,22 +15,60 @@
 #define WIDTH (64 * 15)
 #define HEIGHT (32 * 15)
 
-MainMenu::MainMenu(std::string configFilePath, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
+MainMenu::MainMenu(TTF_Font* font, std::string configFilePath, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    configFilePath(configFilePath), romDirectories(romDirectories), romFiles(romFiles), windows(windows),
-    chooseFolder(0, 400, WIDTH, 80, "Select ROM") {}
+    configFilePath(configFilePath), romDirectories(romDirectories), romFiles(romFiles), windows(windows), font(font) {}
 
 void MainMenu::init() {
     Window::init();
 
+    textEngine = TTF_CreateRendererTextEngine(this->renderer);
+
     for (auto& thing: this->romFiles) {
         for (std::string& file: thing.second) {
 
-            TextButton romButton(0, 25.0f * this->roms.size(), WIDTH, 25, MiscUtil::getFileFromPath(file));
+            TTF_Text* text = TTF_CreateText(textEngine, font, MiscUtil::getFileFromPath(file).c_str(), 0);
+            if (!text) {
+                SDL_Log("Failed to create text: %s\n", SDL_GetError());
+                return;
+            }
+
+            TextButton romButton(0, 25.0f * this->roms.size(), WIDTH, 25, text);
 
             this->roms.emplace(file, romButton);
         }
     }
+
+    TTF_Text* text = TTF_CreateText(textEngine, font, "Select ROM", 0);
+    if (!text) {
+        SDL_Log("Failed to create text: %s\n", SDL_GetError());
+        return;
+    }
+    this->chooseFolder = std::make_unique<TextButton>(0, 400, WIDTH, 80, text);
+
+    // font = TTF_OpenFont("font.ttf", 32); // Ensure the path is correct
+    // if (!font) {
+    //     // printf("TTF_OpenFont Error: %s\n", SDL_GetError());
+    //     return;
+    // }
+    //
+    // // Create the text surface
+    // SDL_Color color = {0, 255, 0, 255}; // Green color
+    // text = TTF_RenderText_Solid(font, "Some test", 9, color);
+    // if (!text) {
+    //     // printf("TTF_RenderText_Solid Error: %s\n", TTF_GetError());
+    //     return;
+    // }
+    //
+    // // Create the text texture
+    // textTexture = SDL_CreateTextureFromSurface(renderer, text);
+    // if (!textTexture) {
+    //     printf("SDL_CreateTextureFromSurface Error: %s\n", SDL_GetError());
+    //     SDL_DestroySurface(text); // Free the surface if texture creation fails
+    //     return;
+    // }
+    //
+    // SDL_DestroySurface(text);
 }
 
 bool MainMenu::handleEvent(SDL_Event &event) {
@@ -64,7 +103,7 @@ void MainMenu::update() {
     }
 
     for (auto &romButton: roms) {
-        romButton.second.update(this->inputHandler, point);
+        romButton.second.update(&this->inputHandler, point);
 
         if (!romButton.second.isJustClicked()) {
             continue;
@@ -72,9 +111,9 @@ void MainMenu::update() {
 
         this->windows.emplace_back(std::make_unique<Emulator>(romButton.first))->init();
     }
-    this->chooseFolder.update(this->inputHandler, point);
+    this->chooseFolder->update(&this->inputHandler, point);
 
-    if (this->chooseFolder.isJustClicked()) {
+    if (this->chooseFolder->isJustClicked()) {
 
         if (nfdresult_t result = PickFolder(this->outPath); result == NFD_OKAY) {
             libconfig::Config config;
@@ -107,7 +146,13 @@ void MainMenu::update() {
                 // Add the file path to the romFiles entry
                 romFiles.find(&romDirectories.back())->second.emplace_back(file.path().string());
 
-                TextButton romButton(0, 25.0f * roms.size(), WIDTH, 25, file.path().filename().string());
+                TTF_Text* text = TTF_CreateText(textEngine, font, file.path().filename().c_str(), 0);
+                if (!text) {
+                    SDL_Log("Failed to create text: %s\n", SDL_GetError());
+                    return;
+                }
+
+                TextButton romButton(0, 25.0f * roms.size(), WIDTH, 25, text);
                 roms.emplace(file.path().string(), romButton);
             }
             config.writeFile(configFilePath);
@@ -124,7 +169,27 @@ void MainMenu::render() {
     for (auto &romButton: roms) {
         romButton.second.draw(renderer);
     }
-    this->chooseFolder.draw(renderer);
+    this->chooseFolder->draw(renderer);
 
     SDL_RenderPresent(renderer);
+}
+
+void MainMenu::resize(SDL_Event& event) {
+    SDL_Point size;
+    SDL_GetWindowSize(this->window, &size.x, &size.y);
+
+    SDL_FPoint point{};
+    SDL_GetMouseState(&point.x, &point.y);
+
+    for (auto& romButton : roms) {
+        romButton.second.updateSize(this->originalSize, size);
+        romButton.second.update(&this->inputHandler, point);
+    }
+
+    chooseFolder->updateSize(this->originalSize,size);
+    chooseFolder->update(&this->inputHandler, point);
+}
+
+void MainMenu::refreshRoms() {
+
 }

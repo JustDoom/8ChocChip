@@ -7,3 +7,6 @@
 [submodule "dependencies/libconfig"]
 	path = dependencies/libconfig
 	url = https://github.com/hyperrealm/libconfig.git
+[submodule "dependencies/sdl_ttf"]
+	path = dependencies/sdl_ttf
+	url = git@github.com:libsdl-org/SDL_ttf.git

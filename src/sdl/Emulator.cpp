@@ -63,3 +63,7 @@ void Emulator::render() {
 
     SDL_Delay(16);
 }
+
+void Emulator::resize(SDL_Event &event) {
+
+}

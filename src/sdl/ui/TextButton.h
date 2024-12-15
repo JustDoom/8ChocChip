@@ -5,14 +5,15 @@
 #include <string>
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 class TextButton {
 private:
     SDL_FRect button;
-    SDL_Point originalSize;
-    SDL_Point originalPosition;
-    std::string& text;
-    // sf::Font* font{};
+    SDL_FPoint originalSize;
+    SDL_FPoint originalPosition;
+    TTF_Text* text;
+    SDL_FPoint textPos;
     SDL_Color color;
     SDL_Color idleColor;
     SDL_Color hoverColor;
@@ -23,11 +24,11 @@ private:
     bool isHovered;
 
 public:
-    TextButton(float x, float y, float width, float height, const std::string& buttonText);
+    TextButton(float x, float y, float width, float height, TTF_Text* text);
 
     void updateSize(SDL_Point originalSize, SDL_Point updatedSize);
 
-    void update(InputHandler& inputHandler, SDL_FPoint pos);
+    void update(InputHandler* inputHandler, SDL_FPoint pos);
 
     void draw(SDL_Renderer* window) const;
 

@@ -2,44 +2,46 @@
 
 #include <iostream>
 
-TextButton::TextButton(float x, float y, float width, float height, const std::string& buttonText) : text(text) {
+TextButton::TextButton(float x, float y, float width, float height, TTF_Text* text) : text(text) {
     this->button = SDL_FRect{x, y, width, height};
-    // this->button.setPosition(sf::Vector2f(x, y));
 
-    // this->originalPosition = this->button.getPosition();
-    // this->originalSize = this->button.getSize();
+    TTF_SetTextColor(text, 0, 0, 0, 255);
+    SDL_Point textSize{};
+    TTF_GetTextSize(text, &textSize.x, &textSize.y);
+    this->textPos.x = x + width / 2 - textSize.x / 2;
+    this->textPos.y = y + height / 2 - textSize.y / 2 + 4;
 
-    // this->text.setFont(*font);
-    // this->text.setString(buttonText);
-    // this->text.setCharacterSize(20);
-    // this->text.setFillColor(sf::Color::Black);
-    // this->text.setPosition(x + width / 2 - this->text.getGlobalBounds().width / 2, y + height / 2 - this->text.getGlobalBounds().height / 2);
+    this->originalPosition = {button.x, button.y};
+    this->originalSize = {button.w, button.h};
 
     this->idleColor = SDL_Color{192, 192, 192};
     this->hoverColor = SDL_Color{128, 128, 128};
     this->activeColor = SDL_Color{64, 64, 64};
-
-    // this->button.setFillColor(this->idleColor);
 
     this->isPressed = false;
     this->isHovered = false;
 }
 
 void TextButton::updateSize(const SDL_Point originalSize, const SDL_Point updatedSize) {
-    // this->button.setSize(SDL_Point(this->originalSize.x / originalSize.x * updatedSize.x, this->originalSize.y / originalSize.y * updatedSize.y));
-    // this->button.setPosition(this->originalPosition.x / originalSize.x * updatedSize.x, this->originalPosition.y / originalSize.y * updatedSize.y);
+    this->button.x = this->originalPosition.x / originalSize.x * updatedSize.x;
+    this->button.y = this->originalPosition.y / originalSize.y * updatedSize.y;
+    this->button.w = this->originalSize.x / originalSize.x * updatedSize.x;
+    this->button.h = this->originalSize.y / originalSize.y * updatedSize.y;
 
-    // this->text.setPosition(this->button.getPosition().x + this->button.getSize().x / 2 - this->text.getGlobalBounds().width / 2, this->button.getPosition().y + this->button.getSize().y / 2 - this->text.getGlobalBounds().height / 2);
+    SDL_Point textSize{};
+    TTF_GetTextSize(text, &textSize.x, &textSize.y);
+    this->textPos.x = this->button.x + this->button.w / 2 - textSize.x / 2;
+    this->textPos.y = this->button.y + this->button.h / 2 - textSize.y / 2 + 4;
 }
 
-void TextButton::update(InputHandler& inputHandler, SDL_FPoint pos) {
+void TextButton::update(InputHandler* inputHandler, SDL_FPoint pos) {
     this->lastPressed = this->isPressed;
     this->isHovered = SDL_PointInRectFloat(&pos, &this->button);
 
-    if (this->isHovered && inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+    if (this->isHovered && inputHandler->isJustClicked(SDL_BUTTON_LEFT)) {
         this->isPressed = true;
         updateColour(this->activeColor);
-    } else if (this->isHovered && inputHandler.isPressed(SDL_KMOD_LSHIFT)) {
+    } else if (this->isHovered && inputHandler->isPressed(SDL_KMOD_LSHIFT)) {
         updateColour( SDL_Color{255, 0, 0});
     } else if (this->isHovered) {
         updateColour(this->hoverColor);
@@ -58,10 +60,12 @@ void TextButton::updateColour(const SDL_Color color) {
 }
 
 void TextButton::draw(SDL_Renderer* window) const {
-    // window.draw(this->button);
-
     SDL_SetRenderDrawColor(window, this->currentColor.r, this->currentColor.g, this->currentColor.b, this->currentColor.a);
     SDL_RenderFillRect(window, &this->button);
+    if (text == nullptr) return;
+    if (!TTF_DrawRendererText(text, textPos.x, textPos.y)) {
+        SDL_Log("Text rendering failed: %s\n", SDL_GetError());
+    }
 }
 
 bool TextButton::isClicked() const {

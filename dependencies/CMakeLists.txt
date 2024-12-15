@@ -1,3 +1,4 @@
 add_subdirectory(nativefiledialog)
 add_subdirectory(libconfig)
 add_subdirectory(sdl)
+add_subdirectory(sdl_ttf)

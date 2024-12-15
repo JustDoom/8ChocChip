@@ -27,7 +27,7 @@ else()
     set(libname "config")
 endif()
 
-target_link_libraries(8ChocChip PRIVATE SDL3::SDL3 nfd ${libname}++)
+target_link_libraries(8ChocChip PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf nfd ${libname}++)
 
 # Set the RPATH of the executable to include the directory where SFML libraries are located
 set_target_properties(8ChocChip PROPERTIES

@@ -31,6 +31,8 @@ void Window::init() {
 
     this->windowId = SDL_GetWindowID(this->window);
     this->shown = true;
+
+    SDL_GetWindowSize(this->window, &this->originalSize.x, &this->originalSize.y);
 }
 
 bool Window::handleEvent(SDL_Event &event) {
@@ -45,7 +47,7 @@ bool Window::handleEvent(SDL_Event &event) {
                 this->shown = false;
             break;
             case SDL_EVENT_WINDOW_RESIZED:
-                //TODO
+                resize(event);
             break;
             case SDL_EVENT_WINDOW_EXPOSED:
                 SDL_RenderPresent(this->renderer);
@@ -89,6 +91,11 @@ bool Window::handleEvent(SDL_Event &event) {
 
 void Window::update() {
 }
+
+void Window::resize(SDL_Event &event) {
+
+}
+
 
 void Window::close() {
 

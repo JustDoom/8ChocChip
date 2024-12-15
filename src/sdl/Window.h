@@ -8,6 +8,7 @@ protected:
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     unsigned int windowId = -1;
+    SDL_Point originalSize;
 
     int height = 720;
     int width = 480;
@@ -27,6 +28,7 @@ public:
     virtual bool handleEvent(SDL_Event& event);
     virtual void update();
     virtual void render() = 0;
+    virtual void resize(SDL_Event& event);
     void close();
 
     bool isShown();

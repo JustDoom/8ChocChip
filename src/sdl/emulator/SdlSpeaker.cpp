@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-SdlSpeaker::SdlSpeaker() = default;
+SdlSpeaker::SdlSpeaker() {
+
+}
 
 void SdlSpeaker::play() {
-    std::cout <<"sp" << std::endl;
+    std::cout << "forkin beepin" << std::endl;
 }
 
 void SdlSpeaker::stop() {
-    std::cout <<"sp1" << std::endl;
 }
-
