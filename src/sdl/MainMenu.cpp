@@ -95,6 +95,8 @@ bool MainMenu::handleEvent(SDL_Event &event) {
 }
 
 void MainMenu::update() {
+    if (!this->mouseFocus) return;
+
     SDL_FPoint point{};
     SDL_GetMouseState(&point.x, &point.y);
 
