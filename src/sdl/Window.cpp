@@ -79,6 +79,7 @@ bool Window::handleEvent(SDL_Event &event) {
             break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 SDL_HideWindow(this->window);
+                close();
             break;
         }
 
@@ -98,7 +99,8 @@ void Window::resize(SDL_Event &event) {
 
 
 void Window::close() {
-
+    SDL_DestroyRenderer(this->renderer);
+    SDL_DestroyWindow(this->window);
 }
 
 bool Window::isShown() {

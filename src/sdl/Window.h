@@ -29,7 +29,7 @@ public:
     virtual void update();
     virtual void render() = 0;
     virtual void resize(SDL_Event& event);
-    void close();
+    virtual void close();
 
     bool isShown();
 };

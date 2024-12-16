@@ -27,7 +27,6 @@ private:
 
     InputHandler inputHandler{};
 
-    SDL_Surface* text = nullptr;
     TTF_TextEngine* textEngine;
     TTF_Font* font = nullptr;
 public:
@@ -40,6 +39,7 @@ public:
     void update() override;
     void render() override;
     void resize(SDL_Event& event) override;
+    void close() override;
 
     void refreshRoms();
 };

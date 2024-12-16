@@ -143,5 +143,9 @@ int main(int argc, char **argv) {
         }
     }
 
+    TTF_CloseFont(font);
+    TTF_Quit();
+    SDL_Quit();
+
     return 0;
 }

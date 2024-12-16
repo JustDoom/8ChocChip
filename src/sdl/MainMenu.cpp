@@ -22,7 +22,7 @@ MainMenu::MainMenu(TTF_Font* font, std::string configFilePath, std::unordered_ma
 void MainMenu::init() {
     Window::init();
 
-    textEngine = TTF_CreateRendererTextEngine(this->renderer);
+    this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
     for (auto& thing: this->romFiles) {
         for (std::string& file: thing.second) {
@@ -190,6 +190,14 @@ void MainMenu::resize(SDL_Event& event) {
 
     chooseFolder->updateSize(this->originalSize,size);
     chooseFolder->update(&this->inputHandler, point);
+}
+
+void MainMenu::close() {
+    for (const auto& window : this->windows) {
+        window->close();
+    }
+    TTF_DestroyRendererTextEngine(this->textEngine);
+    Window::close();
 }
 
 void MainMenu::refreshRoms() {
