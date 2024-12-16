@@ -2,7 +2,6 @@
 #define TEXTBUTTON_H
 
 #include "../InputHandler.h"
-#include <string>
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -14,10 +13,10 @@ private:
     SDL_FPoint originalPosition;
     TTF_Text* text;
     SDL_FPoint textPos;
-    SDL_Color color;
     SDL_Color idleColor;
     SDL_Color hoverColor;
     SDL_Color activeColor;
+    SDL_Color deleteColor;
     SDL_Color currentColor;
     bool isPressed;
     bool lastPressed{};
@@ -26,9 +25,9 @@ private:
 public:
     TextButton(float x, float y, float width, float height, TTF_Text* text);
 
-    void updateSize(SDL_Point originalSize, SDL_Point updatedSize);
+    void updateSize(const SDL_Point & originalSize, const SDL_Point & updatedSize);
 
-    void update(InputHandler* inputHandler, SDL_FPoint pos);
+    void update(InputHandler& inputHandler, SDL_FPoint& pos);
 
     void draw(SDL_Renderer* window) const;
 
@@ -36,7 +35,7 @@ public:
 
     bool isJustClicked() const;
 
-    void updateColour(SDL_Color color);
+    void updateColour(SDL_Color& color);
 };
 
 

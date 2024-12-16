@@ -2,8 +2,13 @@
 
 #include <iostream>
 
-TextButton::TextButton(float x, float y, float width, float height, TTF_Text* text) : text(text) {
+TextButton::TextButton(float x, float y, float width, float height, TTF_Text* text) :
+        text(text), idleColor(SDL_Color{192, 192, 192, 255}),
+        hoverColor(SDL_Color{128, 128, 128, 255}), activeColor(SDL_Color{64, 64, 64, 255}),
+        deleteColor(SDL_Color{255, 0, 0, 255}) {
     this->button = SDL_FRect{x, y, width, height};
+
+    currentColor = idleColor;
 
     TTF_SetTextColor(text, 0, 0, 0, 255);
     SDL_Point textSize{};
@@ -14,15 +19,11 @@ TextButton::TextButton(float x, float y, float width, float height, TTF_Text* te
     this->originalPosition = {button.x, button.y};
     this->originalSize = {button.w, button.h};
 
-    this->idleColor = SDL_Color{192, 192, 192};
-    this->hoverColor = SDL_Color{128, 128, 128};
-    this->activeColor = SDL_Color{64, 64, 64};
-
     this->isPressed = false;
     this->isHovered = false;
 }
 
-void TextButton::updateSize(const SDL_Point originalSize, const SDL_Point updatedSize) {
+void TextButton::updateSize(const SDL_Point& originalSize, const SDL_Point& updatedSize) {
     this->button.x = this->originalPosition.x / originalSize.x * updatedSize.x;
     this->button.y = this->originalPosition.y / originalSize.y * updatedSize.y;
     this->button.w = this->originalSize.x / originalSize.x * updatedSize.x;
@@ -34,15 +35,15 @@ void TextButton::updateSize(const SDL_Point originalSize, const SDL_Point update
     this->textPos.y = this->button.y + this->button.h / 2 - textSize.y / 2 + 4;
 }
 
-void TextButton::update(InputHandler* inputHandler, SDL_FPoint pos) {
+void TextButton::update(InputHandler& inputHandler, SDL_FPoint& pos) {
     this->lastPressed = this->isPressed;
     this->isHovered = SDL_PointInRectFloat(&pos, &this->button);
 
-    if (this->isHovered && inputHandler->isJustClicked(SDL_BUTTON_LEFT)) {
+    if (this->isHovered && inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
         this->isPressed = true;
         updateColour(this->activeColor);
-    } else if (this->isHovered && inputHandler->isPressed(SDL_KMOD_LSHIFT)) {
-        updateColour( SDL_Color{255, 0, 0});
+    } else if (this->isHovered && inputHandler.isPressed(SDL_SCANCODE_LSHIFT)) {
+        updateColour(this->deleteColor);
     } else if (this->isHovered) {
         updateColour(this->hoverColor);
     } else {
@@ -51,18 +52,17 @@ void TextButton::update(InputHandler* inputHandler, SDL_FPoint pos) {
     }
 }
 
-void TextButton::updateColour(const SDL_Color color) {
-    if (this->color.r == color.r && this->color.g == color.g && this->color.b == color.b) {
-        return;
-    }
+void TextButton::updateColour(SDL_Color& color) {
+    // if (this->currentColor == color) {
+    //     return;
+    // }
 
     this->currentColor = color;
 }
 
 void TextButton::draw(SDL_Renderer* window) const {
-    SDL_SetRenderDrawColor(window, this->currentColor.r, this->currentColor.g, this->currentColor.b, this->currentColor.a);
+    SDL_SetRenderDrawColor(window, currentColor.r, currentColor.g, currentColor.b, currentColor.a);
     SDL_RenderFillRect(window, &this->button);
-    if (text == nullptr) return;
     if (!TTF_DrawRendererText(text, textPos.x, textPos.y)) {
         SDL_Log("Text rendering failed: %s\n", SDL_GetError());
     }
