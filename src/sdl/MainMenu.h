@@ -7,7 +7,6 @@
 #include <nfd.hpp>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "Emulator.h"
 #include "InputHandler.h"
 #include "Window.h"
 #include "ui/TextButton.h"

@@ -8,7 +8,7 @@
 
 #include "util/MiscUtil.h"
 
-#include "libconfig.hh"
+#include <libconfig.h++>
 
 #include <SDL3_ttf/SDL_ttf.h>
 
