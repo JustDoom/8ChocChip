@@ -125,6 +125,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        // Do not change, this makes multiple windows not crash
         for (size_t i = 0; i < windows.size(); ++i) {
             windows[i]->update();
             windows[i]->render();
