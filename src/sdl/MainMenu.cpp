@@ -148,7 +148,7 @@ void MainMenu::update() {
                 // Add the file path to the romFiles entry
                 romFiles.find(&romDirectories.back())->second.emplace_back(file.path().string());
 
-                TTF_Text* text = TTF_CreateText(textEngine, font, file.path().filename().c_str(), 0);
+                TTF_Text* text = TTF_CreateText(textEngine, font, file.path().filename().string().c_str(), 0);
                 if (!text) {
                     SDL_Log("Failed to create text: %s\n", SDL_GetError());
                     return;
