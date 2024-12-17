@@ -1,6 +1,5 @@
-add_subdirectory(sfml)
+add_subdirectory(sdl)
 add_subdirectory(util)
 add_subdirectory(emulator)
 
-target_sources(8ChocChip PUBLIC main.cpp)
-
+target_sources(8ChocChip PUBLIC main.cpp Timer.cpp Timer.h)

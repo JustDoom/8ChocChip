@@ -1,21 +1,18 @@
-#include <SFML/Graphics.hpp>
-
 #include <filesystem>
-#include <iostream>
-#include <thread>
-#include <vector>
-#include <unordered_map>
-#include <string_view>
 #include <fstream>
+#include <iostream>
+#include <unordered_map>
 
-#include "sfml/Emulator.h"
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <libconfig.h++>
+
+#include "Timer.h"
+#include "sdl/Emulator.h"
+#include "sdl/MainMenu.h"
 #include "util/MiscUtil.h"
-#include "sfml/MainMenu.h"
-#include "libconfig.hh"
 
 int main(int argc, char **argv) {
-    std::string rom;
-
     for (int i = 0; i < argc; i++) {
         std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
@@ -23,7 +20,57 @@ int main(int argc, char **argv) {
         std::string command = MiscUtil::toLowerCase(std::string(arg));
         if (command == "--rom") {
             if (i + 1 < argc) {
-                return Emulator().launch(argv[++i]);
+                if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+                    std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+                    return 1;
+                }
+
+                std::string rom = argv[++i];
+                Emulator emulator(rom);
+                emulator.init();
+
+                bool debug = false;
+                bool quit = false;
+                SDL_Event event;
+
+                Timer fpsTimer;
+                Timer capTimer;
+
+                int countedFrames = 0;
+                fpsTimer.start();
+
+                while (!quit) {
+                    capTimer.start();
+                    while (SDL_PollEvent(&event)) {
+                        if (event.type == SDL_EVENT_QUIT) {
+                            quit = true;
+                        }
+
+                        emulator.handleEvent(event);
+                    }
+
+                    emulator.update();
+                    emulator.render();
+
+                    float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
+                    if (avgFPS > 2000000) {
+                        avgFPS = 0;
+                    }
+
+                    if (debug) {
+                        std::cout << "FPS: " << avgFPS << std::endl;
+                    }
+
+                    ++countedFrames;
+                    int frameTicks = capTimer.getTicks();
+                    if (frameTicks < 1000 / 60) {
+                        SDL_Delay(1000 / 60 - frameTicks);
+                    }
+                }
+
+                SDL_Quit();
+
+                return 0;
             }
             std::cerr << "Please include the path to the file" << std::endl;
             return 0;
@@ -46,8 +93,6 @@ int main(int argc, char **argv) {
     }
 
     std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
-
-    std::vector<std::unique_ptr<std::thread>> windows;
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
@@ -100,7 +145,88 @@ int main(int argc, char **argv) {
         }
     }
 
-    MainMenu menu(romFiles, romDirectories, windows, configFilePath);
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    if (!TTF_Init()) {
+        SDL_Log("Couldn't initialize TTF: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    TTF_Font *font = TTF_OpenFont("assets/font.ttf", 22);
+    if (!font) {
+        SDL_Log("Failed to load font: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    std::vector<std::unique_ptr<Window>> windows;
+    windows.emplace_back(std::make_unique<MainMenu>(font, configFilePath, romFiles, romDirectories, windows))->init();
+
+    bool debug = false;
+    bool quit = false;
+    SDL_Event event;
+
+    Timer fpsTimer;
+    Timer capTimer;
+
+    int countedFrames = 0;
+    fpsTimer.start();
+
+    while (!quit) {
+        capTimer.start();
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT) {
+                quit = true;
+            }
+
+            for (const auto& window : windows) {
+                window->handleEvent(event);
+            }
+        }
+
+        // Do not change, this makes multiple windows not crash
+        for (int i = 0; i < windows.size(); ++i) {
+            if (windows[i]->isDestroyed()) {
+                windows.erase(windows.begin() + i);
+                continue;
+            }
+            windows[i]->update();
+            windows[i]->render();
+        }
+
+        bool allWindowsClosed = true;
+        for (const auto& window : windows) {
+            if(window->isShown()){
+                allWindowsClosed = false;
+                break;
+            }
+        }
+
+        if (allWindowsClosed || windows.empty()) {
+            quit = true;
+        }
+
+        float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
+        if (avgFPS > 2000000) {
+            avgFPS = 0;
+        }
+
+        if (debug) {
+            std::cout << "FPS: " << avgFPS << std::endl;
+        }
+
+        ++countedFrames;
+        int frameTicks = capTimer.getTicks();
+        if (frameTicks < 1000 / 60) {
+            SDL_Delay(1000 / 60 - frameTicks);
+        }
+    }
+
+    TTF_CloseFont(font);
+    TTF_Quit();
+    SDL_Quit();
 
     return 0;
 }

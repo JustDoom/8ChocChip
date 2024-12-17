@@ -4,12 +4,12 @@ Renderer::Renderer() {
     this->display.resize(this->columns * this->rows);
 }
 
-void Renderer::render() {
+void Renderer::render(SDL_Renderer* renderer) {
     // Render the display
     for (uint16_t y = 0; y < this->rows; ++y) {
         for (uint16_t x = 0; x < this->columns; ++x) {
             if (this->display[y * this->columns + x]) {
-                drawPixel(x, y);
+                drawPixel(renderer, x, y);
             }
         }
     }
@@ -20,7 +20,7 @@ bool Renderer::setPixel(uint8_t x, uint16_t y) {
     x %= this->columns;
     y %= this->rows;
 
-    uint16_t pixelLoc = x + (y * this->columns);
+    const uint16_t pixelLoc = x + (y * this->columns);
     this->display[pixelLoc] = !this->display[pixelLoc];
 
     return !this->display[pixelLoc];
