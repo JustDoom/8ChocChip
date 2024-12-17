@@ -207,6 +207,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
         case 0xD000: {
             const uint16_t height = (opcode & 0xF);
 
+            const uint8_t uX = this->registers[x];
+            const uint8_t uY = this->registers[y];
             this->registers[0xF] = 0;
 
             for (uint16_t row = 0; row < height; row++) {
@@ -217,7 +219,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     // If the bit (sprite) is not 0, render/erase the pixel
                     if ((sprite & 0x80) > 0) {
                         // If setPixel returns 1, which means a pixel was erased, set VF to 1
-                        if (this->renderer->setPixel(this->registers[x] + col, this->registers[y] + row)) {
+                        if (this->renderer->setPixel(uX + col, uY + row)) {
                             this->registers[0xF] = 1;
                         }
                     }
@@ -232,12 +234,12 @@ void Cpu::runInstruction(const uint16_t opcode) {
         case 0xE000:
             switch (opcode & 0xFF) {
                 case 0x9E:
-                    if (this->keyboard->isKeyPressed(this->registers[x])) {
+                    if (this->keyboard->isKeyPressed(this->registers[x] & 0xF)) {
                         this->pc += 2;
                     }
                     break;
                 case 0xA1:
-                    if (!this->keyboard->isKeyPressed(this->registers[x])) {
+                    if (!this->keyboard->isKeyPressed(this->registers[x] & 0xF)) {
                         this->pc += 2;
                     }
                     break;
@@ -269,7 +271,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->address += this->registers[x];
                     break;
                 case 0x29:
-                    this->address = 0x50 + this->registers[x] * 5;
+                    this->address = 0x50 + (this->registers[x] & 0xF) * 5;
                     break;
                 case 0x33: {
                     uint8_t value = this->registers[x];
