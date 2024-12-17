@@ -18,6 +18,7 @@ protected:
     bool fullscreen = false;
     bool minimised = false;
     bool shown = false;
+    bool destroyed = false;
 
     bool debug = false;
 public:
@@ -31,7 +32,8 @@ public:
     virtual void resize(SDL_Event& event);
     virtual void close();
 
-    bool isShown();
+    bool isShown() const;
+    bool isDestroyed() const;
 };
 
 #endif

@@ -136,7 +136,11 @@ int main(int argc, char **argv) {
         }
 
         // Do not change, this makes multiple windows not crash
-        for (size_t i = 0; i < windows.size(); ++i) {
+        for (int i = 0; i < windows.size(); ++i) {
+            if (windows[i]->isDestroyed()) {
+                windows.erase(windows.begin() + i);
+                continue;
+            }
             windows[i]->update();
             windows[i]->render();
         }
@@ -149,12 +153,12 @@ int main(int argc, char **argv) {
             }
         }
 
-        if (allWindowsClosed) {
+        if (allWindowsClosed || windows.empty()) {
             quit = true;
         }
 
         float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
-        if(avgFPS > 2000000) {
+        if (avgFPS > 2000000) {
             avgFPS = 0;
         }
 
@@ -164,7 +168,7 @@ int main(int argc, char **argv) {
 
         ++countedFrames;
         int frameTicks = capTimer.getTicks();
-        if(frameTicks < 1000 / 60) {
+        if (frameTicks < 1000 / 60) {
             SDL_Delay(1000 / 60 - frameTicks);
         }
     }

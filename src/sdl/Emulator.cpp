@@ -38,30 +38,17 @@ bool Emulator::handleEvent(SDL_Event& event) {
     return true;
 }
 
-// void Emulator::focus() {
-//     if (!mShown) {
-//         SDL_ShowWindow(mWindow);
-//     }
-//
-//     SDL_RaiseWindow(mWindow);
-// }
-
 void Emulator::update() {
     // Run a cycle of the emulator
     this->cpu.cycle();
 }
 
 void Emulator::render() {
-    // Set renderer draw color
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
-    // Clear the window
     SDL_RenderClear(this->renderer);
 
-    // Render the window
     this->renderWrapper.render(this->renderer);
     SDL_RenderPresent(this->renderer);
-
-    // SDL_Delay(16);
 }
 
 void Emulator::resize(SDL_Event &event) {

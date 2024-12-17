@@ -97,12 +97,17 @@ void Window::resize(SDL_Event &event) {
 
 }
 
-
 void Window::close() {
     SDL_DestroyRenderer(this->renderer);
     SDL_DestroyWindow(this->window);
+    this->destroyed = true;
 }
 
-bool Window::isShown() {
+bool Window::isShown() const {
     return true;
 }
+
+bool Window::isDestroyed() const {
+    return this->destroyed;
+}
+
