@@ -38,7 +38,7 @@ Some parts are just setting up ssh or installing dependencies which you may have
 
 To build this it requires C++, CMake and whatever SDL/dependencies need. Check build file above.
 
-# Cred
+# Credits
 
 Thanks to these two blogs that helped me through creating this emulator. These are actually based on a "broken" emulator guide so not everything will work. But it is good as a base and learning how to do you own research into the functionality of the emulator.
 - [How to Create Your Very Own Chip-8 Emulator](https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/)
