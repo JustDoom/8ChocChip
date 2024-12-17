@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <thread>
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -27,7 +26,7 @@ void MainMenu::init() {
     for (auto& thing: this->romFiles) {
         for (std::string& file: thing.second) {
 
-            TTF_Text* text = TTF_CreateText(textEngine, font, MiscUtil::getFileFromPath(file).c_str(), 0);
+            TTF_Text* text = TTF_CreateText(this->textEngine, this->font, MiscUtil::getFileFromPath(file).c_str(), 0);
             if (!text) {
                 SDL_Log("Failed to create text: %s\n", SDL_GetError());
                 return;
@@ -37,7 +36,7 @@ void MainMenu::init() {
         }
     }
 
-    TTF_Text* text = TTF_CreateText(textEngine, font, "Select ROM", 0);
+    TTF_Text* text = TTF_CreateText(this->textEngine, this->font, "Select ROM", 0);
     if (!text) {
         SDL_Log("Failed to create text: %s\n", SDL_GetError());
         return;
@@ -74,11 +73,11 @@ void MainMenu::update() {
     SDL_FPoint point{};
     SDL_GetMouseState(&point.x, &point.y);
 
-    if (inputHandler.isJustPressed(SDL_SCANCODE_F3)) {
+    if (this->inputHandler.isJustPressed(SDL_SCANCODE_F3)) {
         this->debug = !this->debug;
     }
 
-    for (auto &romButton: roms) {
+    for (auto &romButton: this->roms) {
         romButton.second.update(this->inputHandler, point);
 
         if (!romButton.second.isJustClicked()) {
@@ -102,11 +101,11 @@ void MainMenu::update() {
             }
 
             libconfig::Setting &directories = settings["directories"];
-            directories.add(libconfig::Setting::TypeString) = outPath.get();
+            directories.add(libconfig::Setting::TypeString) = this->outPath.get();
 
-            romDirectories.emplace_back(outPath.get());
+            this->romDirectories.emplace_back(this->outPath.get());
 
-            for (const auto &file: std::filesystem::directory_iterator(outPath.get())) {
+            for (const auto &file: std::filesystem::directory_iterator(this->outPath.get())) {
                 if (file.is_directory()) {
                     continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like
                     // a word doc
@@ -115,22 +114,22 @@ void MainMenu::update() {
                 printf("Processing file - : %s\n", file.path().c_str());
 
                 // Check if the rom directory doesn't exist in romFiles, then add it
-                if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
-                    romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                if (this->romFiles.find(&this->romDirectories.back()) == this->romFiles.end()) {
+                    this->romFiles.emplace(&this->romDirectories.back(), std::vector<std::string>());
                 }
 
                 // Add the file path to the romFiles entry
-                romFiles.find(&romDirectories.back())->second.emplace_back(file.path().string());
+                this->romFiles.find(&this->romDirectories.back())->second.emplace_back(file.path().string());
 
-                TTF_Text* text = TTF_CreateText(textEngine, font, file.path().filename().string().c_str(), 0);
+                TTF_Text* text = TTF_CreateText(this->textEngine, this->font, file.path().filename().string().c_str(), 0);
                 if (!text) {
                     SDL_Log("Failed to create text: %s\n", SDL_GetError());
                     return;
                 }
 
-                roms.emplace(file.path().string(), TextButton(0, 25.0f * roms.size(), WIDTH, 25, text));
+                this->roms.emplace(file.path().string(), TextButton(0, 25.0f * this->roms.size(), WIDTH, 25, text));
             }
-            config.writeFile(configFilePath);
+            config.writeFile(this->configFilePath);
         }
     }
 
@@ -140,13 +139,13 @@ void MainMenu::update() {
 
 void MainMenu::render() {
     SDL_SetRenderDrawColor(this->renderer, 0x00, 0x00, 0x00, 255);
-    SDL_RenderClear(renderer);
-    for (auto &romButton: roms) {
-        romButton.second.draw(renderer);
+    SDL_RenderClear(this->renderer);
+    for (auto &romButton: this->roms) {
+        romButton.second.draw(this->renderer);
     }
-    this->chooseFolder->draw(renderer);
+    this->chooseFolder->draw(this->renderer);
 
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(this->renderer);
 }
 
 void MainMenu::resize(SDL_Event& event) {
@@ -156,13 +155,13 @@ void MainMenu::resize(SDL_Event& event) {
     SDL_FPoint point{};
     SDL_GetMouseState(&point.x, &point.y);
 
-    for (auto& romButton : roms) {
+    for (auto& romButton : this->roms) {
         romButton.second.updateSize(this->originalSize, size);
         romButton.second.update(this->inputHandler, point);
     }
 
-    chooseFolder->updateSize(this->originalSize,size);
-    chooseFolder->update(this->inputHandler, point);
+    this->chooseFolder->updateSize(this->originalSize,size);
+    this->chooseFolder->update(this->inputHandler, point);
 }
 
 void MainMenu::close() {

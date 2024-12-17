@@ -40,4 +40,4 @@ private:
     Speaker* speaker;
 };
 
-#endif //CPU_H
+#endif

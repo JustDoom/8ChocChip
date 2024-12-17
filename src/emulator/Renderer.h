@@ -26,4 +26,4 @@ private:
     std::vector<bool> display;
 };
 
-#endif //RENDERER_H
+#endif

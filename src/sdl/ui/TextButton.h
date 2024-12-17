@@ -27,7 +27,7 @@ public:
 
     void updateSize(const SDL_Point & originalSize, const SDL_Point & updatedSize);
 
-    void update(InputHandler& inputHandler, SDL_FPoint& pos);
+    void update(InputHandler& inputHandler, const SDL_FPoint & pos);
 
     void draw(SDL_Renderer* window) const;
 
@@ -35,9 +35,7 @@ public:
 
     bool isJustClicked() const;
 
-    void updateColour(SDL_Color& color);
+    void updateColour(const SDL_Color & color);
 };
-
-
 
 #endif

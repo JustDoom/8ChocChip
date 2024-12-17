@@ -1,5 +1,7 @@
 #include "Emulator.h"
 
+#include <iostream>
+
 Emulator::Emulator(const std::string &rom) : cpu(&renderWrapper, &keyboard, &speaker), rom(rom) {}
 
 void Emulator::init() {
@@ -16,9 +18,8 @@ void Emulator::init() {
         return;
     }
 
-    cpu.loadSpritesIntoMemory();
-
-    cpu.loadProgramIntoMemory(&file);
+    this->cpu.loadSpritesIntoMemory();
+    this->cpu.loadProgramIntoMemory(&file);
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {
@@ -28,10 +29,10 @@ bool Emulator::handleEvent(SDL_Event& event) {
 
     switch (event.type) {
         case SDL_EVENT_KEY_DOWN:
-            keyboard.handleKeyDown(event.key.scancode);
+            this->keyboard.handleKeyDown(event.key.scancode);
             break;
         case SDL_EVENT_KEY_UP:
-            keyboard.handleKeyUp(event.key.scancode);
+            this->keyboard.handleKeyUp(event.key.scancode);
             break;
     }
 
@@ -39,7 +40,6 @@ bool Emulator::handleEvent(SDL_Event& event) {
 }
 
 void Emulator::update() {
-    // Run a cycle of the emulator
     this->cpu.cycle();
 }
 

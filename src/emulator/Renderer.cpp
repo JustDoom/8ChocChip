@@ -20,7 +20,7 @@ bool Renderer::setPixel(uint8_t x, uint16_t y) {
     x %= this->columns;
     y %= this->rows;
 
-    uint16_t pixelLoc = x + (y * this->columns);
+    const uint16_t pixelLoc = x + (y * this->columns);
     this->display[pixelLoc] = !this->display[pixelLoc];
 
     return !this->display[pixelLoc];

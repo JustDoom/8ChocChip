@@ -11,4 +11,4 @@ public:
     static std::string getFileFromPath(std::string path);
 };
 
-#endif //MISCUTIL_H
+#endif

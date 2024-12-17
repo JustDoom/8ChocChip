@@ -8,4 +8,4 @@ public:
     virtual void stop() = 0;
 };
 
-#endif //SPEAKER_H
+#endif

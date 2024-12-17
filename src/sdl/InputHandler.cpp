@@ -9,9 +9,8 @@ void InputHandler::addKey(SDL_Keycode key) {
     this->keys.emplace_back(key);
 }
 
-void InputHandler::removeKey(SDL_Keycode key) {
-    auto it = std::find(this->keys.begin(), this->keys.end(), key);
-    if (it != this->keys.end()) {
+void InputHandler::removeKey(const SDL_Keycode key) {
+    if (const auto it = std::find(this->keys.begin(), this->keys.end(), key); it != this->keys.end()) {
         this->keys.erase(it);
     }
 }
@@ -23,11 +22,11 @@ void InputHandler::updateLastKeys() {
     }
 }
 
-bool InputHandler::isJustPressed(SDL_Keycode key) {
+bool InputHandler::isJustPressed(const SDL_Keycode key) {
     return std::count(this->keys.begin(), this->keys.end(), key) > 0 && std::count(this->lastKeys.begin(), this->lastKeys.end(), key) == 0;
 }
 
-bool InputHandler::isPressed(SDL_Keycode key) {
+bool InputHandler::isPressed(const SDL_Keycode key) {
     return std::count(this->keys.begin(), this->keys.end(), key);
 }
 
@@ -36,9 +35,8 @@ void InputHandler::addButton(SDL_Keycode button) {
     this->mouse.emplace_back(button);
 }
 
-void InputHandler::removeButton(SDL_Keycode button) {
-    auto it = std::find(this->mouse.begin(), this->mouse.end(), button);
-    if (it != this->mouse.end()) {
+void InputHandler::removeButton(const SDL_Keycode button) {
+    if (const auto it = std::find(this->mouse.begin(), this->mouse.end(), button); it != this->mouse.end()) {
         this->mouse.erase(it);
     }
 }
@@ -50,10 +48,10 @@ void InputHandler::updateLastMouse() {
     }
 }
 
-bool InputHandler::isJustClicked(SDL_Keycode button) {
+bool InputHandler::isJustClicked(const SDL_Keycode button) {
     return std::count(this->mouse.begin(), this->mouse.end(), button) && !std::count(this->lastMouse.begin(), this->lastMouse.end(), button);
 }
 
-bool InputHandler::isClicked(SDL_Keycode button) {
+bool InputHandler::isClicked(const SDL_Keycode button) {
     return std::count(this->mouse.begin(), this->mouse.end(), button);
 }

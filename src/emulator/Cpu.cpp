@@ -205,12 +205,12 @@ void Cpu::runInstruction(const uint16_t opcode) {
             break;
         }
         case 0xD000: {
-            const uint16_t width = 8;
             const uint16_t height = (opcode & 0xF);
 
             this->registers[0xF] = 0;
 
             for (uint16_t row = 0; row < height; row++) {
+                constexpr uint16_t width = 8;
                 uint8_t sprite = this->memory[this->address + row];
 
                 for (uint16_t col = 0; col < width; col++) {

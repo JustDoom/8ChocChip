@@ -4,7 +4,6 @@
 #include "../../emulator/Speaker.h"
 
 class SdlSpeaker : public Speaker {
-private:
 public:
     SdlSpeaker();
 

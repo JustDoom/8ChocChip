@@ -1,9 +1,8 @@
 #include "SdlKeyboard.h"
 
-void SdlKeyboard::handleKeyDown(uint8_t keyCode) {
-    auto keyMapIter = this->KEYMAP.find(keyCode);
-    if (keyMapIter != this->KEYMAP.end()) {
-        uint8_t key = keyMapIter->second;
+void SdlKeyboard::handleKeyDown(const uint8_t keyCode) {
+    if (const auto keyMapIter = this->KEYMAP.find(keyCode); keyMapIter != this->KEYMAP.end()) {
+        const uint8_t key = keyMapIter->second;
         this->keysPressed[key] = true;
         if (this->onNextKeyPress) {
             this->onNextKeyPress(key);
@@ -13,9 +12,8 @@ void SdlKeyboard::handleKeyDown(uint8_t keyCode) {
 }
 
 void SdlKeyboard::handleKeyUp(uint8_t keyCode) {
-    auto keyMapIter = this->KEYMAP.find(keyCode);
-    if (keyMapIter != this->KEYMAP.end()) {
-        uint8_t key = keyMapIter->second;
+    if (const auto keyMapIter = this->KEYMAP.find(keyCode); keyMapIter != this->KEYMAP.end()) {
+        const uint8_t key = keyMapIter->second;
         this->keysPressed[key] = false;
     }
 }

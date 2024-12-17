@@ -6,7 +6,7 @@
 
 class SdlRenderer : public Renderer {
 private:
-    float scale = 15;
+    const float scale = 15;
 public:
     void drawPixel(SDL_Renderer* renderer, uint16_t x, uint16_t y) override;
     float getScale() const;

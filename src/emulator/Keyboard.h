@@ -34,6 +34,4 @@ public:
     bool isKeyPressed(int keyCode);
 };
 
-
-
-#endif //KEYBOARD_H
+#endif

@@ -1,17 +1,14 @@
 #include <filesystem>
-#include <iostream>
-#include <thread>
-#include <unordered_map>
-#include "sdl/MainMenu.h"
-
 #include <fstream>
+#include <iostream>
+#include <unordered_map>
 
-#include "util/MiscUtil.h"
-
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <libconfig.h++>
 
-#include <SDL3_ttf/SDL_ttf.h>
-
+#include "sdl/MainMenu.h"
+#include "util/MiscUtil.h"
 #include "Timer.h"
 
 int main(int argc, char **argv) {

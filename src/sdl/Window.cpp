@@ -37,8 +37,6 @@ void Window::init() {
 
 bool Window::handleEvent(SDL_Event &event) {
     if (event.window.windowID == this->windowId) {
-        bool caption = false;
-
         switch (event.type) {
             case SDL_EVENT_WINDOW_SHOWN:
                 this->shown = true;
@@ -54,19 +52,15 @@ bool Window::handleEvent(SDL_Event &event) {
             break;
             case SDL_EVENT_WINDOW_MOUSE_ENTER:
                 this->mouseFocus = true;
-                caption = true;
             break;
             case SDL_EVENT_WINDOW_MOUSE_LEAVE:
                 this->mouseFocus = false;
-                caption = false;
             break;
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 this->keyboardFocus = true;
-                caption = true;
             break;
             case SDL_EVENT_WINDOW_FOCUS_LOST:
                 this->keyboardFocus = false;
-            caption = true;
             break;
             case SDL_EVENT_WINDOW_MINIMIZED:
                 this->minimised = true;

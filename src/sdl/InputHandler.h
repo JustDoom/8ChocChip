@@ -27,5 +27,4 @@ public:
     bool isClicked(SDL_Keycode button);
 };
 
-
 #endif
