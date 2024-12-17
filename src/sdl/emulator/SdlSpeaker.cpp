@@ -25,7 +25,6 @@ SdlSpeaker::~SdlSpeaker() {
     if (this->audioStream != nullptr) {
         SDL_DestroyAudioStream(this->audioStream);
     }
-    SDL_Quit();
 }
 
 void SdlSpeaker::play() {
