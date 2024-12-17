@@ -205,27 +205,23 @@ void Cpu::runInstruction(const uint16_t opcode) {
             break;
         }
         case 0xD000: {
-            const uint16_t height = (opcode & 0xF);
+            const uint8_t height = (opcode & 0xF);
 
-            const uint8_t uX = this->registers[x];
-            const uint8_t uY = this->registers[y];
+            const uint8_t uX = this->registers[x] % 64;
+            const uint8_t uY = this->registers[y] % 32;
             this->registers[0xF] = 0;
 
-            for (uint16_t row = 0; row < height; row++) {
-                constexpr uint16_t width = 8;
+            for (uint8_t row = 0; row < height; ++row) {
                 uint8_t sprite = this->memory[this->address + row];
 
-                for (uint16_t col = 0; col < width; col++) {
-                    // If the bit (sprite) is not 0, render/erase the pixel
-                    if ((sprite & 0x80) > 0) {
-                        // If setPixel returns 1, which means a pixel was erased, set VF to 1
-                        if (this->renderer->setPixel(uX + col, uY + row)) {
+                for (uint8_t col = 0; col < 8; ++col) {
+                    if (sprite & 0x80) {
+                        const uint8_t drawX = (uX + col) % 64;
+
+                        if (const uint8_t drawY = (uY + row) % 32; this->renderer->setPixel(drawX, drawY)) {
                             this->registers[0xF] = 1;
                         }
                     }
-
-                    // Shift the sprite left 1. This will move the next next col/bit of the sprite into the first position.
-                    // Ex. 10010000 << 1 will become 0010000
                     sprite <<= 1;
                 }
             }
@@ -256,7 +252,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                 case 0x0A:
                     this->paused = true;
 
-                    this->keyboard->onNextKeyPress = [&](uint8_t key) {
+                    this->keyboard->onNextKeyPress = [&](const uint8_t key) {
                         this->registers[x] = key;
                         this->paused = false;
                     };
