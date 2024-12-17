@@ -1,9 +1,11 @@
 #include "SdlSpeaker.h"
 
-#include <SDL3/SDL.h>
 #include <iostream>
+#include <math.h>
 #include <valarray>
 #include <vector>
+
+#include <SDL3/SDL.h>
 
 SdlSpeaker::SdlSpeaker() : amplitude(28000), sampleRate(44100), frequency(220), duration(500), sampleCount((sampleRate * duration) / 1000), beepData(sampleCount) {
     SDL_AudioSpec desiredSpec;
