@@ -12,6 +12,8 @@
 
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "Timer.h"
+
 int main(int argc, char **argv) {
     std::string rom;
 
@@ -114,7 +116,14 @@ int main(int argc, char **argv) {
     bool quit = false;
     SDL_Event event;
 
+    Timer fpsTimer;
+    Timer capTimer;
+
+    int countedFrames = 0;
+    fpsTimer.start();
+
     while (!quit) {
+        capTimer.start();
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
                 quit = true;
@@ -124,6 +133,13 @@ int main(int argc, char **argv) {
                 window->handleEvent(event);
             }
         }
+
+        float avgFPS = countedFrames / ( fpsTimer.getTicks() / 1000.f );
+        if( avgFPS > 2000000 ) {
+            avgFPS = 0;
+        }
+
+        std::cout << "FPS Average " << avgFPS << std::endl;;
 
         // Do not change, this makes multiple windows not crash
         for (size_t i = 0; i < windows.size(); ++i) {
@@ -141,6 +157,15 @@ int main(int argc, char **argv) {
 
         if (allWindowsClosed) {
             quit = true;
+        }
+
+        ++countedFrames;
+
+        int frameTicks = capTimer.getTicks();
+        if( frameTicks < 1000 / 60 )
+        {
+            //Wait remaining time
+            SDL_Delay( 1000 / 60 - frameTicks );
         }
     }
 

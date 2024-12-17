@@ -61,7 +61,7 @@ void Emulator::render() {
     this->renderWrapper.render(this->renderer);
     SDL_RenderPresent(this->renderer);
 
-    SDL_Delay(16);
+    // SDL_Delay(16);
 }
 
 void Emulator::resize(SDL_Event &event) {
