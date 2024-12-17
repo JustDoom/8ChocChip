@@ -46,7 +46,7 @@ void SdlSpeaker::stop() {
 
 void SdlSpeaker::generateSample() {
     for (int i = 0; i < this->sampleCount; ++i) {
-        this->beepData[i] = static_cast<int16_t>(this->amplitude * std::sin(2.0 * M_PI * this->frequency * i / this->sampleRate));
+        this->beepData[i] = static_cast<int16_t>(this->amplitude * std::sin(2.0 * std::acos(-1) * this->frequency * i / this->sampleRate));
     }
     if (SDL_PutAudioStreamData(this->audioStream, this->beepData.data(), this->beepData.size() * sizeof(int16_t)) < 0) {
         std::cerr << "Failed to put data into audio stream: " << SDL_GetError() << std::endl;
