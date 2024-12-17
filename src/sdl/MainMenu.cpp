@@ -138,7 +138,7 @@ void MainMenu::update() {
 }
 
 void MainMenu::render() {
-    SDL_SetRenderDrawColor(this->renderer, 0x00, 0x00, 0x00, 255);
+    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
     SDL_RenderClear(this->renderer);
     for (auto &romButton: this->roms) {
         romButton.second.draw(this->renderer);
