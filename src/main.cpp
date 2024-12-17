@@ -7,13 +7,12 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <libconfig.h++>
 
+#include "Timer.h"
+#include "sdl/Emulator.h"
 #include "sdl/MainMenu.h"
 #include "util/MiscUtil.h"
-#include "Timer.h"
 
 int main(int argc, char **argv) {
-    std::string rom;
-
     for (int i = 0; i < argc; i++) {
         std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
@@ -21,7 +20,57 @@ int main(int argc, char **argv) {
         std::string command = MiscUtil::toLowerCase(std::string(arg));
         if (command == "--rom") {
             if (i + 1 < argc) {
-                // return Emulator().launch(argv[++i]);
+                if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+                    std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+                    return 1;
+                }
+
+                std::string rom = argv[++i];
+                Emulator emulator(rom);
+                emulator.init();
+
+                bool debug = false;
+                bool quit = false;
+                SDL_Event event;
+
+                Timer fpsTimer;
+                Timer capTimer;
+
+                int countedFrames = 0;
+                fpsTimer.start();
+
+                while (!quit) {
+                    capTimer.start();
+                    while (SDL_PollEvent(&event)) {
+                        if (event.type == SDL_EVENT_QUIT) {
+                            quit = true;
+                        }
+
+                        emulator.handleEvent(event);
+                    }
+
+                    emulator.update();
+                    emulator.render();
+
+                    float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
+                    if (avgFPS > 2000000) {
+                        avgFPS = 0;
+                    }
+
+                    if (debug) {
+                        std::cout << "FPS: " << avgFPS << std::endl;
+                    }
+
+                    ++countedFrames;
+                    int frameTicks = capTimer.getTicks();
+                    if (frameTicks < 1000 / 60) {
+                        SDL_Delay(1000 / 60 - frameTicks);
+                    }
+                }
+
+                SDL_Quit();
+
+                return 0;
             }
             std::cerr << "Please include the path to the file" << std::endl;
             return 0;
@@ -96,8 +145,13 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
     if (!TTF_Init()) {
-        SDL_Log("Couldn't initialize TTF: %s\n",SDL_GetError());
+        SDL_Log("Couldn't initialize TTF: %s\n", SDL_GetError());
         return 1;
     }
 

@@ -14,9 +14,9 @@ private:
     SdlKeyboard keyboard;
     Cpu cpu;
 
-    const std::string &rom;
+    const std::string& rom;
 public:
-    Emulator(const std::string &rom);
+    Emulator(const std::string& rom);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
