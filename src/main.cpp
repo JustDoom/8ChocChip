@@ -113,6 +113,7 @@ int main(int argc, char **argv) {
     std::vector<std::unique_ptr<Window>> windows;
     windows.emplace_back(std::make_unique<MainMenu>(font, configFilePath, romFiles, romDirectories, windows))->init();
 
+    bool debug = false;
     bool quit = false;
     SDL_Event event;
 
@@ -134,13 +135,6 @@ int main(int argc, char **argv) {
             }
         }
 
-        float avgFPS = countedFrames / ( fpsTimer.getTicks() / 1000.f );
-        if( avgFPS > 2000000 ) {
-            avgFPS = 0;
-        }
-
-        std::cout << "FPS Average " << avgFPS << std::endl;;
-
         // Do not change, this makes multiple windows not crash
         for (size_t i = 0; i < windows.size(); ++i) {
             windows[i]->update();
@@ -159,13 +153,19 @@ int main(int argc, char **argv) {
             quit = true;
         }
 
-        ++countedFrames;
+        float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
+        if(avgFPS > 2000000) {
+            avgFPS = 0;
+        }
 
+        if (debug) {
+            std::cout << "FPS: " << avgFPS << std::endl;
+        }
+
+        ++countedFrames;
         int frameTicks = capTimer.getTicks();
-        if( frameTicks < 1000 / 60 )
-        {
-            //Wait remaining time
-            SDL_Delay( 1000 / 60 - frameTicks );
+        if(frameTicks < 1000 / 60) {
+            SDL_Delay(1000 / 60 - frameTicks);
         }
     }
 
