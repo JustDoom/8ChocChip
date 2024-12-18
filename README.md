@@ -5,14 +5,19 @@
 This uses SDL to handle graphics, input, audio and some other small things.
 libconfig is used to manage config and save data files.
 
-## TODO
+## Features
 
 There are a couple of things left to do until I would say it works well enough
-- [x] Proper flag compatibility unlike many out there
+- [x] Proper flag/feature compatibility unlike many out there
 - [ ] Cleaner/more optimised code
 - [x] Windows Support
-- [ ] MacOS Support (Builds, but unable to test)
+- [ ] MacOS Support
 - [x] Switch to SDL from SFML
+- [ ] Save state
+- [ ] Configurable keys
+- [ ] Database for auto setting selector
+- [ ] Other Chip8 variants
+- [ ] Per program settings (Keybindings, graphics, sounds, etc)
 
 ## Usage
 
