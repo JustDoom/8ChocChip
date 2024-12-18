@@ -17,8 +17,8 @@ void Renderer::render(SDL_Renderer* renderer) {
 
 bool Renderer::setPixel(uint8_t x, uint16_t y) {
     // Wrap around if x or y is out of bounds
-    x %= this->columns;
-    y %= this->rows;
+    // x %= this->columns;
+    // y %= this->rows;
 
     const uint16_t pixelLoc = x + (y * this->columns);
     this->display[pixelLoc] = !this->display[pixelLoc];

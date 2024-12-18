@@ -3,7 +3,7 @@
 8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation.
 
 This uses SDL to handle graphics, input, audio and some other small things.
-libconfig is used to manage config and save data files, and NativeFileDialog-extended is used for basic popup windows like the file/directory selector.
+libconfig is used to manage config and save data files.
 
 ## TODO
 
@@ -48,5 +48,4 @@ Thanks to these two blogs that helped me through creating this emulator. These a
 
 Currently, three libraries are being used
 - [SDL](https://github.com/libsdl-org/SDL) - UI, graphics, input and sounds
-- [NativeFileDialog-extended](https://github.com/btzy/nativefiledialog-extended) - Handles file dialogs for selecting files/directories. Fork of [nativefiledialog](https://github.com/mlabbe/nativefiledialog) which I used a fork of that added only CMake support, this new one adds that plus new fixes/features
 - [libconfig](https://github.com/hyperrealm/libconfig) - Library to manage save data (like directories that hold ROMs) and possible future config files

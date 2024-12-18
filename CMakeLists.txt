@@ -19,7 +19,7 @@ else()
     set(libname "config")
 endif()
 
-target_link_libraries(8ChocChip PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf nfd ${libname}++)
+target_link_libraries(8ChocChip PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf ${libname}++)
 
 set_target_properties(8ChocChip PROPERTIES
         INSTALL_RPATH "$ORIGIN"
@@ -28,10 +28,6 @@ set_target_properties(8ChocChip PROPERTIES
 
 # Copy nfd and config++ libraries to the executable directory
 if (UNIX AND NOT APPLE)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            "$<TARGET_FILE:nfd>"
-            "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
             "$<TARGET_FILE:config++>"

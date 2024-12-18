@@ -1,5 +1,3 @@
-add_subdirectory(nativefiledialog)
-
 set(BUILD_EXAMPLES OFF CACHE BOOL "Disable examples for libconfig" FORCE)
 set(BUILD_TESTS ON CACHE BOOL "Disable tests for libconfig" FORCE)
 add_subdirectory(libconfig EXCLUDE_FROM_ALL)

@@ -1,11 +1,11 @@
 #ifndef MAINMENU_H
 #define MAINMENU_H
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <nfd.hpp>
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "InputHandler.h"
@@ -19,9 +19,6 @@ private:
     std::unordered_map<std::string*, std::vector<std::string>>& romFiles;
     std::vector<std::unique_ptr<Window>>& windows;
 
-    NFD::Guard nfdGuard;
-    NFD::UniquePath outPath;
-
     std::unordered_map<std::string, TextButton> roms;
     std::unique_ptr<TextButton> chooseFolder;
 
@@ -29,6 +26,7 @@ private:
 
     TTF_TextEngine* textEngine;
     TTF_Font* font = nullptr;
+    SDL_Mutex* mutex;
 public:
     MainMenu(TTF_Font* font, std::string configFilePath, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,
@@ -42,6 +40,7 @@ public:
     void close() override;
 
     void refreshRoms();
+    static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };
 
 #endif

@@ -16,7 +16,8 @@
 
 MainMenu::MainMenu(TTF_Font* font, std::string configFilePath, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    configFilePath(configFilePath), romDirectories(romDirectories), romFiles(romFiles), windows(windows), font(font) {}
+    configFilePath(configFilePath), romDirectories(romDirectories), romFiles(romFiles), windows(windows), font(font),
+    mutex(SDL_CreateMutex()) {}
 
 void MainMenu::init() {
     Window::init();
@@ -90,47 +91,7 @@ void MainMenu::update() {
 
     if (this->chooseFolder->isJustClicked()) {
 
-        if (nfdresult_t result = PickFolder(this->outPath); result == NFD_OKAY) {
-            libconfig::Config config;
-            config.readFile(this->configFilePath);
-
-            libconfig::Setting &settings = config.getRoot();
-
-            if (!settings.exists("directories")) {
-                settings.add("directories", libconfig::Setting::TypeArray);
-            }
-
-            libconfig::Setting &directories = settings["directories"];
-            directories.add(libconfig::Setting::TypeString) = this->outPath.get();
-
-            this->romDirectories.emplace_back(this->outPath.get());
-
-            for (const auto &file: std::filesystem::directory_iterator(this->outPath.get())) {
-                if (file.is_directory()) {
-                    continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like
-                    // a word doc
-                }
-
-                printf("Processing file - : %s\n", file.path().c_str());
-
-                // Check if the rom directory doesn't exist in romFiles, then add it
-                if (this->romFiles.find(&this->romDirectories.back()) == this->romFiles.end()) {
-                    this->romFiles.emplace(&this->romDirectories.back(), std::vector<std::string>());
-                }
-
-                // Add the file path to the romFiles entry
-                this->romFiles.find(&this->romDirectories.back())->second.emplace_back(file.path().string());
-
-                TTF_Text* text = TTF_CreateText(this->textEngine, this->font, file.path().filename().string().c_str(), 0);
-                if (!text) {
-                    SDL_Log("Failed to create text: %s\n", SDL_GetError());
-                    return;
-                }
-
-                this->roms.emplace(file.path().string(), TextButton(0, 25.0f * this->roms.size(), WIDTH, 25, text));
-            }
-            config.writeFile(this->configFilePath);
-        }
+        SDL_ShowOpenFolderDialog(callback, this, this->window, "/home", false);
     }
 
     this->inputHandler.updateLastKeys();
@@ -169,9 +130,69 @@ void MainMenu::close() {
         window->close();
     }
     TTF_DestroyRendererTextEngine(this->textEngine);
+    SDL_DestroyMutex(this->mutex);
     Window::close();
 }
 
 void MainMenu::refreshRoms() {
+}
 
+void MainMenu::callback(void* userdata, const char* const* directory, int filter) {
+    if (!directory) {
+        SDL_Log("An error occured: %s", SDL_GetError());
+        return;
+    }
+    if (!*directory) {
+        SDL_Log("The user did not select any file.");
+        SDL_Log("Most likely, the dialog was canceled.");
+        return;
+    }
+
+    auto* instance = static_cast<MainMenu*>(userdata);
+
+    std::cout << *directory << std::endl;
+    std::string directoryString = *directory;
+
+    SDL_LockMutex(instance->mutex);
+    libconfig::Config config;
+    config.readFile(instance->configFilePath);
+
+    libconfig::Setting &settings = config.getRoot();
+
+    if (!settings.exists("directories")) {
+        settings.add("directories", libconfig::Setting::TypeArray);
+    }
+
+    libconfig::Setting &directories = settings["directories"];
+    directories.add(libconfig::Setting::TypeString) = directoryString;
+
+    instance->romDirectories.emplace_back(directoryString);
+
+    for (const auto &file: std::filesystem::directory_iterator(directoryString)) {
+        if (file.is_directory()) {
+            continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like
+            // a word doc
+        }
+
+        printf("Processing file - : %s\n", file.path().c_str());
+
+        // Check if the rom directory doesn't exist in romFiles, then add it
+        if (instance->romFiles.find(&instance->romDirectories.back()) == instance->romFiles.end()) {
+            instance->romFiles.emplace(&instance->romDirectories.back(), std::vector<std::string>());
+        }
+
+        // Add the file path to the romFiles entry
+        instance->romFiles.find(&instance->romDirectories.back())->second.emplace_back(file.path().string());
+
+        TTF_Text *text = TTF_CreateText(instance->textEngine, instance->font, file.path().filename().string().c_str(), 0);
+        if (!text) {
+            SDL_Log("Failed to create text: %s\n", SDL_GetError());
+            return;
+        }
+
+        instance->roms.emplace(file.path().string(), TextButton(0, 25.0f * instance->roms.size(), WIDTH, 25, text));
+    }
+    config.writeFile(instance->configFilePath);
+
+    SDL_UnlockMutex(instance->mutex);
 }

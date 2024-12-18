@@ -58,8 +58,6 @@ jobs:
           mkdir -p output
           ls build
           ls build/bin
-#          cp build/bin/8ChocChip output/
-#          cp -r build/bin/assets output/
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
@@ -125,11 +123,7 @@ jobs:
           dir build
           dir build/bin
           dir build/bin/Release
-          cp build/dependencies/nativefiledialog/src/Release/* build/bin/Release
           cp build/out/Release/libconfig++.* build/bin/Release
-#          cp build/src/Release/* build/bin/
-#          cp build/src/Release/assets/* build/bin/assets
-#          cp -r assets output/
     
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -140,26 +134,3 @@ jobs:
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
-
-
-  # build-macos:
-  #   runs-on: macos-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-
-  #     - name: Install dependencies
-  #       run: brew update && brew install cmake sfml
-
-  #     - name: Configure and build
-  #       run: |
-  #         mkdir build && cd build
-  #         cmake ..
-  #         cmake --build .
-
-  #     - name: Upload executable
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: macos-executable
-  #         path: build/src/8ChocChip
