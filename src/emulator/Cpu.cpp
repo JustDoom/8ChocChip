@@ -133,15 +133,24 @@ void Cpu::runInstruction(const uint16_t opcode) {
                 case 0x0:
                     this->registers[x] = this->registers[y];
                     break;
-                case 0x1:
-                    this->registers[x] |= this->registers[y];
+                case 0x1: {
+                    const uint8_t vY = this->registers[y];
+                    this->registers[0xF] = 0;
+                    this->registers[x] |= vY;
                     break;
-                case 0x2:
-                    this->registers[x] &= this->registers[y];
+                }
+                case 0x2: {
+                    const uint8_t vY = this->registers[y];
+                    this->registers[0xF] = 0;
+                    this->registers[x] &= vY;
                     break;
-                case 0x3:
-                    this->registers[x] ^= this->registers[y];
+                }
+                case 0x3: {
+                    const uint8_t vY = this->registers[y];
+                    this->registers[0xF] = 0;
+                    this->registers[x] ^= vY;
                     break;
+                }
                 case 0x4: {
                     const uint16_t sum = this->registers[x] + this->registers[y];
 
@@ -162,6 +171,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 }
                 case 0x6: {
+                    this->registers[x] = this->registers[y]; // TODO: Optional quirk? https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#8xy6-and-8xye-shift
                     const uint8_t value = (this->registers[x] & 0x1);
                     this->registers[x] >>= 1;
                     this->registers[0xF] = value;
@@ -179,6 +189,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
 
                     break;
                 case 0xE: {
+                    this->registers[x] = this->registers[y];
                     const uint8_t value = (this->registers[x] & 0x80) >> 7;
                     this->registers[x] <<= 1;
                     this->registers[0xF] = value;
@@ -281,16 +292,20 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->memory[this->address] = value % 10;
                     break;
                 }
-                case 0x55:
+                case 0x55: {
                     for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->memory[this->address + registerIndex] = this->registers[registerIndex];
                     }
+                    this->address += x + 1;
                     break;
-                case 0x65:
+                }
+                case 0x65: {
                     for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
                         this->registers[registerIndex] = this->memory[this->address + registerIndex];
                     }
+                    this->address += x + 1;
                     break;
+                }
                 default:
                     break;
             }
