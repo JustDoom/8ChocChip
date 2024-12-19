@@ -1,55 +1,48 @@
 #include "Renderer.h"
 
-Renderer::Renderer() {
-    this->display.resize(this->columns * this->rows);
-}
+#include <iostream>
 
 void Renderer::render(SDL_Renderer* renderer) {
-    // Render the display
-    for (uint16_t y = 0; y < this->rows; ++y) {
-        for (uint16_t x = 0; x < this->columns; ++x) {
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    for (uint8_t y = 0; y < this->rows; ++y) {
+        for (uint8_t x = 0; x < this->columns; ++x) {
             if (this->display[y * this->columns + x]) {
-                drawPixel(renderer, x, y);
+                const SDL_FRect rect = {x * this->scale, y * this->scale, this->scale, this->scale};
+                SDL_RenderFillRect(renderer, &rect);
             }
         }
     }
 }
 
-bool Renderer::setPixel(uint8_t x, uint16_t y) {
+bool Renderer::setPixel(const uint8_t x, const uint8_t y) {
     // Wrap around if x or y is out of bounds
     // x %= this->columns;
     // y %= this->rows;
 
-    const uint16_t pixelLoc = x + (y * this->columns);
-    this->display[pixelLoc] = !this->display[pixelLoc];
+    const uint16_t pixelLoc = y * this->columns + x;
+    const bool oldValue = this->display[pixelLoc];
+    this->display[pixelLoc] = !oldValue;
 
-    return !this->display[pixelLoc];
+    return oldValue;
+}
+
+bool Renderer::getPixel(const uint8_t x, const uint8_t y) {
+    return this->display[y * this-> columns + x];
 }
 
 void Renderer::clear() {
-    for (uint16_t y = 0; y < this->rows; ++y) {
-        for (uint16_t x = 0; x < this->columns; ++x) {
-            if (this->display[y * this->columns + x]) {
-                setPixel(x, y);
-            }
-        }
-    }
+    this->display.assign(this->display.size(), false);
 }
 
-uint16_t Renderer::getColumns() const {
+uint8_t Renderer::getColumns() const {
     return this->columns;
 }
 
-uint16_t Renderer::getRows() const {
+uint8_t Renderer::getRows() const {
     return this->rows;
 }
 
 float Renderer::getScale() const {
     return this->scale;
-}
-
-void Renderer::drawPixel(SDL_Renderer* renderer, const uint16_t x, const uint16_t y) {
-    const SDL_FRect rect = {x * this->scale, y * this->scale, this->scale, this->scale};
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set color to white
-    SDL_RenderFillRect(renderer, &rect);
 }

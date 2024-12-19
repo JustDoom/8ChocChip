@@ -227,9 +227,12 @@ void Cpu::runInstruction(const uint16_t opcode) {
 
                 for (uint8_t col = 0; col < 8; ++col) {
                     if (sprite & 0x80) {
-                        const uint8_t drawX = (uX + col) % 64;
+                        const uint8_t drawX = (uX + col);
+                        const uint8_t drawY = (uY + row);
 
-                        if (const uint8_t drawY = (uY + row) % 32; this->renderer->setPixel(drawX, drawY)) {
+                        if (drawX >= 64 || drawY >= 32) continue;
+
+                        if ( this->renderer->setPixel(drawX, drawY)) {
                             this->registers[0xF] = 1;
                         }
                     }
