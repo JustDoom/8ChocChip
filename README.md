@@ -53,4 +53,5 @@ Thanks to these two blogs that helped me through creating this emulator.
 
 Currently, three libraries are being used
 - [SDL](https://github.com/libsdl-org/SDL) - UI, graphics, input and sounds
+- [SDL-ttf](https://github.com/libsdl-org/SDL_ttf) - Text fonts
 - [libconfig](https://github.com/hyperrealm/libconfig) - Library to manage save data (like directories that hold ROMs) and possible future config files
