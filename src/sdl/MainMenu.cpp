@@ -174,7 +174,7 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
             // a word doc
         }
 
-        printf("Processing file - : %s\n", file.path().c_str());
+        std::cout << "Processing file - : " << file.path().c_str() << std::endl;
 
         // Check if the rom directory doesn't exist in romFiles, then add it
         if (instance->romFiles.find(&instance->romDirectories.back()) == instance->romFiles.end()) {
