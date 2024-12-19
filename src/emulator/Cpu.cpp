@@ -59,15 +59,17 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
         if (this->paused) {
-            continue;
+            break;
         }
 
         runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
     }
 
-    if (!this->paused) {
-        updateTimers();
+    if (this->paused && this->keyboard->onNextKeyPress == nullptr) {
+        this->paused = false;
     }
+
+    updateTimers();
 
     // Play sound until timer runs out
     if (this->soundTimer > 0) {
@@ -260,7 +262,6 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 case 0x0A:
                     this->paused = true;
-
                     this->keyboard->onNextKeyPress = [&](const uint8_t key) {
                         this->registers[x] = key;
                         this->paused = false;
@@ -321,7 +322,7 @@ void Cpu::updateTimers() {
         this->delay -= 1;
     }
 
-    if (this->soundTimer > 0) {
+    if (!this->paused && this->soundTimer > 0) {
         this->soundTimer -= 1;
     }
 }
