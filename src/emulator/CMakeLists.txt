@@ -5,4 +5,6 @@ target_sources(8ChocChip PRIVATE
         Keyboard.h
         Renderer.cpp
         Renderer.h
-        Speaker.h)
+        Speaker.cpp
+        Speaker.h
+)

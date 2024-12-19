@@ -1,11 +1,18 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <SDL3/SDL.h>
 #include <cstdint>
 #include <vector>
 
+#include <SDL3/SDL.h>
+
 class Renderer {
+private:
+    const float scale = 15;
+    const uint16_t columns = 64;
+    const uint16_t rows = 32;
+
+    std::vector<bool> display;
 public:
     Renderer();
 
@@ -17,13 +24,9 @@ public:
 
     uint16_t getColumns() const;
     uint16_t getRows() const;
+    float getScale() const;
 
-    virtual void drawPixel(SDL_Renderer* renderer, uint16_t x, uint16_t y) = 0;
-private:
-    const uint16_t columns = 64;
-    const uint16_t rows = 32;
-
-    std::vector<bool> display;
+    void drawPixel(SDL_Renderer* renderer, uint16_t x, uint16_t y);
 };
 
 #endif

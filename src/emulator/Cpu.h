@@ -10,17 +10,6 @@
 #include "Speaker.h"
 
 class Cpu {
-public:
-    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker);
-
-    void loadSpritesIntoMemory();
-    void loadProgramIntoMemory(std::ifstream* file);
-
-    void cycle();
-    void runInstruction(uint16_t opcode);
-    void updateTimers();
-
-    uint8_t random8bit();
 private:
     std::array<uint8_t, 4096> memory;
     std::array<uint8_t, 16> registers;
@@ -38,6 +27,17 @@ private:
     Renderer* renderer;
     Keyboard* keyboard;
     Speaker* speaker;
+public:
+    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker);
+
+    void loadSpritesIntoMemory();
+    void loadProgramIntoMemory(std::ifstream* file);
+
+    void cycle();
+    void runInstruction(uint16_t opcode);
+    void updateTimers();
+
+    uint8_t random8bit();
 };
 
 #endif

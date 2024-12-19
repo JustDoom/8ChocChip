@@ -43,3 +43,13 @@ uint16_t Renderer::getColumns() const {
 uint16_t Renderer::getRows() const {
     return this->rows;
 }
+
+float Renderer::getScale() const {
+    return this->scale;
+}
+
+void Renderer::drawPixel(SDL_Renderer* renderer, const uint16_t x, const uint16_t y) {
+    const SDL_FRect rect = {x * this->scale, y * this->scale, this->scale, this->scale};
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Set color to white
+    SDL_RenderFillRect(renderer, &rect);
+}

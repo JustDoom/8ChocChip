@@ -27,7 +27,7 @@ void MainMenu::init() {
     for (auto& thing: this->romFiles) {
         for (std::string& file: thing.second) {
 
-            TTF_Text* text = TTF_CreateText(this->textEngine, this->font, MiscUtil::getFileFromPath(file).c_str(), 0);
+            TTF_Text* text = TTF_CreateText(this->textEngine, this->font, getFileFromPath(file).c_str(), 0);
             if (!text) {
                 SDL_Log("Failed to create text: %s\n", SDL_GetError());
                 return;

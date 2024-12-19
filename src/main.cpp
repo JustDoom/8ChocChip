@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
         std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
 
-        std::string command = MiscUtil::toLowerCase(std::string(arg));
+        std::string command = toLowerCase(std::string(arg));
         if (command == "--rom") {
             if (i + 1 < argc) {
                 if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {

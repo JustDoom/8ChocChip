@@ -9,5 +9,4 @@ target_sources(8ChocChip PRIVATE
         Window.h
 )
 
-add_subdirectory(emulator)
 add_subdirectory(ui)

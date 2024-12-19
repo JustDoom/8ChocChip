@@ -1,19 +1,16 @@
 #include "Keyboard.h"
 
-#include <utility>
-
 void Keyboard::setOnNextKeyPress(std::function<void(unsigned char)> callback) {
     this->onNextKeyPress = std::move(callback);
 }
 
-bool Keyboard::isKeyPressed(int keyCode) {
+bool Keyboard::isKeyPressed(const int keyCode) {
     return keysPressed[keyCode];
 }
 
-void Keyboard::handleKeyDown(uint8_t keyCode) {
-    auto keyMapIter = this->KEYMAP.find(keyCode);
-    if (keyMapIter != this->KEYMAP.end()) {
-        uint8_t key = keyMapIter->second;
+void Keyboard::handleKeyDown(const uint8_t keyCode) {
+    if (const auto keyMapIter = this->KEYMAP.find(keyCode); keyMapIter != this->KEYMAP.end()) {
+        const uint8_t key = keyMapIter->second;
         this->keysPressed[key] = true;
         if (this->onNextKeyPress) {
             this->onNextKeyPress(key);
@@ -22,10 +19,9 @@ void Keyboard::handleKeyDown(uint8_t keyCode) {
     }
 }
 
-void Keyboard::handleKeyUp(uint8_t keyCode) {
-    auto keyMapIter = this->KEYMAP.find(keyCode);
-    if (keyMapIter != this->KEYMAP.end()) {
-        uint8_t key = keyMapIter->second;
+void Keyboard::handleKeyUp(const uint8_t keyCode) {
+    if (const auto keyMapIter = this->KEYMAP.find(keyCode); keyMapIter != this->KEYMAP.end()) {
+        const uint8_t key = keyMapIter->second;
         this->keysPressed[key] = false;
     }
 }

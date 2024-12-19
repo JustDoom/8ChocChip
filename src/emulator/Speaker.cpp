@@ -1,13 +1,9 @@
-#include "SdlSpeaker.h"
+#include "Speaker.h"
 
-#include <iostream>
 #include <cmath>
-#include <valarray>
-#include <vector>
+#include <iostream>
 
-#include <SDL3/SDL.h>
-
-SdlSpeaker::SdlSpeaker() : amplitude(28000), sampleRate(44100), frequency(220), duration(500), sampleCount((sampleRate * duration) / 1000), beepData(sampleCount) {
+Speaker::Speaker() : amplitude(28000), sampleRate(44100), frequency(220), duration(500), sampleCount((sampleRate * duration) / 1000), beepData(sampleCount) {
     SDL_AudioSpec desiredSpec;
     SDL_zero(desiredSpec);
     desiredSpec.freq = this->sampleRate;
@@ -23,13 +19,13 @@ SdlSpeaker::SdlSpeaker() : amplitude(28000), sampleRate(44100), frequency(220), 
     generateSample();
 }
 
-SdlSpeaker::~SdlSpeaker() {
+Speaker::~Speaker() {
     if (this->audioStream != nullptr) {
         SDL_DestroyAudioStream(this->audioStream);
     }
 }
 
-void SdlSpeaker::play() {
+void Speaker::play() {
     if (this->audioStream != nullptr) {
         if (SDL_GetAudioStreamAvailable(this->audioStream) == 0) {
             generateSample();
@@ -38,13 +34,13 @@ void SdlSpeaker::play() {
     }
 }
 
-void SdlSpeaker::stop() {
+void Speaker::stop() {
     if (this->audioStream != nullptr) {
         SDL_PauseAudioStreamDevice(this->audioStream);
     }
 }
 
-void SdlSpeaker::generateSample() {
+void Speaker::generateSample() {
     for (int i = 0; i < this->sampleCount; ++i) {
         this->beepData[i] = static_cast<int16_t>(this->amplitude * std::sin(2.0 * std::acos(-1) * this->frequency * i / this->sampleRate));
     }
