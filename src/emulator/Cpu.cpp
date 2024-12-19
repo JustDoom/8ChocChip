@@ -8,6 +8,7 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->delay = 0;
     this->soundTimer = 0;
     this->pc = 0x200; // Starting position for reading instructions. At least for most programs
+    this->drawn = false;
     this->paused = false;
     this->speed = 20; // Game speed
 
@@ -58,12 +59,13 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 
 void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
-        if (this->paused) {
+        if (this->paused || this->drawn) {
             break;
         }
 
         runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
     }
+    this->drawn = false;
 
     if (this->paused && this->keyboard->onNextKeyPress == nullptr) {
         this->paused = false;
@@ -232,13 +234,14 @@ void Cpu::runInstruction(const uint16_t opcode) {
 
                         if (drawX >= 64 || drawY >= 32) continue;
 
-                        if ( this->renderer->setPixel(drawX, drawY)) {
+                        if (this->renderer->setPixel(drawX, drawY)) {
                             this->registers[0xF] = 1;
                         }
                     }
                     sprite <<= 1;
                 }
             }
+            this->drawn = true;
             break;
         }
         case 0xE000:

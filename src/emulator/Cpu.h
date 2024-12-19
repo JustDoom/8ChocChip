@@ -20,6 +20,7 @@ private:
     uint8_t delay;
     uint8_t soundTimer;
 
+    bool drawn;
     bool paused;
     uint8_t speed;
     uint8_t seed;
