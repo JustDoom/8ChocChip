@@ -91,8 +91,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->renderer->clear();
                     break;
                 case 0x00EE:
-                    --this->sp;
-                    this->pc = this->stack[this->sp];
+                    this->pc = this->stack[--this->sp & 0xF];
                     break;
                 default:
                     break;
@@ -103,8 +102,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
             this->pc = (opcode & 0xFFF);
             break;
         case 0x2000:
-            this->stack[this->sp] = this->pc;
-            ++this->sp;
+            this->stack[this->sp++ & 0xF] = this->pc;
             this->pc = (opcode & 0xFFF);
             break;
         case 0x3000:
