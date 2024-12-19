@@ -7,10 +7,10 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
-    this->pc = 0x200; // Starting position for reading instructions. At least for most programs
+    this->pc = 0x200;
     this->drawn = false;
     this->paused = false;
-    this->speed = 15; // Game speed
+    this->speed = 15;
 
     this->renderer = renderer;
     this->keyboard = keyboard;
@@ -71,7 +71,13 @@ void Cpu::cycle() {
         this->paused = false;
     }
 
-    updateTimers();
+    if (this->delay > 0) {
+        this->delay -= 1;
+    }
+
+    if (!this->paused && this->soundTimer > 0) {
+        this->soundTimer -= 1;
+    }
 
     // Play sound until timer runs out
     if (this->soundTimer > 0) {
@@ -320,16 +326,6 @@ void Cpu::runInstruction(const uint16_t opcode) {
         default:
             std::cerr << "Unknown code" << opcode << std::endl;
             break;
-    }
-}
-
-void Cpu::updateTimers() {
-    if (this->delay > 0) {
-        this->delay -= 1;
-    }
-
-    if (!this->paused && this->soundTimer > 0) {
-        this->soundTimer -= 1;
     }
 }
 

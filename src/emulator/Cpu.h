@@ -36,7 +36,6 @@ public:
 
     void cycle();
     void runInstruction(uint16_t opcode);
-    void updateTimers();
 
     uint8_t random8bit();
 };
