@@ -42,7 +42,7 @@ void MainMenu::init() {
         SDL_Log("Failed to create text: %s\n", SDL_GetError());
         return;
     }
-    this->chooseFolder = std::make_unique<TextButton>(0, 400, WIDTH, 80, text);
+    this->chooseFolder = std::make_unique<TextButton>(0.0f, 400.0f, static_cast<float>(WIDTH), 80.0f, text);
 }
 
 bool MainMenu::handleEvent(SDL_Event &event) {
