@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE INTERNAL "")
+set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 
 option(BUILD_SHARED_LIBS "Build a shared library instead of static" OFF)
 option(SDL_VENDORED "Use vendored libraries" ON)
@@ -30,7 +31,6 @@ set_target_properties(8ChocChip PROPERTIES
         INSTALL_RPATH "$ORIGIN"
         BUILD_RPATH "$ORIGIN"
 )
-
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
