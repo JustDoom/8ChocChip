@@ -10,7 +10,7 @@ on:
       - '.github/workflows/**'
     branches:
       - master
-      - sdl
+      - xp-test
   workflow_dispatch:
 
 jobs:

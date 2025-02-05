@@ -3,6 +3,15 @@ project(8ChocChip
 LANGUAGES CXX
 VERSION 0.1)
 
+if(CMAKE_HOST_WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
+    set(CMAKE_CXX_STANDARD 98)
+    set_property(TARGET 8ChocChip PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
+    set(libname "libconfig")
+else()
+    set(libname "config")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -17,12 +26,6 @@ add_executable(8ChocChip)
 
 add_subdirectory(dependencies)
 add_subdirectory(src)
-
-if(CMAKE_HOST_WIN32)
-    set(libname "libconfig")
-else()
-    set(libname "config")
-endif()
 
 target_link_libraries(8ChocChip PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf ${libname}++)
 target_compile_definitions(8ChocChip PUBLIC SDL_MAIN_USE_CALLBACKS)
