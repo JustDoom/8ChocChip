@@ -19,6 +19,26 @@ There are a couple of things left to do until I would say it works well enough
 - [ ] Other Chip8 variants
 - [ ] Per program settings (Keybindings, graphics, sounds, etc)
 
+### Supported Platforms
+
+I want to try support a bunch of platforms like old Windows and MacOS versions.
+
+- GNU/Linux - Should work on any distro that will let you run plain executable files from the last few years at least
+- Windows 7 - Make sure to install [Visual Studio 2017](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
+- Windows 8(.1)
+- Windows 10
+- Windows 11
+
+#### Planned
+
+- Windows 95
+- Windows 98
+- Windows XP
+- Windows Vista
+- MacOS 9
+- MacOS X
+- MacOS
+
 ## Usage
 
 To run 8ChocChip you can either launch the executable file with the command line and specify a rom to instantly launch into like this `/path/to/exectable/8ChocChip --rom /path/to/rom.8ch`. 
