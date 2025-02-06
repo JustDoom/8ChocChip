@@ -37,14 +37,15 @@ int main(int argc, char **argv) {
         }
     }
 
-    const char* home = nullptr;
+    const char* variable = nullptr;
 #ifdef _WIN32
-    home = std::getenv("USERPROFILE");
+    variable = "USERPROFILE";
 #else
-    home = std::getenv("HOME");
+    variable = "HOME";
 #endif
+    const char* home = std::getenv(variable);
     if (!home) {
-        std::cerr << "HOME environment variable not set!" << std::endl;
+        std::cerr << variable << " environment variable not set. " << std::endl;
         return 1;
     }
 
