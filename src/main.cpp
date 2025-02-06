@@ -17,19 +17,22 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < argc; i++) {
         std::string_view arg = argv[i];
-        if (arg.rfind("--") != 0) continue; // TODO: Account for --longform or -sf (short form) commands. just needs a better command handler
+        if (arg.rfind("--") != 0) {
+            continue;
+        }
 
-        std::string command = toLowerCase(std::string(arg));
-        if (command == "--rom") {
+        std::string command = toLowerCase(arg);
+        if (command == "--rom" || command == "-r") {
             if (i + 1 < argc) {
                 rom = argv[++i];
-            } else {
-                std::cerr << "Please include the path to the file" << std::endl;
-                return 0;
+                continue;
             }
+
+            std::cerr << "Please include the path to the file" << std::endl;
+            return 0;
         }
-        if (command == "--help") {
-            std::cerr << "Usage: 8chocchip --rom <rompath>" << std::endl;
+        if (command == "--help" || command == "-h") {
+            std::cerr << "Usage: 8ChocChip --rom <pathtorom>" << std::endl;
             return 0;
         }
     }
