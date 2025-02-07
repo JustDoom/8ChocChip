@@ -181,9 +181,8 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     instance->romDirectories.emplace_back(directoryString);
 
     for (const auto &file: std::filesystem::directory_iterator(directoryString)) {
-        if (file.is_directory()) {
-            continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like
-            // a word doc
+        if (file.is_directory() || file.file_size() > 3584) {
+            continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
         }
 
         std::cout << "Processing file - : " << file.path().c_str() << std::endl;

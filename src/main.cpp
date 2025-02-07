@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
             romDirectories.emplace_back(directoryPath);
 
             for (const auto& romFile: std::filesystem::directory_iterator(directoryPath)) {
-                if (romFile.is_directory()) {
+                if (romFile.is_directory() || romFile.file_size() > 3584) {
                     continue;
                 }
 
