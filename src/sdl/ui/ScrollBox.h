@@ -29,6 +29,8 @@ public:
     float getWidth() override;
     float getHeight() override;
 
+    bool isPointInsideArea(SDL_FPoint& point) override;
+
     void setElements(std::vector<std::shared_ptr<Element>> elements);
 };
 

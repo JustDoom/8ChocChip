@@ -24,6 +24,8 @@ public:
     virtual float getRealY() = 0;
     virtual float getWidth() = 0;
     virtual float getHeight() = 0;
+
+    virtual bool isPointInsideArea(SDL_FPoint& point) = 0;
 };
 
 #endif

@@ -74,6 +74,10 @@ float ScrollBox::getHeight() {
     return this->box.h;
 }
 
+bool ScrollBox::isPointInsideArea(SDL_FPoint &point) {
+    return SDL_PointInRectFloat(&point, &this->box);
+}
+
 void ScrollBox::setElements(std::vector<std::shared_ptr<Element>> elements) {
     this->elements = std::move(elements);
 }

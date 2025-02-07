@@ -60,6 +60,8 @@ public:
     float getWidth() override;
     float getHeight() override;
 
+    bool isPointInsideArea(SDL_FPoint& point) override;
+
     void setOnClick(const std::function<void()> function);
 };
 

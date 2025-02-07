@@ -44,6 +44,9 @@ void TextButton::update(InputHandler& inputHandler) {
 
     this->lastPressed = this->isPressed;
     this->isHovered = SDL_PointInRectFloat(&pos, &this->renderButton); // TODO: Can hover over 2 at once sometimes and open 2
+    if (const auto lock = this->parent.lock()) {
+        this->isHovered = this->isHovered && lock->isPointInsideArea(pos);
+    }
 
     if (this->isHovered && inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
         this->isPressed = true;
@@ -115,6 +118,10 @@ float TextButton::getWidth() {
 
 float TextButton::getHeight() {
     return this->originalButton.h;
+}
+
+bool TextButton::isPointInsideArea(SDL_FPoint& point) {
+    return SDL_PointInRectFloat(&point, &this->renderButton);
 }
 
 void TextButton::setOnClick(const std::function<void()> function) {
