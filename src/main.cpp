@@ -12,6 +12,17 @@
 #include "sdl/MainMenu.h"
 #include "util/MiscUtil.h"
 
+#ifdef _WIN32
+#include <windows.h>
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    char **argv = new char*[0];
+    int result = main(0, argv);
+    delete[] argv;
+    return result;
+}
+#endif
+
 int main(int argc, char **argv) {
     std::string rom;
 
