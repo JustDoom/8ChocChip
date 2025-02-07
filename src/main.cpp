@@ -15,6 +15,8 @@
 #ifdef _WIN32
 #include <windows.h>
 
+int main(int argc, char **argv);
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     char **argv = new char*[0];
     int result = main(0, argv);
