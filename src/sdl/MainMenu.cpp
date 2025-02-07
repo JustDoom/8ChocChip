@@ -8,9 +8,10 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <libconfig.h++>
 
-#include "../util/MiscUtil.h"
 #include "Emulator.h"
 #include "ui/ScrollBox.h"
+#include "../util/MiscUtil.h"
+#include "../util/Constants.h"
 
 #define WIDTH (64 * 15)
 #define HEIGHT (32 * 15)
@@ -57,7 +58,7 @@ void MainMenu::init() {
 
     this->chooseFolder = std::make_shared<TextButton>(0.0f, 400.0f, WIDTH, 80, text, SDL_Color{150, 150, 150, 255});
     this->chooseFolder->setOnClick([this]() {
-        SDL_ShowOpenFolderDialog(callback, this, this->window, "/home", false); // TODO: /home probably does not exist on windows
+        SDL_ShowOpenFolderDialog(callback, this, this->window, home, false);
     });
     this->elements.emplace_back(this->chooseFolder);
 }

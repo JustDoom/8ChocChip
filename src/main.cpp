@@ -10,6 +10,7 @@
 #include "Timer.h"
 #include "sdl/Emulator.h"
 #include "sdl/MainMenu.h"
+#include "util/Constants.h"
 #include "util/MiscUtil.h"
 
 int main(int argc, char **argv) {
@@ -37,15 +38,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    const char* variable = nullptr;
-#ifdef _WIN32
-    variable = "USERPROFILE";
-#else
-    variable = "HOME";
-#endif
-    const char* home = std::getenv(variable);
     if (!home) {
-        std::cerr << variable << " environment variable not set. " << std::endl;
+        std::cerr << home << " environment variable not set. " << std::endl;
         return 1;
     }
 
