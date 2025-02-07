@@ -79,5 +79,6 @@ bool ScrollBox::isPointInsideArea(SDL_FPoint &point) {
 }
 
 void ScrollBox::setElements(std::vector<std::shared_ptr<Element>> elements) {
+    this->elements.clear();
     this->elements = std::move(elements);
 }

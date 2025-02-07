@@ -10,6 +10,7 @@
 
 #include "InputHandler.h"
 #include "Window.h"
+#include "ui/ScrollBox.h"
 #include "ui/TextButton.h"
 
 class MainMenu : public Window {
@@ -21,6 +22,7 @@ private:
 
     std::unordered_map<std::string, TextButton> roms;
     std::shared_ptr<TextButton> chooseFolder;
+    std::shared_ptr<ScrollBox> scrollRoms;
     std::vector<std::shared_ptr<Element>> elements;
 
     InputHandler inputHandler{};
@@ -41,7 +43,7 @@ public:
     void close() override;
 
     void launchRom(const std::string& file);
-    void refreshRoms();
+    std::vector<std::shared_ptr<Element>> refreshRoms();
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };
 

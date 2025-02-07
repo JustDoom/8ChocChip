@@ -26,29 +26,9 @@ void MainMenu::init() {
 
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
-    std::shared_ptr<ScrollBox> scrollBox = std::make_shared<ScrollBox>(0, 0, WIDTH, 400);
-    std::vector<std::shared_ptr<Element>> scrollBoxRoms;
-    int count = 0;
-    for (auto& thing: this->romFiles) {
-        for (std::string& file: thing.second) {
-            TTF_Text* text = TTF_CreateText(this->textEngine, this->font, getFileFromPath(file).c_str(), 0);
-            if (!text) {
-                SDL_Log("Failed to create text: %s\n", SDL_GetError());
-                return;
-            }
-
-            auto button = std::shared_ptr<TextButton>();
-            if (count++ & 1) {
-                button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, scrollBox, SDL_Color{175, 175, 175, 255});
-            } else {
-                button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, scrollBox);
-            }
-            button->setOnClick([this, &file]() { launchRom(file);});
-            scrollBoxRoms.emplace_back(button);
-        }
-    }
-    scrollBox->setElements(scrollBoxRoms);
-    this->elements.emplace_back(scrollBox);
+    this->scrollRoms = std::make_shared<ScrollBox>(0, 0, WIDTH, 400);
+    this->scrollRoms->setElements(refreshRoms());
+    this->elements.emplace_back(this->scrollRoms);
 
     TTF_Text* text = TTF_CreateText(this->textEngine, this->font, "Select ROM", 0);
     if (!text) {
@@ -146,7 +126,28 @@ void MainMenu::launchRom(const std::string &file) {
 }
 
 
-void MainMenu::refreshRoms() {
+std::vector<std::shared_ptr<Element>> MainMenu::refreshRoms() {
+    std::vector<std::shared_ptr<Element>> scrollBoxRoms;
+    int count = 0;
+    for (auto& thing: this->romFiles) {
+        for (std::string& file: thing.second) {
+            TTF_Text* text = TTF_CreateText(this->textEngine, this->font, getFileFromPath(file).c_str(), 0);
+            if (!text) {
+                SDL_Log("Failed to create text: %s\n", SDL_GetError());
+                continue;
+            }
+
+            auto button = std::shared_ptr<TextButton>();
+            if (count++ & 1) {
+                button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, this->scrollRoms, SDL_Color{175, 175, 175, 255});
+            } else {
+                button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, this->scrollRoms);
+            }
+            button->setOnClick([this, &file]() { launchRom(file);});
+            scrollBoxRoms.emplace_back(button);
+        }
+    }
+    return scrollBoxRoms;
 }
 
 void MainMenu::callback(void* userdata, const char* const* directory, int filter) {
@@ -204,6 +205,7 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
         instance->roms.emplace(file.path().string(), TextButton(0, 25.0f * instance->roms.size(), WIDTH, 25, text));
     }
     config.writeFile(instance->configFilePath);
+    instance->scrollRoms->setElements(instance->refreshRoms());
 
     SDL_UnlockMutex(instance->mutex);
 }
