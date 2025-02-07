@@ -104,7 +104,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->pc = this->stack[--this->sp & 0xF];
                     break;
                 default:
-                    break;
+                    std::cerr << "Unknown code - " << opcode << std::endl;
+                break;
             }
 
             break;
@@ -204,7 +205,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 }
                 default:
-                    break;
+                    std::cerr << "Unknown code - " << opcode << std::endl;
+                break;
             }
 
             break;
@@ -263,7 +265,8 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     }
                     break;
                 default:
-                    break;
+                    std::cerr << "Unknown code - " << opcode << std::endl;
+                break;
             }
 
             break;
@@ -318,14 +321,14 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 }
                 default:
-                    break;
+                    std::cerr << "Unknown code - " << opcode << std::endl;
+                break;
             }
-
             break;
 
         default:
-            std::cerr << "Unknown code" << opcode << std::endl;
-            break;
+            std::cerr << "Unknown code - " << opcode << std::endl;
+        break;
     }
 }
 
