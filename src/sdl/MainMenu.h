@@ -20,7 +20,8 @@ private:
     std::vector<std::unique_ptr<Window>>& windows;
 
     std::unordered_map<std::string, TextButton> roms;
-    std::unique_ptr<TextButton> chooseFolder;
+    std::shared_ptr<TextButton> chooseFolder;
+    std::vector<std::shared_ptr<Element>> elements;
 
     InputHandler inputHandler{};
 
@@ -39,6 +40,7 @@ public:
     void resize(SDL_Event& event) override;
     void close() override;
 
+    void launchRom(const std::string& file);
     void refreshRoms();
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };

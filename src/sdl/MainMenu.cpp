@@ -10,6 +10,7 @@
 
 #include "../util/MiscUtil.h"
 #include "Emulator.h"
+#include "ui/ScrollBox.h"
 
 #define WIDTH (64 * 15)
 #define HEIGHT (32 * 15)
@@ -24,25 +25,41 @@ void MainMenu::init() {
 
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
+    std::shared_ptr<ScrollBox> scrollBox = std::make_shared<ScrollBox>(0, 0, WIDTH, 400);
+    std::vector<std::shared_ptr<Element>> scrollBoxRoms;
+    int count = 0;
     for (auto& thing: this->romFiles) {
         for (std::string& file: thing.second) {
-
             TTF_Text* text = TTF_CreateText(this->textEngine, this->font, getFileFromPath(file).c_str(), 0);
             if (!text) {
                 SDL_Log("Failed to create text: %s\n", SDL_GetError());
                 return;
             }
 
-            this->roms.emplace(file, TextButton(0, 25.0f * this->roms.size(), WIDTH, 25, text));
+            auto button = std::shared_ptr<TextButton>();
+            if (count++ & 1) {
+                button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, scrollBox, SDL_Color{175, 175, 175, 255});
+            } else {
+                button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, scrollBox);
+            }
+            button->setOnClick([this, &file]() { launchRom(file);});
+            scrollBoxRoms.emplace_back(button);
         }
     }
+    scrollBox->setElements(scrollBoxRoms);
+    this->elements.emplace_back(scrollBox);
 
     TTF_Text* text = TTF_CreateText(this->textEngine, this->font, "Select ROM", 0);
     if (!text) {
         SDL_Log("Failed to create text: %s\n", SDL_GetError());
         return;
     }
-    this->chooseFolder = std::make_unique<TextButton>(0.0f, 400.0f, static_cast<float>(WIDTH), 80.0f, text);
+
+    this->chooseFolder = std::make_shared<TextButton>(0.0f, 400.0f, WIDTH, 80, text, SDL_Color{150, 150, 150, 255});
+    this->chooseFolder->setOnClick([this]() {
+        SDL_ShowOpenFolderDialog(callback, this, this->window, "/home", false); // TODO: /home probably does not exist on windows
+    });
+    this->elements.emplace_back(this->chooseFolder);
 }
 
 bool MainMenu::handleEvent(SDL_Event &event) {
@@ -65,33 +82,22 @@ bool MainMenu::handleEvent(SDL_Event &event) {
         break;
     }
 
+    for (const std::shared_ptr<Element>& element : this->elements) {
+        element->handleEvent(event);
+    }
+
     return true;
 }
 
 void MainMenu::update() {
     if (!this->mouseFocus) return;
 
-    SDL_FPoint point{};
-    SDL_GetMouseState(&point.x, &point.y);
-
     if (this->inputHandler.isJustPressed(SDL_SCANCODE_F3)) {
         this->debug = !this->debug;
     }
 
-    for (auto &romButton: this->roms) {
-        romButton.second.update(this->inputHandler, point);
-
-        if (!romButton.second.isJustClicked()) {
-            continue;
-        }
-
-        this->windows.emplace_back(std::make_unique<Emulator>(romButton.first))->init();
-    }
-    this->chooseFolder->update(this->inputHandler, point);
-
-    if (this->chooseFolder->isJustClicked()) {
-
-        SDL_ShowOpenFolderDialog(callback, this, this->window, "/home", false);
+    for (const std::shared_ptr<Element>& element : this->elements) {
+        element->update(this->inputHandler);
     }
 
     this->inputHandler.updateLastKeys();
@@ -101,10 +107,10 @@ void MainMenu::update() {
 void MainMenu::render() {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
     SDL_RenderClear(this->renderer);
-    for (auto &romButton: this->roms) {
-        romButton.second.draw(this->renderer);
+
+    for (const std::shared_ptr<Element>& element : this->elements) {
+        element->draw(this->renderer);
     }
-    this->chooseFolder->draw(this->renderer);
 
     SDL_RenderPresent(this->renderer);
 }
@@ -116,13 +122,13 @@ void MainMenu::resize(SDL_Event& event) {
     SDL_FPoint point{};
     SDL_GetMouseState(&point.x, &point.y);
 
-    for (auto& romButton : this->roms) {
-        romButton.second.updateSize(this->originalSize, size);
-        romButton.second.update(this->inputHandler, point);
-    }
-
-    this->chooseFolder->updateSize(this->originalSize,size);
-    this->chooseFolder->update(this->inputHandler, point);
+    // for (auto& romButton : this->roms) {
+    //     romButton.second.updateSize(this->originalSize, size);
+    //     romButton.second.update(this->inputHandler, point);
+    // }
+    //
+    // this->chooseFolder->updateSize(this->originalSize,size);
+    // this->chooseFolder->update(this->inputHandler, point);
 }
 
 void MainMenu::close() {
@@ -133,6 +139,11 @@ void MainMenu::close() {
     SDL_DestroyMutex(this->mutex);
     Window::close();
 }
+
+void MainMenu::launchRom(const std::string &file) {
+    this->windows.emplace_back(std::make_unique<Emulator>(file))->init();
+}
+
 
 void MainMenu::refreshRoms() {
 }
