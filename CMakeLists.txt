@@ -7,9 +7,6 @@ if(CMAKE_HOST_WIN32)
 #    add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
 #    set_property(TARGET 8ChocChip PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-    set_target_properties(8ChocChip PROPERTIES
-            WIN32_EXECUTABLE TRUE
-    )
     set(libname "libconfig")
 else()
     set(libname "config")
@@ -26,6 +23,9 @@ option(BUILD_SHARED_LIBS "Build a shared library instead of static" OFF)
 option(SDL_VENDORED "Use vendored libraries" ON)
 
 if(CMAKE_HOST_WIN32)
+    set_target_properties(8ChocChip PROPERTIES
+            WIN32_EXECUTABLE TRUE
+    )
     add_executable(8ChocChip WIN32)
 else()
     add_executable(8ChocChip)
