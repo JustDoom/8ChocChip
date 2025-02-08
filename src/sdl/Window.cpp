@@ -10,7 +10,7 @@ Window::~Window() {
 }
 
 void Window::init() {
-    if (!SDL_CreateWindowAndRenderer("8ChocChip - CHIP-8 Emulator", 64 * 15, 32 * 15, SDL_WINDOW_RESIZABLE, &this->window, &this->renderer)) {
+    if (!SDL_CreateWindowAndRenderer("8ChocChip - CHIP-8 Emulator", 64 * 15, 32 * 15, 0, &this->window, &this->renderer)) {
         std::cerr << "Couldn't create window and renderer. SDL_Error: " << SDL_GetError() << std::endl;
         return;
     }
