@@ -5,7 +5,7 @@
 
 
 #include "../InputHandler.h"
-#include "Element.h"
+#include "ChildHolderElement.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -31,10 +31,10 @@ private:
     std::function<void()> onClick;
 
 public:
-    TextButton(float x, float y, float width, float height, TTF_Text* text) : TextButton(x, y, width, height, text, std::weak_ptr<Element>()) {}
-    TextButton(float x, float y, float width, float height, TTF_Text* text, const std::weak_ptr<Element>& parent) : TextButton(x, y, width, height, text, parent, SDL_Color{192, 192, 192, 255}) {}
-    TextButton(float x, float y, float width, float height, TTF_Text* text, SDL_Color idleColour) : TextButton(x, y, width, height, text, std::weak_ptr<Element>(), idleColour) {}
-    TextButton(float x, float y, float width, float height, TTF_Text* text, const std::weak_ptr<Element>& parent, SDL_Color idleColour);
+    TextButton(float x, float y, float width, float height, TTF_Text* text) : TextButton(x, y, width, height, text, std::weak_ptr<ChildHolderElement>()) {}
+    TextButton(float x, float y, float width, float height, TTF_Text* text, const std::weak_ptr<ChildHolderElement>& parent) : TextButton(x, y, width, height, text, parent, SDL_Color{192, 192, 192, 255}) {}
+    TextButton(float x, float y, float width, float height, TTF_Text* text, SDL_Color idleColour) : TextButton(x, y, width, height, text, std::weak_ptr<ChildHolderElement>(), idleColour) {}
+    TextButton(float x, float y, float width, float height, TTF_Text* text, const std::weak_ptr<ChildHolderElement>& parent, SDL_Color idleColour);
 
     void updateSize(const SDL_Point & originalSize, const SDL_Point & updatedSize);
 
@@ -59,6 +59,8 @@ public:
     float getRealY() override;
     float getWidth() override;
     float getHeight() override;
+    void setX(float x) override;
+    void setY(float y) override;
 
     bool isPointInsideArea(SDL_FPoint& point) override;
 

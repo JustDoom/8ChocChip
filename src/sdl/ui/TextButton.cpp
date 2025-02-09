@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-TextButton::TextButton(const float x, const float y, const float width, const float height, TTF_Text *text, const std::weak_ptr<Element>& parent, SDL_Color idleColour) :
+TextButton::TextButton(const float x, const float y, const float width, const float height, TTF_Text *text, const std::weak_ptr<ChildHolderElement>& parent, SDL_Color idleColour) :
         Element(parent), text(text), idleColor(idleColour),
         hoverColor(SDL_Color{128, 128, 128, 255}), activeColor(SDL_Color{64, 64, 64, 255}),
         deleteColor(SDL_Color{255, 0, 0, 255}) {
@@ -48,16 +48,21 @@ void TextButton::update(InputHandler& inputHandler) {
         this->isHovered = this->isHovered && lock->isPointInsideArea(pos);
     }
 
-    if (this->isHovered && inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
-        this->isPressed = true;
-        updateColour(this->activeColor);
-        if (this->onClick) {
-            this->onClick();
+    if (this->isHovered) {
+        if (inputHandler.isPressed(SDL_SCANCODE_LSHIFT)) {
+            updateColour(this->deleteColor);
+            if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+                destroy();
+            }
+        } else if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+            this->isPressed = true;
+            updateColour(this->activeColor);
+            if (this->onClick) {
+                this->onClick();
+            }
+        } else {
+            updateColour(this->hoverColor);
         }
-    } else if (this->isHovered && inputHandler.isPressed(SDL_SCANCODE_LSHIFT)) {
-        updateColour(this->deleteColor);
-    } else if (this->isHovered) {
-        updateColour(this->hoverColor);
     } else {
         this->isPressed = false;
         updateColour(this->idleColor);
@@ -118,6 +123,14 @@ float TextButton::getWidth() {
 
 float TextButton::getHeight() {
     return this->originalButton.h;
+}
+
+void TextButton::setX(float x) {
+    this->originalButton.x = x;
+}
+
+void TextButton::setY(float y) {
+    this->originalButton.y = y;
 }
 
 bool TextButton::isPointInsideArea(SDL_FPoint& point) {

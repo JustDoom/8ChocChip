@@ -1,7 +1,5 @@
 #include "ScrollBox.h"
 
-#include <utility>
-
 void ScrollBox::draw(SDL_Renderer* window) {
     SDL_SetRenderDrawColor(window, 200, 200, 200, 255);
     SDL_RenderFillRect(window, &this->box);
@@ -19,8 +17,15 @@ void ScrollBox::draw(SDL_Renderer* window) {
 }
 
 void ScrollBox::update(InputHandler& inputHandler) {
-    for (const std::shared_ptr<Element>& element : this->elements) {
+    const int size = this->elements.size();
+    for (const std::shared_ptr<Element>& element : std::vector(this->elements)) {
         element->update(inputHandler);
+    }
+    if (size != this->elements.size()) {
+        int count = 0;
+        for (const std::shared_ptr<Element>& element : this->elements) {
+            element->setY(25.0f * count++);
+        }
     }
 }
 
@@ -74,11 +79,14 @@ float ScrollBox::getHeight() {
     return this->box.h;
 }
 
-bool ScrollBox::isPointInsideArea(SDL_FPoint &point) {
-    return SDL_PointInRectFloat(&point, &this->box);
+void ScrollBox::setX(float x) {
+    this->box.x = x;
 }
 
-void ScrollBox::setElements(std::vector<std::shared_ptr<Element>> elements) {
-    this->elements.clear();
-    this->elements = std::move(elements);
+void ScrollBox::setY(float y) {
+    this->box.y = y;
+}
+
+bool ScrollBox::isPointInsideArea(SDL_FPoint &point) {
+    return SDL_PointInRectFloat(&point, &this->box);
 }
