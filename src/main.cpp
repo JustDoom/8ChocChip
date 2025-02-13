@@ -119,15 +119,17 @@ int main(int argc, char **argv) {
         windows.emplace_back(std::make_unique<Emulator>(rom))->init();
     }
 
-    bool debug = false;
+    bool debug = true;
     bool quit = false;
     SDL_Event event;
 
     Timer fpsTimer;
     Timer capTimer;
+    Timer fpsPrintTimer;
 
     int countedFrames = 0;
     fpsTimer.start();
+    fpsPrintTimer.start();
 
     while (!quit) {
         capTimer.start();
@@ -169,7 +171,18 @@ int main(int argc, char **argv) {
         }
 
         if (debug) {
-            std::cout << "FPS: " << avgFPS << std::endl;
+            if (fpsPrintTimer.getTicks() >= 1000) {
+                if (!windows.empty()) {
+                    auto* emulatorPtr = dynamic_cast<Emulator*>(windows[1].get());
+                    if (emulatorPtr) {
+                        std::cout << "FPS: " << avgFPS << " - " << emulatorPtr->getInstructions() << std::endl;
+                        emulatorPtr->resetInstructions();
+                    } else {
+                        std::cout << "FPS: " << avgFPS << " - Failed to cast Window to Emulator\n";
+                    }
+                }
+                fpsPrintTimer.start();
+            }
         }
 
         ++countedFrames;

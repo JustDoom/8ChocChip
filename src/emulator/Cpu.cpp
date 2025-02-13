@@ -63,6 +63,7 @@ void Cpu::cycle() {
             break;
         }
 
+        this->instructions++;
         runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
     }
     this->drawn = false;
@@ -144,37 +145,30 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 case 0x1: {
                     const uint8_t vY = this->registers[y];
-                    this->registers[0xF] = 0;
                     this->registers[x] |= vY;
+                    this->registers[0xF] = 0;
                     break;
                 }
                 case 0x2: {
                     const uint8_t vY = this->registers[y];
-                    this->registers[0xF] = 0;
                     this->registers[x] &= vY;
+                    this->registers[0xF] = 0;
                     break;
                 }
                 case 0x3: {
                     const uint8_t vY = this->registers[y];
-                    this->registers[0xF] = 0;
                     this->registers[x] ^= vY;
+                    this->registers[0xF] = 0;
                     break;
                 }
                 case 0x4: {
                     const uint16_t sum = this->registers[x] + this->registers[y];
-
                     this->registers[x] = sum & 0xFF;
-
-                    if (sum > 0xFF) {
-                        this->registers[0xF] = 1;
-                    } else {
-                        this->registers[0xF] = 0;
-                    }
+                    this->registers[0xF] = sum > 0xFF ? 1 : 0;
                     break;
                 }
                 case 0x5: {
                     const uint8_t value = this->registers[x] >= this->registers[y] ? 1 : 0;
-
                     this->registers[x] -= this->registers[y];
                     this->registers[0xF] = value;
                     break;
@@ -186,17 +180,12 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->registers[0xF] = value;
                     break;
                 }
-                case 0x7:
-
+                case 0x7: {
+                    uint8_t value =  this->registers[y] >= this->registers[x] ? 1 : 0;
                     this->registers[x] = this->registers[y] - this->registers[x];
-
-                    if (this->registers[y] >= this->registers[x]) {
-                        this->registers[0xF] = 1;
-                    } else {
-                        this->registers[0xF] = 0;
-                    }
-
+                    this->registers[0xF] = value;
                     break;
+                }
                 case 0xE: {
                     this->registers[x] = this->registers[y];
                     const uint8_t value = (this->registers[x] & 0x80) >> 7;
@@ -240,7 +229,9 @@ void Cpu::runInstruction(const uint16_t opcode) {
                         const uint8_t drawX = (uX + col);
                         const uint8_t drawY = (uY + row);
 
-                        if (drawX >= 64 || drawY >= 32) continue;
+                        if (drawX > 63 || drawY > 31) {
+                            continue;
+                        }
 
                         if (this->renderer->setPixel(drawX, drawY)) {
                             this->registers[0xF] = 1;

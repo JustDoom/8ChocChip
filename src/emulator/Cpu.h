@@ -22,7 +22,7 @@ private:
 
     bool drawn;
     bool paused;
-    uint8_t speed;
+    uint32_t speed;
     uint8_t seed;
 
     Renderer* renderer;
@@ -38,6 +38,8 @@ public:
     void runInstruction(uint16_t opcode);
 
     uint8_t random8bit();
+
+    int instructions;
 };
 
 #endif

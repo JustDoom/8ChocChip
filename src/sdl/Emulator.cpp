@@ -54,3 +54,12 @@ void Emulator::render() {
 void Emulator::resize(SDL_Event &event) {
 
 }
+
+int Emulator::getInstructions() {
+    return this->cpu.instructions;
+}
+
+void Emulator::resetInstructions() {
+    this->cpu.instructions = 0;
+}
+
