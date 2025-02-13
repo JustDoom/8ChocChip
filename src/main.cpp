@@ -15,6 +15,7 @@
 
 int main(int argc, char **argv) {
     std::string rom;
+    bool debug = false;
 
     for (int i = 0; i < argc; i++) {
         std::string_view arg = argv[i];
@@ -35,6 +36,9 @@ int main(int argc, char **argv) {
         if (command == "--help" || command == "-h") {
             std::cerr << "Usage: 8ChocChip --rom <pathtorom>" << std::endl;
             return 0;
+        }
+        if (command == "--debug" || command == "-d") {
+            debug = true;
         }
     }
 
@@ -119,7 +123,6 @@ int main(int argc, char **argv) {
         windows.emplace_back(std::make_unique<Emulator>(rom))->init();
     }
 
-    bool debug = true;
     bool quit = false;
     SDL_Event event;
 
@@ -155,7 +158,7 @@ int main(int argc, char **argv) {
 
         bool allWindowsClosed = true;
         for (const auto& window : windows) {
-            if(window->isShown()){
+            if (window->isShown()){
                 allWindowsClosed = false;
                 break;
             }
@@ -170,19 +173,17 @@ int main(int argc, char **argv) {
             avgFPS = 0;
         }
 
-        if (debug) {
-            if (fpsPrintTimer.getTicks() >= 1000) {
-                if (!windows.empty()) {
-                    auto* emulatorPtr = dynamic_cast<Emulator*>(windows[1].get());
-                    if (emulatorPtr) {
-                        std::cout << "FPS: " << avgFPS << " - " << emulatorPtr->getInstructions() << std::endl;
-                        emulatorPtr->resetInstructions();
-                    } else {
-                        std::cout << "FPS: " << avgFPS << " - Failed to cast Window to Emulator\n";
-                    }
+        if (debug && fpsPrintTimer.getTicks() >= 1000) {
+            if (!windows.empty()) {
+                auto *emulatorPtr = dynamic_cast<Emulator *>(windows[1].get());
+                if (emulatorPtr) {
+                    std::cout << "FPS: " << avgFPS << " - " << emulatorPtr->getInstructions() << std::endl;
+                    emulatorPtr->resetInstructions();
+                } else {
+                    std::cout << "FPS: " << avgFPS << " - Failed to cast Window to Emulator\n";
                 }
-                fpsPrintTimer.start();
             }
+            fpsPrintTimer.start();
         }
 
         ++countedFrames;
