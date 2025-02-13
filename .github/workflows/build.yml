@@ -123,7 +123,6 @@ jobs:
           dir build
           dir build/bin
           dir build/bin/Release
-          cp build/out/Release/libconfig++.* build/bin/Release
     
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
