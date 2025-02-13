@@ -63,8 +63,8 @@ int main(int argc, char **argv) {
         std::cout << json << std::endl;
         if (json["directories"] != nullptr) {
             for (const auto& directory : json["directories"]) {
-                if (std::ifstream file(directory); !file.good()) {
-                    std::cerr << "Unable to find direcotry " << directory << std::endl;
+                if (std::ifstream file(directory.get<std::string>()); !file.good()) {
+                    std::cerr << "Unable to find directory " << directory << std::endl;
                     continue;
                 }
                 romDirectories.emplace_back(directory.get<std::string>());
