@@ -9,7 +9,6 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->soundTimer = 0;
     this->pc = 0x200;
     this->drawn = false;
-    this->paused = false;
     this->speed = 15;
 
     this->renderer = renderer;
@@ -59,7 +58,7 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 
 void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
-        if (this->paused || this->drawn) {
+        if (this->drawn) {
             break;
         }
 
@@ -68,16 +67,12 @@ void Cpu::cycle() {
     }
     this->drawn = false;
 
-    if (this->paused && this->keyboard->onNextKeyPress == nullptr) {
-        this->paused = false;
-    }
-
     if (this->delay > 0) {
-        this->delay -= 1;
+        this->delay--;
     }
 
-    if (!this->paused && this->soundTimer > 0) {
-        this->soundTimer -= 1;
+    if (this->soundTimer > 0) {
+        this->soundTimer--;
     }
 
     // Play sound until timer runs out
@@ -181,7 +176,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 }
                 case 0x7: {
-                    uint8_t value =  this->registers[y] >= this->registers[x] ? 1 : 0;
+                    const uint8_t value =  this->registers[y] >= this->registers[x] ? 1 : 0;
                     this->registers[x] = this->registers[y] - this->registers[x];
                     this->registers[0xF] = value;
                     break;
@@ -267,11 +262,14 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->registers[x] = this->delay;
                     break;
                 case 0x0A:
-                    this->paused = true;
-                    this->keyboard->onNextKeyPress = [&](const uint8_t key) {
+                    this->pc -= 2;
+                    if (this->keyboard->onNextKeyPress != nullptr) {
+                        break;
+                    }
+                    this->keyboard->setOnNextKeyPress([&](const uint8_t key) {
                         this->registers[x] = key;
-                        this->paused = false;
-                    };
+                        this->pc += 2;
+                    });
                     break;
                 case 0x15:
                     this->delay = this->registers[x];
@@ -298,15 +296,15 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     break;
                 }
                 case 0x55: {
-                    for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
-                        this->memory[this->address + registerIndex] = this->registers[registerIndex];
+                    for (uint8_t i = 0; i <= x; i++) {
+                        this->memory[this->address + i] = this->registers[i];
                     }
                     this->address += x + 1;
                     break;
                 }
                 case 0x65: {
-                    for (uint8_t registerIndex = 0; registerIndex <= x; ++registerIndex) {
-                        this->registers[registerIndex] = this->memory[this->address + registerIndex];
+                    for (uint8_t i = 0; i <= x; i++) {
+                        this->registers[i] = this->memory[this->address + i];
                     }
                     this->address += x + 1;
                     break;

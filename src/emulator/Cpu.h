@@ -21,7 +21,6 @@ private:
     uint8_t soundTimer;
 
     bool drawn;
-    bool paused;
     uint32_t speed;
     uint8_t seed;
 
