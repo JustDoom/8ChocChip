@@ -15,8 +15,6 @@
 
 int main(int argc, char **argv) {
     std::string rom;
-    bool debug = false;
-
     for (int i = 0; i < argc; i++) {
         std::string_view arg = argv[i];
         if (arg.rfind("--") != 0) {

@@ -7,6 +7,7 @@
     #define HOME_VARIABLE "HOME"
 #endif
 
-inline const char* home = std::getenv(HOME_VARIABLE);
+inline const char *home = std::getenv(HOME_VARIABLE);
+inline bool debug = false;
 
 #endif
