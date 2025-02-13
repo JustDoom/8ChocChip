@@ -1,6 +1,5 @@
-set(BUILD_EXAMPLES OFF CACHE BOOL "Disable examples for libconfig" FORCE)
-set(BUILD_TESTS ON CACHE BOOL "Disable tests for libconfig" FORCE)
-add_subdirectory(libconfig EXCLUDE_FROM_ALL)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(json)
 
 if(SDL_VENDORED)
     add_subdirectory(sdl EXCLUDE_FROM_ALL)

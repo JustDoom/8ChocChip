@@ -6,12 +6,13 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <libconfig.h++>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "../util/Constants.h"
+#include "../util/MiscUtil.h"
 #include "Emulator.h"
 #include "ui/ScrollBox.h"
-#include "../util/MiscUtil.h"
-#include "../util/Constants.h"
 
 #define WIDTH (64 * 15)
 #define HEIGHT (32 * 15)
@@ -167,17 +168,18 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     std::string directoryString = *directory;
 
     SDL_LockMutex(instance->mutex);
-    libconfig::Config config;
-    config.readFile(instance->configFilePath);
 
-    libconfig::Setting &settings = config.getRoot();
-
-    if (!settings.exists("directories")) {
-        settings.add("directories", libconfig::Setting::TypeArray);
+    nlohmann::json json;
+    if (std::ifstream file(instance->configFilePath); file.good()) {
+        json = nlohmann::json::parse(file);
+        file.close();
     }
 
-    libconfig::Setting &directories = settings["directories"];
-    directories.add(libconfig::Setting::TypeString) = directoryString;
+    json["directories"].push_back(directoryString);
+
+    std::ofstream fileWrite(instance->configFilePath);
+    fileWrite << json.dump(4);
+    fileWrite.close();
 
     instance->romDirectories.emplace_back(directoryString);
 
@@ -204,7 +206,6 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
 
         instance->roms.emplace(file.path().string(), TextButton(0, 25.0f * instance->roms.size(), WIDTH, 25, text));
     }
-    config.writeFile(instance->configFilePath);
     instance->scrollRoms->setElements(instance->refreshRoms());
 
     SDL_UnlockMutex(instance->mutex);

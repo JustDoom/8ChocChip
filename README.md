@@ -3,7 +3,7 @@
 8ChocChip is an emulator for the Chip8 software that I am working on to learn the basics around emulation.
 
 This uses SDL to handle graphics, input, audio and some other small things.
-libconfig is used to manage config and save data files.
+nlohmann/json is used to manage config and save data files.
 
 ## Features
 
@@ -74,4 +74,4 @@ Thanks to these two blogs that helped me through creating this emulator.
 Currently, three libraries are being used
 - [SDL](https://github.com/libsdl-org/SDL) - UI, graphics, input and sounds
 - [SDL-ttf](https://github.com/libsdl-org/SDL_ttf) - Text fonts
-- [libconfig](https://github.com/hyperrealm/libconfig) - Library to manage save data (like directories that hold ROMs) and possible future config files
+- [nlohmann/json](https://github.com/nlohmann/json) - Library to manage save data (like directories that hold ROMs) and possible future config files

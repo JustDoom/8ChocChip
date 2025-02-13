@@ -18,13 +18,7 @@ add_executable(8ChocChip)
 add_subdirectory(dependencies)
 add_subdirectory(src)
 
-if(CMAKE_HOST_WIN32)
-    set(libname "libconfig")
-else()
-    set(libname "config")
-endif()
-
-target_link_libraries(8ChocChip PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf ${libname}++)
+target_link_libraries(8ChocChip PRIVATE nlohmann_json::nlohmann_json SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 target_compile_definitions(8ChocChip PUBLIC SDL_MAIN_USE_CALLBACKS)
 
 set_target_properties(8ChocChip PROPERTIES

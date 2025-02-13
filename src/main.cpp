@@ -3,9 +3,9 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <nlohmann/json.hpp>
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include <libconfig.h++>
 
 #include "Timer.h"
 #include "sdl/Emulator.h"
@@ -47,56 +47,46 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.cfg").string();
+    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
 
-    libconfig::Config config;
-    if (std::ifstream file(configFilePath, std::ios::binary | std::ios::ate); file.good()) {
-        config.readFile(configFilePath);
-
-        libconfig::Setting &settings = config.getRoot();
-        if (!settings.exists("directories")) {
-            settings.add("directories", libconfig::Setting::TypeArray);
+    if (std::ifstream file(configFilePath); file.good()) {
+        nlohmann::json json;
+        try {
+            json = nlohmann::json::parse(file);
+        } catch (const nlohmann::json::parse_error& error) {
+            // TODO: Better warning
+            std::cerr << "Unable to parse the config, please make sure it contains valid JSON";
+            return 1;
         }
-
-        libconfig::Setting& directories = settings["directories"];
-        romDirectories.reserve(directories.getLength());
-        for (int i = 0; i < directories.getLength(); i++) {
-            libconfig::Setting &string = directories[i];
-            std::string directoryPath = string.c_str();
-
-            romDirectories.emplace_back(directoryPath);
-
-            for (const auto& romFile: std::filesystem::directory_iterator(directoryPath)) {
-                if (romFile.is_directory() || romFile.file_size() > 3584) {
+        file.close();
+        std::cout << json << std::endl;
+        if (json["directories"] != nullptr) {
+            for (const auto& directory : json["directories"]) {
+                if (std::ifstream file(directory); !file.good()) {
+                    std::cerr << "Unable to find direcotry " << directory << std::endl;
                     continue;
                 }
+                romDirectories.emplace_back(directory.get<std::string>());
 
-                std::cout << "Processing file: " << romFile.path().c_str() << std::endl;
+                for (const auto& romFile: std::filesystem::directory_iterator(directory.get<std::string>())) {
+                    if (romFile.is_directory() || romFile.file_size() > 3584) {
+                        continue;
+                    }
 
-                // Check if the rom directory doesn't exist in romFiles, then add it
-                if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
-                    romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                    std::cout << "Processing file: " << romFile.path().c_str() << std::endl;
+
+                    // Check if the rom directory doesn't exist in romFiles, then add it
+                    if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+                        romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+                    }
+
+                    // Add the file path to the romFiles entry
+                    romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
                 }
-
-                // Add the file path to the romFiles entry
-                romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
             }
-        }
-    } else {
-        try {
-            config.getRoot().add("directories", libconfig::Setting::TypeList);
-            config.writeFile(configFilePath.c_str());
-
-            std::cout << "Configuration file created successfully." << std::endl;
-        } catch (const libconfig::FileIOException &ioException) {
-            std::cerr << "I/O error while writing the configuration file." << std::endl;
-            return 1;
-        } catch (const libconfig::SettingException &settingException) {
-            std::cerr << "Setting error: " << settingException.what() << std::endl;
-            return 1;
         }
     }
 
