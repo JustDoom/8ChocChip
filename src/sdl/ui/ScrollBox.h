@@ -19,6 +19,8 @@ public:
     void update(InputHandler &inputHandler) override;
     bool handleEvent(SDL_Event &event) override;
 
+    void removeElement(Element *element) override;
+
     float getX() override;
     float getY() override;
     float getRealX() override;

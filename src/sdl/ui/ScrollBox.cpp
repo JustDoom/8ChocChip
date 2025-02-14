@@ -55,6 +55,10 @@ bool ScrollBox::handleEvent(SDL_Event& event) {
     return true;
 }
 
+void ScrollBox::removeElement(Element *element) {
+    ChildHolderElement::removeElement(element);
+}
+
 float ScrollBox::getX() {
     return this->box.x;
 }

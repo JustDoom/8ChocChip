@@ -1,9 +1,9 @@
 [submodule "dependencies/sdl"]
 	path = dependencies/sdl
-	url = git@github.com:libsdl-org/SDL.git
+	url = https://github.com:libsdl-org/SDL.git
 [submodule "dependencies/sdl_ttf"]
 	path = dependencies/sdl_ttf
-	url = git@github.com:libsdl-org/SDL_ttf.git
+	url = https://github.com:libsdl-org/SDL_ttf.git
 [submodule "dependencies/json"]
 	path = dependencies/json
-	url = git@github.com:nlohmann/json.git
+	url = https://github.com:nlohmann/json.git
