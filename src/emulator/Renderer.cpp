@@ -16,11 +16,7 @@ void Renderer::render(SDL_Renderer* renderer) {
 }
 
 bool Renderer::setPixel(const uint8_t x, const uint8_t y) {
-    const uint16_t pixelLoc = y * this->columns + x;
-    const bool oldValue = this->display[pixelLoc];
-    this->display[pixelLoc] = !oldValue;
-
-    return oldValue;
+    return !(this->display[y * this->columns + x] ^= 1);
 }
 
 bool Renderer::getPixel(const uint8_t x, const uint8_t y) {

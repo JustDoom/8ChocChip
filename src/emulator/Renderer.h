@@ -15,7 +15,7 @@ private:
 
 public:
     Renderer() : display(columns * rows) {};
-    std::vector<bool> display;
+    std::vector<uint8_t> display;
 
     bool setPixel(uint8_t x, uint8_t y);
     bool getPixel(uint8_t x, uint8_t y);
