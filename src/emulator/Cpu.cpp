@@ -3,13 +3,15 @@
 #include <iostream>
 #include <random>
 
+#include "../util/Constants.h"
+
 Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
     this->pc = 0x200;
     this->drawn = false;
-    this->speed = 15;
+    this->speed = ipf;
 
     this->renderer = renderer;
     this->keyboard = keyboard;
@@ -58,7 +60,7 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 
 void Cpu::cycle() {
     for (int i = 0; i < this->speed; i++) {
-        if (this->drawn) {
+        if (!speedTest && this->drawn) {
             break;
         }
 

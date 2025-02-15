@@ -9,5 +9,7 @@
 
 inline const char *home = std::getenv(HOME_VARIABLE);
 inline bool debug = false;
+inline bool speedTest = false;
+inline uint64_t ipf = 15;
 
 #endif

@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     std::string rom;
     for (int i = 0; i < argc; i++) {
         std::string_view arg = argv[i];
-        if (arg.rfind("--") != 0) {
+        if (arg.rfind("--") != 0 && arg.rfind("-") != 0) {
             continue;
         }
 
@@ -37,6 +37,14 @@ int main(int argc, char **argv) {
         }
         if (command == "--debug" || command == "-d") {
             debug = true;
+        }
+        if (command == "--speedtest" || command == "-st") {
+            std::cout << "speed" << std::endl;
+            speedTest = true;
+        }
+        if (command == "--instructions" || command == "-ipf") {
+            std::cout << argv[++i] << std::endl;
+            ipf = std::stoi(argv[i]);
         }
     }
 
@@ -163,7 +171,7 @@ int main(int argc, char **argv) {
 
         if (debug && fpsPrintTimer.getTicks() >= 1000) {
             if (!windows.empty()) {
-                auto *emulatorPtr = dynamic_cast<Emulator *>(windows[1].get());
+                auto *emulatorPtr = dynamic_cast<Emulator *>(windows[(rom.empty() ? 1 : 0)].get());
                 if (emulatorPtr) {
                     std::cout << "FPS: " << avgFPS << " - " << emulatorPtr->getInstructions() << std::endl;
                     emulatorPtr->resetInstructions();
