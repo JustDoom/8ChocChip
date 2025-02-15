@@ -96,9 +96,13 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        std::cerr << "SDL could not initialize. SDL_Error: " << SDL_GetError() << std::endl;
         return 1;
+    }
+
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
+        std::cerr << "SDL could not initialize audio. SDL_Error: " << SDL_GetError() << std::endl;
     }
 
     if (!TTF_Init()) {
