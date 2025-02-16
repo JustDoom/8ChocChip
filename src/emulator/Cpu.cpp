@@ -10,6 +10,7 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker) {
     this->delay = 0;
     this->soundTimer = 0;
     this->pc = 0x200;
+    this->sp = 0;
     this->drawn = false;
     this->speed = ipf;
 
@@ -61,15 +62,14 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 void Cpu::cycle() {
     if (speedTest) {
         for (int i = 0; i < this->speed; i++) {
-            runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
+            runInstruction();
         }
     } else {
         for (int i = 0; i < this->speed; i++) {
             if (this->drawn) {
                 break;
             }
-
-            runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
+            runInstruction();
         }
     }
 
@@ -92,7 +92,9 @@ void Cpu::cycle() {
     }
 }
 
-void Cpu::runInstruction(const uint16_t opcode) {
+void Cpu::runInstruction() {
+    const uint8_t second = this->memory[this->pc + 1];
+    const uint16_t opcode = (this->memory[this->pc] << 8) | second;
     this->pc += 2;
 
     const uint8_t x = (opcode & 0x0F00) >> 8;
@@ -122,12 +124,12 @@ void Cpu::runInstruction(const uint16_t opcode) {
             this->pc = (opcode & 0xFFF);
             break;
         case 0x3000:
-            if (this->registers[x] == (opcode & 0xFF)) {
+            if (this->registers[x] == second) {
                 this->pc += 2;
             }
             break;
         case 0x4000:
-            if (this->registers[x] != (opcode & 0xFF)) {
+            if (this->registers[x] != second) {
                 this->pc += 2;
             }
             break;
@@ -137,10 +139,10 @@ void Cpu::runInstruction(const uint16_t opcode) {
             }
             break;
         case 0x6000:
-            this->registers[x] = (opcode & 0xFF);
+            this->registers[x] = second;
             break;
         case 0x7000:
-            this->registers[x] += (opcode & 0xFF);
+            this->registers[x] += second;
             break;
         case 0x8000:
             switch (opcode & 0xF) {
@@ -148,20 +150,17 @@ void Cpu::runInstruction(const uint16_t opcode) {
                     this->registers[x] = this->registers[y];
                     break;
                 case 0x1: {
-                    const uint8_t vY = this->registers[y];
-                    this->registers[x] |= vY;
+                    this->registers[x] |= this->registers[y];
                     this->registers[0xF] = 0;
                     break;
                 }
                 case 0x2: {
-                    const uint8_t vY = this->registers[y];
-                    this->registers[x] &= vY;
+                    this->registers[x] &= this->registers[y];
                     this->registers[0xF] = 0;
                     break;
                 }
                 case 0x3: {
-                    const uint8_t vY = this->registers[y];
-                    this->registers[x] ^= vY;
+                    this->registers[x] ^= this->registers[y];
                     this->registers[0xF] = 0;
                     break;
                 }
@@ -215,7 +214,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
             this->pc = (opcode & 0xFFF) + this->registers[0];
             break;
         case 0xC000: {
-            this->registers[x] = (random8bit() & 0xFF) & (opcode & 0xFF);
+            this->registers[x] = (random8bit() & 0xFF) & second;
             break;
         }
         case 0xD000: {
@@ -252,7 +251,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
             break;
         }
         case 0xE000:
-            switch (opcode & 0xFF) {
+            switch (second) {
                 case 0x9E:
                     if (this->keyboard->isKeyPressed(this->registers[x] & 0xF)) {
                         this->pc += 2;
@@ -270,7 +269,7 @@ void Cpu::runInstruction(const uint16_t opcode) {
 
             break;
         case 0xF000:
-            switch (opcode & 0xFF) {
+            switch (second) {
                 case 0x07:
                     this->registers[x] = this->delay;
                     break;

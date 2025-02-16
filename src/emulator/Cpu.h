@@ -34,7 +34,7 @@ public:
     void loadProgramIntoMemory(std::ifstream* file);
 
     void cycle();
-    void runInstruction(uint16_t opcode);
+    void runInstruction();
 
     uint8_t random8bit();
 
