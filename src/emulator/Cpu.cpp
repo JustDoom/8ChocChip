@@ -5,7 +5,7 @@
 
 #include "../util/Constants.h"
 
-Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker * speaker) {
+Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -64,9 +64,9 @@ void Cpu::cycle() {
             break;
         }
 
-        this->instructions++;
         runInstruction((this->memory[this->pc] << 8) | this->memory[this->pc + 1]);
     }
+    this->instructions += this->speed;
     this->drawn = false;
 
     if (this->delay > 0) {
@@ -212,26 +212,30 @@ void Cpu::runInstruction(const uint16_t opcode) {
             break;
         }
         case 0xD000: {
-            const uint8_t height = (opcode & 0xF);
-
-            const uint8_t uX = this->registers[x] % 64;
-            const uint8_t uY = this->registers[y] % 32;
-            this->registers[0xF] = 0;
+            const uint8_t height = opcode & 0xF;
+            const uint8_t uX = this->registers[x] & 63;
+            const uint8_t uY = this->registers[y] & 31;
+            const uint8_t* sprites = &this->memory[this->address];
+            uint8_t& vF = this->registers[0xF]; // Store reference to not fetching it every time
+            vF = 0;
 
             for (uint8_t row = 0; row < height; ++row) {
-                uint8_t sprite = this->memory[this->address + row];
+                uint8_t sprite = sprites[row];
+                const uint8_t drawY = (uY + row);
+                if (drawY > 31) {
+                    continue;
+                }
 
                 for (uint8_t col = 0; col < 8; ++col) {
                     if (sprite & 0x80) {
                         const uint8_t drawX = (uX + col);
-                        const uint8_t drawY = (uY + row);
 
-                        if (drawX > 63 || drawY > 31) {
+                        if (drawX > 63) {
                             continue;
                         }
 
                         if (this->renderer->setPixel(drawX, drawY)) {
-                            this->registers[0xF] = 1;
+                            vF = 1;
                         }
                     }
                     sprite <<= 1;
