@@ -38,7 +38,7 @@ public:
 
     uint8_t random8bit();
 
-    uint64_t instructions;
+    uint64_t instructions = 0;
 };
 
 #endif

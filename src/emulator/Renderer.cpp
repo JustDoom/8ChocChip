@@ -15,7 +15,7 @@ void Renderer::render(SDL_Renderer* renderer) {
     }
 }
 
-bool Renderer::setPixel(const uint8_t& x, const uint8_t& y) {
+bool Renderer::setPixel(const uint8_t x, const uint8_t y) {
     return !(this->display[y * this->columns + x] ^= 1);
 }
 
