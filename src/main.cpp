@@ -175,12 +175,15 @@ int main(int argc, char **argv) {
 
         if (debug && fpsPrintTimer.getTicks() >= 1000) {
             if (!windows.empty()) {
-                auto *emulatorPtr = dynamic_cast<Emulator *>(windows[(rom.empty() ? 1 : 0)].get());
-                if (emulatorPtr) {
-                    std::cout << "FPS: " << avgFPS << " - " << emulatorPtr->getInstructions() << std::endl;
-                    emulatorPtr->resetInstructions();
-                } else {
-                    std::cout << "FPS: " << avgFPS << " - Failed to cast Window to Emulator\n";
+                std::cout << "FPS: " << avgFPS << std::endl;
+                for (int i = 0; i < windows.size(); i++) {
+                    auto *emulatorPtr = dynamic_cast<Emulator *>(windows[i].get());
+                    if (emulatorPtr) {
+                        std::cout << "Window " << i << " - " << emulatorPtr->getInstructions() << std::endl;
+                        emulatorPtr->resetInstructions();
+                    } else {
+                         std::cout << "Window " << i << " - Failed to cast Window to Emulator. Might just be the main menu or settings window" << std::endl;
+                    }
                 }
             }
             fpsPrintTimer.start();
