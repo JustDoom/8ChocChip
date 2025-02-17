@@ -18,6 +18,7 @@ There are a couple of things left to do until I would say it works well enough
 - [ ] Database for auto setting selector
 - [ ] Other Chip8 variants
 - [ ] Per program settings (Keybindings, graphics, sounds, etc)
+- [ ] Discord Rich Presence support
 
 ### Supported Platforms
 
