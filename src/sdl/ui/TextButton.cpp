@@ -28,30 +28,38 @@ void TextButton::update(InputHandler& inputHandler) {
     SDL_GetMouseState(&pos.x, &pos.y);
 
     this->lastPressed = this->isPressed;
-    this->isHovered = SDL_PointInRectFloat(&pos, &this->buttonBox); // TODO: Can hover over 2 at once sometimes and open 2
+    this->hovered = SDL_PointInRectFloat(&pos, &this->buttonBox); // TODO: Can hover over 2 at once sometimes and open 2
     if (const auto lock = this->parent.lock()) {
-        this->isHovered = this->isHovered && lock->isPointInsideArea(pos);
+        this->hovered = this->hovered && lock->isPointInsideArea(pos);
     }
 
-    if (this->isHovered) {
-        if (inputHandler.isPressed(SDL_SCANCODE_LSHIFT)) {
-            updateColour(this->deleteColor);
-            if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
-                destroy();
-            }
-        } else if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
-            this->isPressed = true;
-            updateColour(this->activeColor);
-            if (this->onClick) {
-                this->onClick();
-            }
-        } else {
-            updateColour(this->hoverColor);
+    if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+        this->isPressed = true;
+        updateColour(this->activeColor);
+        if (this->onClick) {
+            this->onClick();
         }
-    } else {
-        this->isPressed = false;
-        updateColour(this->idleColor);
     }
+
+    // if (button->isHovered()) {
+    //     if (inputHandler.isPressed(SDL_SCANCODE_LSHIFT)) {
+    //         updateColour(this->deleteColor);
+    //         if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+    //             button.destroy();
+    //         }
+    //     } else if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+    //         this->isPressed = true;
+    //         updateColour(this->activeColor);
+    //         if (this->onClick) {
+    //             this->onClick();
+    //         }
+    //     } else {
+    //         updateColour(this->hoverColor);
+    //     }
+    // } else {
+    //     this->isPressed = false;
+    //     updateColour(this->idleColor);
+    // }
 }
 
 void TextButton::updateColour(const SDL_Color& colour) {
@@ -76,6 +84,10 @@ bool TextButton::isClicked() const {
 
 bool TextButton::isJustClicked() const {
     return !this->lastPressed && this->isPressed;
+}
+
+bool TextButton::isHovered() const {
+    return this->hovered;
 }
 
 SDL_FRect& TextButton::getRect() {

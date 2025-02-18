@@ -122,10 +122,9 @@ void MainMenu::close() {
     Window::close();
 }
 
-void MainMenu::launchRom(const std::string &file) {
+void MainMenu::launchRom(const std::string &file) const {
     this->windows.emplace_back(std::make_unique<Emulator>(file))->init();
 }
-
 
 std::vector<std::shared_ptr<Element>> MainMenu::refreshRoms() {
     std::vector<std::shared_ptr<Element>> scrollBoxRoms;
@@ -144,8 +143,29 @@ std::vector<std::shared_ptr<Element>> MainMenu::refreshRoms() {
             } else {
                 button = std::make_shared<TextButton>(0, 25 * scrollBoxRoms.size(), WIDTH, 25, text, this->scrollRoms);
             }
-            button->setOnClick([this, &file]() { launchRom(file);});
-            scrollBoxRoms.emplace_back(button);
+        //     button->setOnClick([this, button, &file]() {
+        //         launchRom(file);
+        //         if (button->isHovered()) {
+        //             if (inputHandler.isPressed(SDL_SCANCODE_LSHIFT)) {
+        //                 updateColour(this->deleteColor);
+        //                 if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+        //                     button.destroy();
+        //                 }
+        //             } else if (inputHandler.isJustClicked(SDL_BUTTON_LEFT)) {
+        //                 this->isPressed = true;
+        //                 updateColour(this->activeColor);
+        //                 if (this->onClick) {
+        //                     this->onClick();
+        //                 }
+        //             } else {
+        //                 updateColour(this->hoverColor);
+        //             }
+        //         } else {
+        //             this->isPressed = false;
+        //             updateColour(this->idleColor);
+        //         }
+        //     });
+        scrollBoxRoms.emplace_back(button);
         }
     }
     return scrollBoxRoms;

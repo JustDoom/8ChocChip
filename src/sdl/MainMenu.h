@@ -43,7 +43,7 @@ public:
     void resize(SDL_Event& event) override;
     void close() override;
 
-    void launchRom(const std::string& file);
+    void launchRom(const std::string& file) const;
     std::vector<std::shared_ptr<Element>> refreshRoms();
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };
