@@ -31,6 +31,8 @@ public:
     virtual float getHeight() = 0;
     virtual void setX(float x) = 0;
     virtual void setY(float y) = 0;
+    virtual void setRealX(float x) = 0;
+    virtual void setRealY(float y) = 0;
 
     virtual bool isPointInsideArea(SDL_FPoint& point) = 0;
 

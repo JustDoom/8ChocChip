@@ -12,21 +12,18 @@
 
 class TextButton : public Element {
 private:
-    SDL_FRect originalButton;
-    SDL_FRect renderButton;
-    SDL_FPoint originalSize;
-    SDL_FPoint originalPosition;
+    SDL_FPoint localPosition;
+    SDL_FRect buttonBox;
     TTF_Text* text;
-    SDL_FPoint originalTextPos;
-    SDL_FPoint renderTextPos;
+    SDL_FPoint textPosition;
     SDL_Color idleColor;
     SDL_Color hoverColor;
     SDL_Color activeColor;
     SDL_Color deleteColor;
     SDL_Color currentColor;
-    bool isPressed;
-    bool lastPressed{};
-    bool isHovered;
+    bool isPressed = false;
+    bool isHovered = false;
+    bool lastPressed = false;
 
     std::function<void()> onClick;
 
@@ -61,10 +58,14 @@ public:
     float getHeight() override;
     void setX(float x) override;
     void setY(float y) override;
+    void setRealX(float x) override;
+    void setRealY(float y) override;
 
     bool isPointInsideArea(SDL_FPoint& point) override;
 
     void setOnClick(const std::function<void()> function);
+
+
 };
 
 #endif

@@ -17,6 +17,12 @@ void ScrollBox::draw(SDL_Renderer* window) {
 }
 
 void ScrollBox::update(InputHandler& inputHandler) {
+    if (this->scrollUpdated) {
+        this->scrollUpdated = false;
+        for (const std::shared_ptr<Element>& element : std::vector(this->elements)) {
+            element->setRealY(getY() + element->getY());
+        }
+    }
     const int size = this->elements.size();
     for (const std::shared_ptr<Element>& element : std::vector(this->elements)) {
         element->update(inputHandler);
@@ -37,11 +43,12 @@ bool ScrollBox::handleEvent(SDL_Event& event) {
             if (!SDL_PointInRectFloat(&pos, &this->box) || this->elements.size() * 25 < getHeight()) {
                 break;
             }
+            this->scrollUpdated = true;
             this->scrollPosition -= event.wheel.y * this->scrollSpeed;
             if (this->scrollPosition < 0) {
                 this->scrollPosition = 0;
             }
-            if (float position = static_cast<float>(this->elements.size()) * 25.0f - getHeight();
+            if (const float position = static_cast<float>(this->elements.size()) * 25.0f - getHeight();
                 this->scrollPosition > position) {
                 this->scrollPosition = position;
             }
@@ -89,6 +96,14 @@ void ScrollBox::setX(float x) {
 
 void ScrollBox::setY(float y) {
     this->box.y = y;
+}
+
+void ScrollBox::setRealX(float x) {
+
+}
+
+void ScrollBox::setRealY(float y) {
+
 }
 
 bool ScrollBox::isPointInsideArea(SDL_FPoint &point) {

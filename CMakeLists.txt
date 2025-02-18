@@ -13,7 +13,9 @@ set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 option(BUILD_SHARED_LIBS "Build a shared library instead of static" OFF)
 option(SDL_VENDORED "Use vendored libraries" ON)
 
-add_executable(8ChocChip)
+add_executable(8ChocChip
+        src/sdl/ui/MainBox.cpp
+        src/sdl/ui/MainBox.h)
 
 add_subdirectory(dependencies)
 add_subdirectory(src)

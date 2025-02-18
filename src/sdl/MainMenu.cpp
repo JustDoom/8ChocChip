@@ -27,9 +27,11 @@ void MainMenu::init() {
 
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
-    this->scrollRoms = std::make_shared<ScrollBox>(0, 0, WIDTH, 400);
+    this->mainBox = std::make_shared<MainBox>(WIDTH, HEIGHT);
+
+    this->scrollRoms = std::make_shared<ScrollBox>(0, 0, WIDTH, 400, this->mainBox);
     this->scrollRoms->setElements(refreshRoms());
-    this->elements.emplace_back(this->scrollRoms);
+    this->mainBox->getElements().emplace_back(this->scrollRoms);
 
     TTF_Text* text = TTF_CreateText(this->textEngine, this->font, "Select ROM", 0);
     if (!text) {
@@ -37,11 +39,11 @@ void MainMenu::init() {
         return;
     }
 
-    this->chooseFolder = std::make_shared<TextButton>(0.0f, 400.0f, WIDTH, 80, text, SDL_Color{150, 150, 150, 255});
+    this->chooseFolder = std::make_shared<TextButton>(0.0f, 400.0f, WIDTH, 80, text, this->mainBox, SDL_Color{150, 150, 150, 255});
     this->chooseFolder->setOnClick([this]() {
         SDL_ShowOpenFolderDialog(callback, this, this->window, home, false);
     });
-    this->elements.emplace_back(this->chooseFolder);
+    this->mainBox->getElements().emplace_back(this->chooseFolder);
 }
 
 bool MainMenu::handleEvent(SDL_Event &event) {
@@ -64,7 +66,7 @@ bool MainMenu::handleEvent(SDL_Event &event) {
         break;
     }
 
-    for (const std::shared_ptr<Element>& element : this->elements) {
+    for (const std::shared_ptr<Element>& element : this->mainBox->getElements()) {
         element->handleEvent(event);
     }
 
@@ -72,15 +74,15 @@ bool MainMenu::handleEvent(SDL_Event &event) {
 }
 
 void MainMenu::update() {
-    if (!this->mouseFocus) return;
+    if (!this->mouseFocus) {
+        return;
+    }
 
     if (this->inputHandler.isJustPressed(SDL_SCANCODE_F3)) {
         this->debug = !this->debug;
     }
 
-    for (const std::shared_ptr<Element>& element : this->elements) {
-        element->update(this->inputHandler);
-    }
+    this->mainBox->update(this->inputHandler);
 
     this->inputHandler.updateLastKeys();
     this->inputHandler.updateLastMouse();
@@ -90,9 +92,7 @@ void MainMenu::render() {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
     SDL_RenderClear(this->renderer);
 
-    for (const std::shared_ptr<Element>& element : this->elements) {
-        element->draw(this->renderer);
-    }
+    this->mainBox->draw(this->renderer);
 
     SDL_RenderPresent(this->renderer);
 }

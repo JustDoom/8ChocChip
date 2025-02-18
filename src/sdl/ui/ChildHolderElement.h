@@ -12,6 +12,7 @@ protected:
 public:
     explicit ChildHolderElement(const std::weak_ptr<ChildHolderElement>& parent) : Element(parent) {}
 
+    std::vector<std::shared_ptr<Element>>& getElements();
     void setElements(std::vector<std::shared_ptr<Element>> elements);
     virtual void removeElement(Element* element);
 };
