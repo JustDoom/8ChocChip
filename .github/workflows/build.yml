@@ -167,9 +167,9 @@ jobs:
         run: |
           dir build\bin\Release
           dir build\
-          dir build\out
+          dir build\out\Release
           dir build\Release
-          dir build\Win32
+          dir build\Win32\Release
 #          if exist build\out\Release\libconfig++.* copy build\out\Release\libconfig++.* build\bin\Release
         shell: cmd
 
