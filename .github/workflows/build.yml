@@ -168,6 +168,8 @@ jobs:
           dir build\bin\Release
           dir build\
           dir build\out
+          dir build\Release
+          dir build\Win32
 #          if exist build\out\Release\libconfig++.* copy build\out\Release\libconfig++.* build\bin\Release
         shell: cmd
 
