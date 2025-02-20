@@ -136,7 +136,7 @@ jobs:
         run: ctest --build-config ${{ matrix.build_type }}
         
   build-windows-xp:
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     strategy:
       fail-fast: false
