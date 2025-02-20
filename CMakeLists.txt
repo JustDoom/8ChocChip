@@ -3,12 +3,8 @@ project(8ChocChip
 LANGUAGES CXX
 VERSION 0.1)
 
-if(CMAKE_HOST_WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-    set(libname "libconfig")
-else()
-    set(libname "config")
-endif()
+option(BUILD_SHARED_LIBS "Build a shared library instead of static" OFF)
+option(SDL_VENDORED "Use vendored libraries" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,17 +13,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE INTERNAL "")
 set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 
-option(BUILD_SHARED_LIBS "Build a shared library instead of static" OFF)
-option(SDL_VENDORED "Use vendored libraries" ON)
-
 if(CMAKE_HOST_WIN32)
+    set(libname "libconfig")
     add_executable(8ChocChip WIN32)
     set_target_properties(8ChocChip PROPERTIES
             WIN32_EXECUTABLE TRUE
     )
     add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
-#    set_property(TARGET 8ChocChip PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
 else()
+    set(libname "config")
     add_executable(8ChocChip)
 endif()
 
