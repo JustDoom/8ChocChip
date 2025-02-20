@@ -134,3 +134,43 @@ jobs:
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: ctest --build-config ${{ matrix.build_type }}
+        
+  build-windows-xp:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Release]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Release
+        shell: cmd
+
+      - name: Build CMake
+        run: |
+          cd build
+          cmake --build . --config Release
+        shell: cmd
+
+      - name: Collect executable and assets
+        run: |
+          dir build\bin\Release
+          if exist build\out\Release\libconfig++.* copy build\out\Release\libconfig++.* build\bin\Release
+        shell: cmd
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-windows-32bit
+          path: build/bin/Release/
