@@ -18,6 +18,14 @@ if(CMAKE_HOST_WIN32)
     set(CMAKE_GENERATOR_PLATFORM Win32 CACHE STRING "Platform" FORCE)
     set(libname "libconfig")
     set(SDL_GAMEINPUT OFF CACHE BOOL "Disable GameInput for XP compatibility" FORCE)
+    set(SDL_CMAKE_ARGS 
+        -DSDL_XINPUT=OFF
+        -DSDL_DIRECTX=OFF
+        -DSDL_RENDER_D3D=OFF
+        -DSDL_GAMEINPUT=OFF
+        -DCMAKE_C_FLAGS="-D_WIN32_WINNT=0x0501 -DWINVER=0x0501 -DNTDDI_VERSION=0x05010000"
+        -DCMAKE_CXX_FLAGS="-D_WIN32_WINNT=0x0501 -DWINVER=0x0501 -DNTDDI_VERSION=0x05010000"
+    )
     add_executable(8ChocChip WIN32)
     set_target_properties(8ChocChip PROPERTIES
             WIN32_EXECUTABLE TRUE
