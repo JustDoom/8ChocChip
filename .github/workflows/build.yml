@@ -154,7 +154,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Release -DSDL_GAMEINPUT=OFF
+          cmake .. -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=Release -DSDL_XINPUT=OFF -DSDL_DIRECTX=ON -DSDL_RENDER_D3D=OFF -DSDL_GAMEINPUT=OFF
         shell: cmd
 
       - name: Build CMake
