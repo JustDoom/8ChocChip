@@ -163,19 +163,6 @@ jobs:
           cmake --build . --config Release
         shell: cmd
 
-      - name: Search for .dll and .lib files
-        run: |
-          echo "Searching for .dll and .lib files..."
-          Get-ChildItem -Path . -Recurse -Include *.dll,*.lib | ForEach-Object { $_.FullName } | Out-File -FilePath found_files.txt
-        shell: cmd
-
-      - name: Output Results
-        if: success()
-        run: |
-          echo "Found the following .dll and .lib files:"
-          cat found_files.txt
-        shell: cmd
-
       - name: Collect executable and assets
         run: |
           dir build\bin\Release
