@@ -15,6 +15,7 @@ set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 
 if(CMAKE_HOST_WIN32)
     set(libname "libconfig")
+    set(SDL_GAMEINPUT OFF CACHE BOOL "Disable GameInput for XP compatibility" FORCE)
     add_executable(8ChocChip WIN32)
     set_target_properties(8ChocChip PROPERTIES
             WIN32_EXECUTABLE TRUE
