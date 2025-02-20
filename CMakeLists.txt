@@ -14,13 +14,15 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE INTERNAL "")
 set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 
 if(CMAKE_HOST_WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501 -DNTDDI_VERSION=0x05010000)
+    set(CMAKE_GENERATOR_PLATFORM Win32 CACHE STRING "Platform" FORCE
     set(libname "libconfig")
     set(SDL_GAMEINPUT OFF CACHE BOOL "Disable GameInput for XP compatibility" FORCE)
     add_executable(8ChocChip WIN32)
     set_target_properties(8ChocChip PROPERTIES
             WIN32_EXECUTABLE TRUE
+            LINK_FLAGS "/SUBSYSTEM:WINDOWS,5.01"
     )
-    add_definitions(-D_WIN32_WINNT=0x0501 -DWINVER=0x0501)
 else()
     set(libname "config")
     add_executable(8ChocChip)
