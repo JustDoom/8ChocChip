@@ -16,12 +16,11 @@
 int main(int argc, char **argv) {
     std::string rom;
     for (int i = 0; i < argc; i++) {
-        std::string_view arg = argv[i];
-        if (arg.rfind("--") != 0 && arg.rfind("-") != 0) {
+        std::string command = toLowerCase(argv[i]);
+        if (command.rfind("--") != 0 && command.rfind('-') != 0) {
             continue;
         }
 
-        std::string command = toLowerCase(arg);
         if (command == "--rom" || command == "-r") {
             if (i + 1 < argc) {
                 rom = argv[++i];
