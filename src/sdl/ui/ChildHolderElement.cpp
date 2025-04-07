@@ -2,6 +2,10 @@
 
 #include <algorithm>
 
+std::vector<std::shared_ptr<Element>>& ChildHolderElement::getElements() {
+    return this->elements;
+}
+
 void ChildHolderElement::setElements(std::vector<std::shared_ptr<Element>> elements) {
     this->elements.clear();
     this->elements = std::move(elements);

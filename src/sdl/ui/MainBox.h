@@ -1,20 +1,13 @@
-#ifndef SCROLLBOX_H
-#define SCROLLBOX_H
-
-#include <memory>
+#ifndef MAINBOX_H
+#define MAINBOX_H
 
 #include "ChildHolderElement.h"
 
-class ScrollBox : public ChildHolderElement {
+class MainBox : public ChildHolderElement {
 private:
     SDL_FRect box;
-    float scrollPosition = 0;
-    float scrollSpeed = 20;
-    bool scrollUpdated = false;
 public:
-    ScrollBox(float x, float y, float width, float height) : ScrollBox(x, y, width, height, std::weak_ptr<ChildHolderElement>()) {}
-    ScrollBox(float x, float y, float width, float height, const std::weak_ptr<ChildHolderElement>& parent) :
-        ChildHolderElement(parent), box({x, y, width, height}) {}
+    MainBox(const float width, const float height) : ChildHolderElement(std::weak_ptr<ChildHolderElement>()), box({0, 0, width, height}) {}
 
     void draw(SDL_Renderer *window) override;
     void update(InputHandler &inputHandler) override;

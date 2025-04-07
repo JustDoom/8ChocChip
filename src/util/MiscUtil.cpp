@@ -1,14 +1,14 @@
 #include "MiscUtil.h"
 
 #include <algorithm>
+#include <cctype>
 
-std::string toLowerCase(const std::string_view string) {
-    std::string result(string); // Create a mutable string from the string_view
-    std::transform(result.begin(), result.end(), result.begin(),[](const unsigned char c) { return std::tolower(c); });
-    return result;
+std::string toLowerCase(std::string string) {
+    std::transform(string.begin(), string.end(), string.begin(), [](const unsigned char c) { return std::tolower(c); });
+    return string;
 }
 
-std::string getFileFromPath(std::string path) {
+std::string getFileFromPath(std::string& path) {
     if (const size_t lastSlashPos = path.find_last_of('/'); lastSlashPos != std::string::npos) {
         return path.substr(lastSlashPos + 1);
     }

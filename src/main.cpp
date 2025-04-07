@@ -16,12 +16,11 @@
 int main(int argc, char **argv) {
     std::string rom;
     for (int i = 0; i < argc; i++) {
-        std::string_view arg = argv[i];
-        if (arg.rfind("--") != 0 && arg.rfind("-") != 0) {
+        std::string command = toLowerCase(argv[i]);
+        if (command.rfind("--") != 0 && command.rfind('-') != 0) {
             continue;
         }
 
-        std::string command = toLowerCase(arg);
         if (command == "--rom" || command == "-r") {
             if (i + 1 < argc) {
                 rom = argv[++i];
@@ -175,12 +174,15 @@ int main(int argc, char **argv) {
 
         if (debug && fpsPrintTimer.getTicks() >= 1000) {
             if (!windows.empty()) {
-                auto *emulatorPtr = dynamic_cast<Emulator *>(windows[(rom.empty() ? 1 : 0)].get());
-                if (emulatorPtr) {
-                    std::cout << "FPS: " << avgFPS << " - " << emulatorPtr->getInstructions() << std::endl;
-                    emulatorPtr->resetInstructions();
-                } else {
-                    std::cout << "FPS: " << avgFPS << " - Failed to cast Window to Emulator\n";
+                std::cout << "FPS: " << avgFPS << std::endl;
+                for (int i = 0; i < windows.size(); i++) {
+                    auto *emulatorPtr = dynamic_cast<Emulator *>(windows[i].get());
+                    if (emulatorPtr) {
+                        std::cout << "Window " << i << " - " << emulatorPtr->getInstructions() << std::endl;
+                        emulatorPtr->resetInstructions();
+                    } else {
+                         std::cout << "Window " << i << " - Failed to cast Window to Emulator. Might just be the main menu or settings window" << std::endl;
+                    }
                 }
             }
             fpsPrintTimer.start();

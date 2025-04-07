@@ -10,6 +10,7 @@
 
 #include "InputHandler.h"
 #include "Window.h"
+#include "ui/MainBox.h"
 #include "ui/ScrollBox.h"
 #include "ui/TextButton.h"
 
@@ -23,7 +24,7 @@ private:
     std::unordered_map<std::string, TextButton> roms;
     std::shared_ptr<TextButton> chooseFolder;
     std::shared_ptr<ScrollBox> scrollRoms;
-    std::vector<std::shared_ptr<Element>> elements;
+    std::shared_ptr<MainBox> mainBox;
 
     InputHandler inputHandler{};
 
@@ -42,7 +43,7 @@ public:
     void resize(SDL_Event& event) override;
     void close() override;
 
-    void launchRom(const std::string& file);
+    void launchRom(const std::string& file) const;
     std::vector<std::shared_ptr<Element>> refreshRoms();
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };
