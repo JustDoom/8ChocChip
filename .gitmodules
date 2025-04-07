@@ -7,3 +7,9 @@
 [submodule "dependencies/json"]
 	path = dependencies/json
 	url = https://github.com/nlohmann/json
+[submodule "dependencies/clay"]
+	path = dependencies/clay
+	url = https://github.com/nicbarker/clay.git
+[submodule "dependencies/sdl_image"]
+	path = dependencies/sdl_image
+	url = https://github.com/libsdl-org/SDL_image.git
