@@ -8,5 +8,3 @@ target_sources(8ChocChip PRIVATE
         Window.cpp
         Window.h
 )
-
-add_subdirectory(ui)

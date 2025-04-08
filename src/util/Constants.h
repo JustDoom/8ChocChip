@@ -7,7 +7,8 @@
     #define HOME_VARIABLE "HOME"
 #endif
 
-inline const char *home = std::getenv(HOME_VARIABLE);
+inline const char* home = std::getenv(HOME_VARIABLE);
+inline std::string configFilePath;
 inline bool debug = false;
 inline bool speedTest = false;
 inline uint64_t ipf = 15;

@@ -51,8 +51,7 @@ int main(int argc, char **argv) {
         std::cerr << home << " environment variable not set. " << std::endl;
         return 1;
     }
-
-    std::string configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
+    configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
@@ -117,7 +116,7 @@ int main(int argc, char **argv) {
 
     std::vector<std::unique_ptr<Window>> windows;
     if (rom.empty()) {
-        windows.emplace_back(std::make_unique<MainMenu>(font, configFilePath, romFiles, romDirectories, windows))->init();
+        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows))->init();
     } else {
         windows.emplace_back(std::make_unique<Emulator>(rom))->init();
     }

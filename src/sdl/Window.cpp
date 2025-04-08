@@ -10,7 +10,7 @@ Window::~Window() {
 }
 
 void Window::init() {
-    if (!SDL_CreateWindowAndRenderer("8ChocChip - CHIP-8 Emulator", 64 * 15, 32 * 15, 0, &this->window, &this->renderer)) {
+    if (!SDL_CreateWindowAndRenderer("8ChocChip - CHIP-8 Emulator", 64 * 15, 32 * 15, SDL_WINDOW_RESIZABLE, &this->window, &this->renderer)) {
         std::cerr << "Couldn't create window and renderer. SDL_Error: " << SDL_GetError() << std::endl;
         return;
     }
@@ -31,7 +31,7 @@ void Window::init() {
 }
 
 bool Window::handleEvent(SDL_Event &event) {
-    if (event.window.windowID == this->windowId) {
+    if (event.window.windowID == this->windowId) { // TODO: Maybe let it go one more frame?
         switch (event.type) {
             case SDL_EVENT_WINDOW_SHOWN:
                 this->shown = true;
