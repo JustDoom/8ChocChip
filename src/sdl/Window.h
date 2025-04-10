@@ -2,11 +2,14 @@
 #define WINDOW_H
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 class Window {
 protected:
     SDL_Window* window = nullptr;
-    SDL_Renderer* renderer = nullptr;
+    SDL_Renderer* renderer;
+    TTF_TextEngine* textEngine;
+    TTF_Font** fonts;
     unsigned int windowId = -1;
     SDL_Point originalSize;
 

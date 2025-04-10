@@ -13,6 +13,10 @@
 #include "util/Constants.h"
 #include "util/MiscUtil.h"
 
+// Includes the definitions for clay. Include the clay.h file normally without definition for normal use
+#define CLAY_IMPLEMENTATION
+#include "../dependencies/clay/clay.h"
+
 int main(int argc, char **argv) {
     std::string rom;
     for (int i = 0; i < argc; i++) {

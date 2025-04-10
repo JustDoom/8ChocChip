@@ -11,9 +11,8 @@
 #include "InputHandler.h"
 #include "Window.h"
 
-#define CLAY_IMPLEMENTATION
 #include "../../dependencies/clay/clay.h"
-#include "../TestRender.h"
+#include "../ClaySDL3Renderer.h"
 
 class MainMenu : public Window {
 private:
@@ -22,9 +21,6 @@ private:
     std::vector<std::unique_ptr<Window>>& windows;
 
     InputHandler inputHandler{};
-
-    TTF_TextEngine* textEngine;
-    TTF_Font* font = nullptr;
     SDL_Mutex* mutex;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,

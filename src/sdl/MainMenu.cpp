@@ -25,55 +25,23 @@ struct HoverData {
     std::string* romPath;
 };
 bool clicked = false;
-Clay_SDL3RendererData rendererData;
+
 Clay_Vector2 size{WIDTH, HEIGHT};
 Clay_Vector2 wheel{};
-std::vector<std::unique_ptr<char[]>> clayStringBuffers;
-void clearClayStringBuffers() {
-    clayStringBuffers.clear();
-}
-
-Clay_String toClayString(const std::string& str) {
-    const size_t requiredSize = str.size() + 1;
-    auto buffer = std::make_unique<char[]>(requiredSize);
-    std::strcpy(buffer.get(), str.c_str());
-
-    const Clay_String clayStr = {
-        .length = static_cast<int32_t>(str.size()),
-        .chars = buffer.get()
-    };
-
-    clayStringBuffers.push_back(std::move(buffer));
-    return clayStr;
-}
-static Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData) {
-    TTF_Font **fonts = (TTF_Font**) userData;
-    TTF_Font *font = fonts[config->fontId];
-    int width, height;
-
-    if (!TTF_GetStringSize(font, text.chars, text.length, &width, &height)) {
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to measure text: %s", SDL_GetError());
-    }
-
-    return (Clay_Dimensions) { (float) width, (float) height };
-}
 
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    romDirectories(romDirectories), romFiles(romFiles), windows(windows), font(font), mutex(SDL_CreateMutex()) {}
-
-void HandleClayErrors(Clay_ErrorData errorData) {
-    printf("%s", errorData.errorText.chars);
+    romDirectories(romDirectories), romFiles(romFiles), windows(windows), mutex(SDL_CreateMutex()) {
+    this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
+    this->fonts[0] = font;
 }
 
 void MainMenu::init() {
     Window::init();
 
+    this->renderer = this->renderer;
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
-    rendererData.renderer = this->renderer;
-    rendererData.textEngine = this->textEngine;
-    rendererData.fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
-    rendererData.fonts[0] = font;
+
     uint64_t totalMemorySize = Clay_MinMemorySize();
     Clay_Arena clayMemory = (Clay_Arena) {
         .capacity = totalMemorySize,
@@ -82,8 +50,8 @@ void MainMenu::init() {
 
     int width, height;
     SDL_GetWindowSize(this->window, &width, &height);
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { HandleClayErrors });
-    Clay_SetMeasureTextFunction(SDL_MeasureText, rendererData.fonts);
+    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { handleClayErrors });
+    Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
 }
 
 bool MainMenu::handleEvent(SDL_Event &event) {
@@ -190,7 +158,7 @@ void MainMenu::render() {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
     SDL_RenderClear(this->renderer);
 
-    SDL_Clay_RenderClayCommands(&rendererData, &renderCommands);
+    SDL_Clay_RenderClayCommands(this->renderer, this->textEngine, this->fonts, &renderCommands);
     clearClayStringBuffers();
 
     SDL_RenderPresent(this->renderer);
