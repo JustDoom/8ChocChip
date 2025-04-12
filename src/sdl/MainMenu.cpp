@@ -14,9 +14,11 @@
 #include "../util/MiscUtil.h"
 #include "Emulator.h"
 
-constexpr auto COLOR_LIGHT = (Clay_Color) {224, 215, 210, 255};
-constexpr auto COLOR_RED = (Clay_Color) {168, 66, 28, 255};
-constexpr auto COLOR_ORANGE = (Clay_Color) {225, 138, 50, 255};
+constexpr auto COLOR_BOX = (Clay_Color) {224, 215, 210, 255};
+constexpr auto COLOR_TITLE = (Clay_Color) {140, 100, 60, 255};
+constexpr auto COLOR_ROMS = (Clay_Color) {180, 140, 90, 255};
+constexpr auto COLOR_HIGHLIGHT = (Clay_Color) {110, 80, 50, 255};
+constexpr auto COLOR_BUTTON = (Clay_Color) {90, 60, 40, 255};
 
 bool clicked = false;
 Clay_Vector2 wheel{};
@@ -111,27 +113,34 @@ void MainMenu::render() {
             .id = CLAY_ID("SideBarContainer"),
             .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
         }) {
-            CLAY({ .id = CLAY_ID("SideBarTitle"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_RED }) {
+            CLAY({ .id = CLAY_ID("SideBarTitle"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_TITLE }) {
                 CLAY_TEXT(CLAY_STRING("Chip8 Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
             }
 
             CLAY({
                 .id = CLAY_ID("SideBar"),
                 .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
-                .backgroundColor = COLOR_LIGHT,
+                .backgroundColor = COLOR_BOX,
                 .scroll = { .vertical = true }
             }) {
                 for (auto& dir : this->romFiles) {
                     for (std::string& romPath : dir.second) {
-                        CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) },.padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ORANGE}) {
-                            CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
-                            Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                        if (&romPath == this->selectedRom) {
+                            CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_HIGHLIGHT}) {
+                                CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                                Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                            }
+                        } else {
+                            CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ROMS}) {
+                                CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                                Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                            }
                         }
                     }
                 }
             }
 
-            CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = (Clay_Color) {224, 25, 210, 255} }) {
+            CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_BUTTON }) {
                 CLAY_TEXT(CLAY_STRING("Add New"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleAddNewRom, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
             }
@@ -140,10 +149,14 @@ void MainMenu::render() {
             .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM }}) {
             CLAY({ .id = CLAY_ID("MainContent"),
                 .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } },
-                .backgroundColor = COLOR_LIGHT }) {}
-            CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = (Clay_Color) {224, 25, 210, 255} }) {
-                CLAY_TEXT(CLAY_STRING("Play"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                .backgroundColor = COLOR_BOX }) {}
+            CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
+                if (this->selectedRom == nullptr) {
+                    CLAY_TEXT(CLAY_STRING("Please select a ROM"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                } else {
+                    CLAY_TEXT(CLAY_STRING("Play"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                    Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                }
             }
         }
     }

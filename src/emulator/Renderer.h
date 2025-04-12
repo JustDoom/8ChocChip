@@ -1,7 +1,6 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <cstdint>
 #include <vector>
 
 #include <SDL3/SDL.h>
