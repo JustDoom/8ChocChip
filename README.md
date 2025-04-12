@@ -10,7 +10,7 @@ I plan to support other Chip8 variants in the future with many other features li
 
 There are a couple of things left to do until I would say it works well enough
 - [x] Proper flag/feature compatibility unlike many out there
-- [ ] Cleaner/more optimised code
+- [x] Get emulator to run at a decent speed
 - [x] Windows Support
 - [ ] MacOS Support
 - [x] Switch to SDL from SFML
@@ -21,12 +21,12 @@ There are a couple of things left to do until I would say it works well enough
 - [ ] Per program settings (Keybindings, graphics, sounds, etc)
 - [ ] Discord Rich Presence support
 - [ ] JIT mode
-- [ ] Proper install method
+- [ ] Proper installation method
 
 ### Supported Platforms
 
 - [x] GNU/Linux - Should work on any distro that will let you run plain executable files from the last few years at least
-- [x] Windows 7 - Make sure to install [Visual Studio 2017](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
+- [x] Windows 7 - ~~Make sure to install [Visual Studio 2017](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)~~ Needs testing since I changed some compiler stuff
 - [x] Windows 8(.1), 10, 11
 - [ ] Windows 95
 - [ ] Windows 98
@@ -58,7 +58,13 @@ For a proper test suite you can check out https://github.com/Timendus/chip8-test
 
 Install dependencies
 ```
-sudo apt-get update && sudo apt-get install -y cmake build-essential g++ libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev libgtk-3-dev
+sudo apt-get install build-essential git make \
+        pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+        libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+        libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+        libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+        libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+        libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
 ```
 
 Clone the repository through the command line, or another option you may have
@@ -87,7 +93,7 @@ The generated files will be inside the `build/bin` directory
 
 ### Windows
 
-I don't have a Windows machine set up to test so for now just follow the [workflow](https://github.com/JustDoom/8ChocChip/blob/master/.github/workflows/build.yml#L68)
+I don't have a Windows machine set up to test so for now just follow the [workflow](https://github.com/JustDoom/8ChocChip/blob/master/.github/workflows/build.yml)
 
 # Credits
 
