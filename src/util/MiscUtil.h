@@ -5,6 +5,7 @@
 #include "../../dependencies/clay/clay.h"
 
 std::string toLowerCase(std::string string);
+std::string to_string(const std::filesystem::path& path);
 std::string getFileFromPath(std::string& path);
 void handleClayErrors(Clay_ErrorData errorData);
 void clearClayStringBuffers();
