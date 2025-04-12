@@ -180,6 +180,9 @@ void MainMenu::resize(SDL_Event& event) {
 
 void MainMenu::close() {
     for (const auto& window : this->windows) {
+        if (window.get() == this) {
+            continue;
+        }
         window->close();
     }
     TTF_DestroyRendererTextEngine(this->textEngine);
