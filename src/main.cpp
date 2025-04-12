@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
                         continue;
                     }
 
-                    std::cout << "Processing file: " << romFile.path().c_str() << std::endl;
+                    std::cout << "Processing file: " << to_string(romFile.path()) << std::endl;
 
                     // Check if the rom directory doesn't exist in romFiles, then add it
                     if (romFiles.find(&romDirectories.back()) == romFiles.end()) {

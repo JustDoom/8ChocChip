@@ -1,4 +1,4 @@
-name: Build
+name: CMake on multiple platforms
 
 on:
   push:
@@ -10,113 +10,69 @@ on:
       - '.github/workflows/**'
     branches:
       - master
-      - sdl
   workflow_dispatch:
 
 jobs:
-  build-ubuntu:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
+      
       matrix:
-        build_type: [ Release ]
-        c_compiler: [ gcc ]
-        cpp_compiler: [ g++ ]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev libgtk-3-dev
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Configure CMake
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build CMake
-        run: |
-          cd build
-          cmake --build . --config Release -j $(nproc)
-
-      - name: Collect executable and assets
-        run: |
-          mkdir -p output
-          ls build
-          ls build/bin
-
-      - name: Upload executable
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-linux
-          path: build/bin/
-
-  build-windows:
-    runs-on: windows-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
+        os: [ubuntu-latest, windows-2025]
         build_type: [Release]
         c_compiler: [gcc]
-        cpp_compiler: [g++]
+        include:
+          - os: windows-2025
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-  
-      - name: Set reusable strings
-        id: strings
-        shell: bash
-        run: |
-          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-  
-      - name: Configure CMake
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release -D CMAKE_SYSTEM_VERSION=10.0.26100.0
-  
-      - name: Build CMake
-        run: |
-          cd build
-          cmake --build . --config Release -j ${{ env.NUMBER_OF_PROCESSORS }}
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
-      - name: Search for .dll and .lib files
-        run: |
-          echo "Searching for .dll and .lib files..."
-          Get-ChildItem -Path . -Recurse -Include *.dll,*.lib | ForEach-Object { $_.FullName } | Out-File -FilePath found_files.txt
+    - name: Install Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get install build-essential git make \
+        pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
+        libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
+        libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
+        libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
+        libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
+        libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
 
-      - name: Output Results
-        if: success()
-        run: |
-          echo "Found the following .dll and .lib files:"
-          cat found_files.txt
-  
-      - name: Collect executable and assets
-        run: |
-          mkdir -p output
-          dir build
-          dir build/bin
-          dir build/bin/Release
-    
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-windows
-          path: build/bin/Release
-  
-      - name: Test
-        working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        run: ctest --build-config ${{ matrix.build_type }}
+    - name: Install MinGW
+      if: runner.os == 'Windows'
+      run: |
+        choco install mingw -y
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Configure CMake
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S ${{ github.workspace }}
+        ${{ runner.os == 'Windows' && '-G "MinGW Makefiles"' || '' }}
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ matrix.os }}
+        path: ${{ steps.strings.outputs.build-output-dir }}/bin

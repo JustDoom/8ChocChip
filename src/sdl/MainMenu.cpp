@@ -247,7 +247,7 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
             continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
         }
 
-        std::cout << "Processing file - : " << file.path().c_str() << std::endl;
+        std::cout << "Processing file - : " << to_string(file.path()) << std::endl;
 
         // Check if the rom directory doesn't exist in romFiles, then add it
         if (instance->romFiles.find(&instance->romDirectories.back()) == instance->romFiles.end()) {
