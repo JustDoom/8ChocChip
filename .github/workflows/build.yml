@@ -32,15 +32,10 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y cmake libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libxrandr-dev libxcursor-dev libgtk-3-dev
 
-      - name: Setup SSH key and Install submodules
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git submodule update --init --recursive
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Configure CMake
         run: |
@@ -80,19 +75,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "$env:SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-      - name: Install MinGW
-        run: |
-          choco install mingw --version=8.1.0 -y
-          echo "C:/ProgramData/chocolatey/bin" >> $GITHUB_PATH
   
       - name: Set reusable strings
         id: strings
@@ -104,7 +86,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -D CMAKE_SYSTEM_VERSION=10.0.26100.0 -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
+          cmake .. -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release -D CMAKE_SYSTEM_VERSION=10.0.26100.0
   
       - name: Build CMake
         run: |
