@@ -1,6 +1,7 @@
 #ifndef MISCUTIL_H
 #define MISCUTIL_H
 
+#include <filesystem>
 #include <string>
 #include "../../dependencies/clay/clay.h"
 
