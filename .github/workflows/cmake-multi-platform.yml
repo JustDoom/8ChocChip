@@ -64,6 +64,12 @@ jobs:
 
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+    - name: Copy MinGW DLLs (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        cp /c/MinGW/bin/libgcc_s_seh-1.dll ${{ steps.strings.outputs.build-output-dir }}/bin/
+        cp /c/MinGW/bin/libstdc++-6.dll ${{ steps.strings.outputs.build-output-dir }}/bin/
       
     - name: Upload executable
       uses: actions/upload-artifact@v4
