@@ -28,7 +28,7 @@ target_link_libraries(8ChocChip PRIVATE nlohmann_json::nlohmann_json SDL3_ttf::S
 
 
 if (MINGW)
-    target_link_options(8ChocChip PRIVATE -static-libgcc -static-libstdc++)
+    target_link_options(8ChocChip PRIVATE -static -pthread -static-libgcc -static-libstdc++)
 endif()
 
 set_target_properties(8ChocChip PROPERTIES
