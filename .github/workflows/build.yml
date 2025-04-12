@@ -2,9 +2,15 @@ name: CMake on multiple platforms
 
 on:
   push:
-    branches: [ "new-workflow" ]
-  pull_request:
-    branches: [ "new-workflow" ]
+    paths:
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'assets/**'
+      - 'dependencies/**'
+      - '.github/workflows/**'
+    branches:
+      - master
+  workflow_dispatch:
 
 jobs:
   build:
