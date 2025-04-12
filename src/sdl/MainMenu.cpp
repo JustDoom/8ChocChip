@@ -9,24 +9,16 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "../ClaySDL3Renderer.h"
 #include "../util/Constants.h"
 #include "../util/MiscUtil.h"
 #include "Emulator.h"
 
-#define WIDTH (64 * 15)
-#define HEIGHT (32 * 15)
-
 constexpr auto COLOR_LIGHT = (Clay_Color) {224, 215, 210, 255};
 constexpr auto COLOR_RED = (Clay_Color) {168, 66, 28, 255};
 constexpr auto COLOR_ORANGE = (Clay_Color) {225, 138, 50, 255};
-struct HoverData {
-    MainMenu* self;
-    SDL_Window* window;
-    std::string* romPath;
-};
-bool clicked = false;
 
-Clay_Vector2 size{WIDTH, HEIGHT};
+bool clicked = false;
 Clay_Vector2 wheel{};
 
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
@@ -92,6 +84,7 @@ bool MainMenu::handleEvent(SDL_Event &event) {
 
 void MainMenu::update() {
     if (!this->mouseFocus) {
+        clicked = false;
         return;
     }
 
@@ -106,51 +99,52 @@ void MainMenu::update() {
 void MainMenu::render() {
     float x, y;
     SDL_GetMouseState(&x, &y);
-    Clay_SetLayoutDimensions((Clay_Dimensions) { size.x, size.y });
+    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
     Clay_SetPointerState((Clay_Vector2) { x, y }, clicked);
-    Clay_UpdateScrollContainers(true, (Clay_Vector2) { wheel.x, wheel.y }, 0.0166f);
+    Clay_UpdateScrollContainers(false, (Clay_Vector2) { wheel.x, wheel.y }, 0.0166f);
     wheel.x = 0;
     wheel.y = 0;
 
     Clay_BeginLayout();
     CLAY({ .id = CLAY_ID("OuterContainer"), .layout = { .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}, .padding = CLAY_PADDING_ALL(16), .childGap = 16 }, .backgroundColor = {250,250,255,255} }) {
         CLAY({
-            .id = CLAY_ID("SideBar"),
-            .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
-            .backgroundColor = COLOR_LIGHT,
-            .scroll = { .vertical = true }
+            .id = CLAY_ID("SideBarContainer"),
+            .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
         }) {
-            CLAY({ .id = CLAY_ID("ProfilePictureOuter"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_RED }) {
-                CLAY_TEXT(CLAY_STRING("Game Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+            CLAY({ .id = CLAY_ID("SideBarTitle"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_RED }) {
+                CLAY_TEXT(CLAY_STRING("Chip8 Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
             }
 
-            for (auto& dir : this->romFiles) {
-                for (std::string& romPath : dir.second) {
-                    CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) },.padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ORANGE}) {
-                        CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
-                        HoverData* data = new HoverData{this, this->window, &romPath};
-                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
-                            if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-                                const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->windows.emplace_back(std::make_unique<Emulator>(*data->romPath))->init();
-                            }
-                        }, reinterpret_cast<intptr_t>(data));
+            CLAY({
+                .id = CLAY_ID("SideBar"),
+                .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
+                .backgroundColor = COLOR_LIGHT,
+                .scroll = { .vertical = true }
+            }) {
+                for (auto& dir : this->romFiles) {
+                    for (std::string& romPath : dir.second) {
+                        CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) },.padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ORANGE}) {
+                            CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                            Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                        }
                     }
                 }
             }
 
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = (Clay_Color) {224, 25, 210, 255} }) {
                 CLAY_TEXT(CLAY_STRING("Add New"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                HoverData* data = new HoverData{this, this->window, nullptr};
-                Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
-                    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-                        const auto data = reinterpret_cast<HoverData*>(userData);
-                        SDL_ShowOpenFolderDialog(data->self->callback, data->self, data->window, home, false);
-                    }
-                }, reinterpret_cast<intptr_t>(data));
+                Clay_OnHover(handleAddNewRom, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
             }
-
-            CLAY({ .id = CLAY_ID("MainContent"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } }, .backgroundColor = COLOR_LIGHT }) {}
+        }
+        CLAY({ .id = CLAY_ID("MainContentHolder"),
+            .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM }}) {
+            CLAY({ .id = CLAY_ID("MainContent"),
+                .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } },
+                .backgroundColor = COLOR_LIGHT }) {}
+            CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = (Clay_Color) {224, 25, 210, 255} }) {
+                CLAY_TEXT(CLAY_STRING("Play"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+            }
         }
     }
     Clay_RenderCommandArray renderCommands = Clay_EndLayout();
@@ -162,11 +156,13 @@ void MainMenu::render() {
     clearClayStringBuffers();
 
     SDL_RenderPresent(this->renderer);
+
+    this->dataList.clear();
 }
 
 void MainMenu::resize(SDL_Event& event) {
-    size.x = event.window.data1;
-    size.y = event.window.data2;
+    this->width = event.window.data1;
+    this->height = event.window.data2;
 }
 
 void MainMenu::close() {
@@ -176,6 +172,30 @@ void MainMenu::close() {
     TTF_DestroyRendererTextEngine(this->textEngine);
     SDL_DestroyMutex(this->mutex);
     Window::close();
+}
+
+void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        data->self->selectedRom = data->romPath;
+    }
+}
+
+void MainMenu::handleAddNewRom(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        SDL_ShowOpenFolderDialog(callback, data->self, data->self->window, home, false);
+    }
+}
+
+void MainMenu::handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        if (data->self->selectedRom == nullptr) {
+            return;
+        }
+        data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom))->init();
+    }
 }
 
 void MainMenu::callback(void* userdata, const char* const* directory, int filter) {

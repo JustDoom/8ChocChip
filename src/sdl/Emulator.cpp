@@ -5,7 +5,7 @@
 Emulator::Emulator(const std::string& rom) : cpu(&renderWrapper, &keyboard, &speaker), rom(rom) {}
 
 void Emulator::init() {
-    Window::init();
+    Window::init(64 * 15, 32 * 15);
 
     if (this->rom.empty()) {
         std::cerr << "No ROM file has been specified :(" << std::endl;

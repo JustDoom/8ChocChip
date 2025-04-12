@@ -13,8 +13,8 @@ protected:
     unsigned int windowId = -1;
     SDL_Point originalSize;
 
+    int width = 1280;
     int height = 720;
-    int width = 480;
 
     bool mouseFocus = false;
     bool keyboardFocus = false;
@@ -29,6 +29,7 @@ public:
     virtual ~Window();
 
     virtual void init();
+    virtual void init(int width, int height);
     virtual bool handleEvent(SDL_Event& event);
     virtual void update();
     virtual void render() = 0;

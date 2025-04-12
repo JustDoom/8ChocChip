@@ -12,9 +12,15 @@
 #include "Window.h"
 
 #include "../../dependencies/clay/clay.h"
-#include "../ClaySDL3Renderer.h"
 
-class MainMenu : public Window {
+class MainMenu;
+
+struct HoverData {
+    MainMenu* self;
+    std::string* romPath;
+};
+
+class MainMenu final : public Window {
 private:
     std::vector<std::string>& romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>>& romFiles;
@@ -22,6 +28,9 @@ private:
 
     InputHandler inputHandler{};
     SDL_Mutex* mutex;
+    std::vector<HoverData> dataList;
+
+    std::string* selectedRom;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,
@@ -34,6 +43,9 @@ public:
     void resize(SDL_Event& event) override;
     void close() override;
 
+    static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };
 
