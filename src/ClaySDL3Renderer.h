@@ -17,8 +17,8 @@ typedef struct {
 static int NUM_CIRCLE_SEGMENTS = 16;
 
 //all rendering is performed by a single SDL call, avoiding multiple RenderRect + plumbing choice for circles.
-void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect, const float cornerRadius, const Clay_Color _color);
-void SDL_Clay_RenderArc(SDL_Renderer* renderer, const SDL_FPoint center, const float radius, const float startAngle, const float endAngle, const float thickness, const Clay_Color color);
+void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, SDL_FRect rect, float cornerRadius, Clay_Color _color);
+void SDL_Clay_RenderArc(SDL_Renderer* renderer, SDL_FPoint center, float radius, float startAngle, float endAngle, float thickness, Clay_Color color);
 void SDL_Clay_RenderClayCommands(SDL_Renderer* renderer, TTF_TextEngine* textEngine, TTF_Font** fonts, Clay_RenderCommandArray *rcommands);
 
 #endif
