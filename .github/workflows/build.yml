@@ -59,6 +59,14 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Set Job Count
+      run: |
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          echo "JOBS=$(nproc)" >> $GITHUB_ENV
+        else
+          echo "JOBS=$NUMBER_OF_PROCESSORS" >> $GITHUB_ENV
+        fi
+
     - name: Configure CMake
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
@@ -69,7 +77,7 @@ jobs:
         ${{ runner.os == 'Windows' && '-G "MinGW Makefiles"' || '' }}
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} -j ${{ env.JOBS }}
       
     - name: Upload executable
       uses: actions/upload-artifact@v4
