@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -29,6 +30,24 @@ std::string getFileFromPath(std::string& path) {
     }
 
     return path;
+}
+
+void searchDirectory(std::string directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories) {
+    for (const auto& romFile: std::filesystem::directory_iterator(directory)) {
+        if (romFile.is_directory() || romFile.file_size() > 3584) {
+            continue;
+        }
+
+        std::cout << "Processing file: " << to_string(romFile.path()) << std::endl;
+
+        // Check if the rom directory doesn't exist in romFiles, then add it
+        if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+            romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+        }
+
+        // Add the file path to the romFiles entry
+        romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
+    }
 }
 
 void handleClayErrors(Clay_ErrorData errorData) {

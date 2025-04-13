@@ -46,6 +46,7 @@ public:
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
 };
 

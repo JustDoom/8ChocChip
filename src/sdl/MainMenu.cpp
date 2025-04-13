@@ -140,9 +140,15 @@ void MainMenu::render() {
                 }
             }
 
-            CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_BUTTON }) {
-                CLAY_TEXT(CLAY_STRING("Add New"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(handleAddNewRom, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+            CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
+                CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_BUTTON }) {
+                    CLAY_TEXT(CLAY_STRING("Add New"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                    Clay_OnHover(handleAddNewRom, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                }
+                CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_BUTTON }) {
+                    CLAY_TEXT(CLAY_STRING("Refresh"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                    Clay_OnHover(handleRefresh, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                }
             }
         }
         CLAY({ .id = CLAY_ID("MainContentHolder"),
@@ -211,6 +217,16 @@ void MainMenu::handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData
             return;
         }
         data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom))->init();
+    }
+}
+
+void MainMenu::handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        data->self->romFiles.clear();
+        for (const auto& dir : data->self->romDirectories) {
+            searchDirectory(dir, data->self->romFiles, data->self->romDirectories);
+        }
     }
 }
 
