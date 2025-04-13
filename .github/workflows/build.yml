@@ -77,7 +77,7 @@ jobs:
         ${{ runner.os == 'Windows' && '-G "MinGW Makefiles"' || '' }}
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} -j ${{ env.JOBS }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} -j ${{ runner.os == 'Windows' && env.NUMBER_OF_PROCESSORS || nproc }}
       
     - name: Upload executable
       uses: actions/upload-artifact@v4
