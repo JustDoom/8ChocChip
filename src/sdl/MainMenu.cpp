@@ -260,22 +260,6 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     fileWrite.close();
 
     instance->romDirectories.emplace_back(directoryString);
-
-    for (const auto &file: std::filesystem::directory_iterator(directoryString)) {
-        if (file.is_directory() || file.file_size() > 3584) {
-            continue; // TODO: Make sure its a file that can be emulated, at least basic checks so it isn't like a word doc
-        }
-
-        std::cout << "Processing file - : " << to_string(file.path()) << std::endl;
-
-        // Check if the rom directory doesn't exist in romFiles, then add it
-        if (instance->romFiles.find(&instance->romDirectories.back()) == instance->romFiles.end()) {
-            instance->romFiles.emplace(&instance->romDirectories.back(), std::vector<std::string>());
-        }
-
-        // Add the file path to the romFiles entry
-        instance->romFiles.find(&instance->romDirectories.back())->second.emplace_back(file.path().string());
-    }
-
+    searchDirectory(directoryString, instance->romFiles, instance->romDirectories);
     SDL_UnlockMutex(instance->mutex);
 }
