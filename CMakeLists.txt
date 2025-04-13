@@ -15,6 +15,7 @@ set(SDLIMAGE_AVIF OFF)
 set(SDLIMAGE_BMP OFF)
 set(SDLIMAGE_JPEG OFF)
 set(SDLIMAGE_WEBP OFF)
+set(SDLIMAGE_TIFF OFF)
 
 option(BUILD_SHARED_LIBS "Build a shared library instead of static" OFF)
 option(SDL_VENDORED "Use vendored libraries" ON)
