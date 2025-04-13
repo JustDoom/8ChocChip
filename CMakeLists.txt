@@ -25,7 +25,7 @@ add_executable(8ChocChip)
 add_subdirectory(dependencies)
 add_subdirectory(src)
 
-target_link_libraries(8ChocChip PRIVATE nlohmann_json::nlohmann_json SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image SDL3::SDL3)
+target_link_libraries(8ChocChip PRIVATE nlohmann_json::nlohmann_json SDL3_ttf::SDL3_ttf SDL3::SDL3)
 
 
 if (MINGW)
