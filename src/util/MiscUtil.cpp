@@ -31,7 +31,7 @@ std::string getFileFromPath(std::string& path) {
     return path;
 }
 
-void searchDirectory(std::string directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories) {
+void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories) {
     for (const auto& romFile: std::filesystem::directory_iterator(directory)) {
         if (romFile.is_directory() || romFile.file_size() > 3584) {
             continue;
