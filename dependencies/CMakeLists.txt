@@ -6,7 +6,7 @@ add_subdirectory(json)
 
 if(SDL_VENDORED)
     add_subdirectory(sdl EXCLUDE_FROM_ALL)
-#    add_subdirectory(sdl_image EXCLUDE_FROM_ALL)
+    add_subdirectory(sdl_image EXCLUDE_FROM_ALL)
     set(SDLTTF_VENDORED ON)
     add_subdirectory(sdl_ttf EXCLUDE_FROM_ALL)
 else()
