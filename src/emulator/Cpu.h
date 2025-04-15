@@ -9,6 +9,8 @@
 #include "Renderer.h"
 #include "Speaker.h"
 
+#include "../Settings.h"
+
 class Cpu {
 private:
     std::array<uint8_t, 4096> memory;
@@ -27,8 +29,10 @@ private:
     Renderer* renderer;
     Keyboard* keyboard;
     Speaker* speaker;
+
+    const RomSettings romSettings;
 public:
-    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker);
+    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, RomSettings romSettings);
 
     void loadSpritesIntoMemory();
     void loadProgramIntoMemory(std::ifstream* file);

@@ -7,6 +7,8 @@
 #include "../emulator/Renderer.h"
 #include "../emulator/Speaker.h"
 
+#include "../Settings.h"
+
 class Emulator : public Window {
 private:
     Renderer renderWrapper;
@@ -16,7 +18,7 @@ private:
 
     const std::string& rom;
 public:
-    Emulator(const std::string& rom);
+    Emulator(const std::string& rom, const RomSettings& romSettings);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;

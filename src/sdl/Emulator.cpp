@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Emulator::Emulator(const std::string& rom) : cpu(&renderWrapper, &keyboard, &speaker), rom(rom) {}
+Emulator::Emulator(const std::string& rom, const RomSettings& romSettings) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {}
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);

@@ -5,9 +5,11 @@
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <openssl/sha.h>
 
 std::vector<std::unique_ptr<char[]>> clayStringBuffers;
 
@@ -16,7 +18,7 @@ std::string toLowerCase(std::string string) {
     return string;
 }
 
-std::string to_string(const std::filesystem::path& path) {
+std::string toString(const std::filesystem::path& path) {
     #ifdef _WIN32
         return path.string();
     #else
@@ -37,7 +39,7 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
             continue;
         }
 
-        std::cout << "Processing file: " << to_string(romFile.path()) << std::endl;
+        std::cout << "Processing file: " << toString(romFile.path()) << " - " << sha1FromFile(toString(romFile.path())) << std::endl;
 
         // Check if the rom directory doesn't exist in romFiles, then add it
         if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
@@ -81,4 +83,32 @@ Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *c
     }
 
     return (Clay_Dimensions) { (float) width, (float) height };
+}
+
+std::string sha1FromFile(const std::string& filename) {
+    SHA_CTX sha1;
+    SHA1_Init(&sha1);
+
+    std::ifstream file(filename, std::ios::binary);
+    if (!file.is_open()) {
+        return "Error: Could not open file";
+    }
+
+    const size_t buffer_size = 8192;
+    char buffer[buffer_size];
+    while (file.read(buffer, buffer_size)) {
+        SHA1_Update(&sha1, buffer, buffer_size);
+    }
+    SHA1_Update(&sha1, buffer, file.gcount());
+
+    unsigned char hash[SHA_DIGEST_LENGTH];
+    SHA1_Final(hash, &sha1);
+
+    std::stringstream ss;
+    for (int i = 0; i < SHA_DIGEST_LENGTH; i++) {
+        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+    }
+
+    file.close();
+    return ss.str();
 }

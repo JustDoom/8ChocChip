@@ -5,7 +5,7 @@
 
 #include "../util/Constants.h"
 
-Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker) {
+Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings) : renderer(renderer), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -13,10 +13,6 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker) {
     this->sp = 0;
     this->drawn = false;
     this->speed = ipf;
-
-    this->renderer = renderer;
-    this->keyboard = keyboard;
-    this->speaker = speaker;
 }
 
 void Cpu::loadSpritesIntoMemory() {
@@ -151,17 +147,23 @@ void Cpu::runInstruction() {
                     break;
                 case 0x1: {
                     this->registers[x] |= this->registers[y];
-                    this->registers[0xF] = 0;
+                    if (this->romSettings.logic) {
+                        this->registers[0xF] = 0;
+                    }
                     break;
                 }
                 case 0x2: {
                     this->registers[x] &= this->registers[y];
-                    this->registers[0xF] = 0;
+                    if (this->romSettings.logic) {
+                        this->registers[0xF] = 0;
+                    }
                     break;
                 }
                 case 0x3: {
                     this->registers[x] ^= this->registers[y];
-                    this->registers[0xF] = 0;
+                    if (this->romSettings.logic) {
+                        this->registers[0xF] = 0;
+                    }
                     break;
                 }
                 case 0x4: {
@@ -177,7 +179,9 @@ void Cpu::runInstruction() {
                     break;
                 }
                 case 0x6: {
-                    this->registers[x] = this->registers[y]; // TODO: Optional quirk? https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#8xy6-and-8xye-shift
+                    if (!this->romSettings.shift) {
+                        this->registers[x] = this->registers[y];
+                    }
                     const uint8_t value = (this->registers[x] & 0x1);
                     this->registers[x] >>= 1;
                     this->registers[0xF] = value;
@@ -190,7 +194,9 @@ void Cpu::runInstruction() {
                     break;
                 }
                 case 0xE: {
-                    this->registers[x] = this->registers[y];
+                    if (!this->romSettings.shift) {
+                        this->registers[x] = this->registers[y];
+                    }
                     const uint8_t value = (this->registers[x] & 0x80) >> 7;
                     this->registers[x] <<= 1;
                     this->registers[0xF] = value;
@@ -211,7 +217,11 @@ void Cpu::runInstruction() {
             this->address = (opcode & 0xFFF);
             break;
         case 0xB000:
-            this->pc = (opcode & 0xFFF) + this->registers[0];
+            if (this->romSettings.jump) {
+                this->pc = (opcode & 0xFFF) + this->registers[x];
+            } else {
+                this->pc = (opcode & 0xFFF) + this->registers[0];
+            }
             break;
         case 0xC000: {
             this->registers[x] = (random8bit() & 0xFF) & second;
@@ -247,7 +257,9 @@ void Cpu::runInstruction() {
                     sprite <<= 1;
                 }
             }
-            this->drawn = true;
+            if (this->romSettings.vblank) {
+                this->drawn = true;
+            }
             break;
         }
         case 0xE000:
@@ -311,14 +323,18 @@ void Cpu::runInstruction() {
                     for (uint8_t i = 0; i <= x; i++) {
                         this->memory[this->address + i] = this->registers[i];
                     }
-                    this->address += x + 1;
+                    if (!this->romSettings.memoryLeaveIUnchanged) {
+                        this->address += (this->romSettings.memoryIncrementByX ? x : x + 1);
+                    }
                     break;
                 }
                 case 0x65: {
                     for (uint8_t i = 0; i <= x; i++) {
                         this->registers[i] = this->memory[this->address + i];
                     }
-                    this->address += x + 1;
+                    if (!this->romSettings.memoryLeaveIUnchanged) {
+                        this->address += (this->romSettings.memoryIncrementByX ? x : x + 1);
+                    }
                     break;
                 }
                 default:

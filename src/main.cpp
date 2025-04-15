@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
     if (rom.empty()) {
         windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows))->init();
     } else {
-        windows.emplace_back(std::make_unique<Emulator>(rom))->init();
+        windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}))->init(); // TODO: Handle Rom Settings
     }
 
     bool quit = false;

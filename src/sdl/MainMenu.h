@@ -10,6 +10,7 @@
 
 #include "InputHandler.h"
 #include "Window.h"
+#include "../Settings.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -31,6 +32,8 @@ private:
     std::vector<HoverData> dataList;
 
     std::string* selectedRom;
+    RomSettings romSettings;
+
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,
