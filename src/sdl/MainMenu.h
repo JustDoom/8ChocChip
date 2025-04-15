@@ -31,7 +31,7 @@ private:
     SDL_Mutex* mutex;
     std::vector<HoverData> dataList;
 
-    std::string* selectedRom;
+    std::string* selectedRom = nullptr;
     RomSettings romSettings;
 
 public:
