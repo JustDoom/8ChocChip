@@ -1,4 +1,8 @@
-# 8ChocChip
+<div style="display: flex; align-items: center;">
+  <img src="assets/icon.png" alt="Chip" style="width: 64px; height: 64px; margin-right: 10px;">
+  <h1 style="margin: 0;">8ChocChip</h1>
+</div>
+
 [![Discord](https://img.shields.io/discord/810752039470235688?style=for-the-badge&logo=discord&label=Discord&labelColor=grey&color=green)](https://discord.imjustdoom.com)
 [![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/ImJustDoom?style=for-the-badge&logo=x&label=Follow!&color=gray)](https://twitter.com/ImJustDoom)
 [![Static Badge](https://img.shields.io/badge/Backers-%20?style=for-the-badge&logo=ko-fi&color=gray)](https://ko-fi.com/justdoom) [![GitHub](https://img.shields.io/github/stars/JustDoom/8ChocChip?style=for-the-badge&logo=github)](https://github.com/JustDoom/8ChocChip)
