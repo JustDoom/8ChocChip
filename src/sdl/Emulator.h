@@ -17,6 +17,7 @@ private:
     Cpu cpu;
 
     const std::string& rom;
+    bool encounteredError = false;
 public:
     Emulator(const std::string& rom, const RomSettings& romSettings);
 

@@ -107,8 +107,7 @@ void Cpu::runInstruction() {
                     this->pc = this->stack[--this->sp & 0xF];
                     break;
                 default:
-                    std::cerr << "Unknown code - " << opcode << std::endl;
-                break;
+                    throw opcode;
             }
 
             break;
@@ -203,8 +202,7 @@ void Cpu::runInstruction() {
                     break;
                 }
                 default:
-                    std::cerr << "Unknown code - " << opcode << std::endl;
-                break;
+                    throw opcode;
             }
 
             break;
@@ -275,8 +273,7 @@ void Cpu::runInstruction() {
                     }
                     break;
                 default:
-                    std::cerr << "Unknown code - " << opcode << std::endl;
-                break;
+                    throw opcode;
             }
 
             break;
@@ -338,14 +335,12 @@ void Cpu::runInstruction() {
                     break;
                 }
                 default:
-                    std::cerr << "Unknown code - " << opcode << std::endl;
-                break;
+                    throw opcode;
             }
             break;
 
         default:
-            std::cerr << "Unknown code - " << opcode << std::endl;
-        break;
+            throw opcode;
     }
 }
 

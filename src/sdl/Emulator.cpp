@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../util/MiscUtil.h"
+
 Emulator::Emulator(const std::string& rom, const RomSettings& romSettings) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {}
 
 void Emulator::init() {
@@ -40,7 +42,15 @@ bool Emulator::handleEvent(SDL_Event& event) {
 }
 
 void Emulator::update() {
-    this->cpu.cycle();
+    try {
+        if (!this->encounteredError) {
+            this->cpu.cycle();
+        }
+    } catch (uint16_t opcode) {
+        std::cout << "Program cancelled, Unknown opcode - " << opcode << std::endl;
+        this->encounteredError = true;
+        SDL_SetWindowTitle(this->window, ("Program cancelled, Unknown opcode - " + std::to_string(opcode)).c_str());
+    }
 }
 
 void Emulator::render() {
