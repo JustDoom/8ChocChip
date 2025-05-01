@@ -9,7 +9,14 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <bcrypt.h>
+#pragma comment(lib, "bcrypt.lib")
+#else
 #include <openssl/sha.h>
+#endif
 
 std::vector<std::unique_ptr<char[]>> clayStringBuffers;
 
@@ -86,6 +93,71 @@ Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *c
 }
 
 std::string sha1FromFile(const std::string& filename) {
+#ifdef _WIN32
+    BCRYPT_ALG_HANDLE hAlg = nullptr;
+    BCRYPT_HASH_HANDLE hHash = nullptr;
+    NTSTATUS status;
+    DWORD hashLength = 20;
+    unsigned char hash[20];
+    std::string result;
+
+    status = BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA1_ALGORITHM, nullptr, 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        return "Error: Could not open algorithm provider";
+    }
+
+    status = BCryptCreateHash(hAlg, &hHash, nullptr, 0, nullptr, 0, 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return "Error: Could not create hash";
+    }
+
+    std::ifstream file(filename, std::ios::binary);
+    if (!file.is_open()) {
+        BCryptDestroyHash(hHash);
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return "Error: Could not open file";
+    }
+
+    const size_t buffer_size = 8192;
+    char buffer[buffer_size];
+    while (file.read(buffer, buffer_size)) {
+        status = BCryptHashData(hHash, reinterpret_cast<PUCHAR>(buffer), buffer_size, 0);
+        if (!BCRYPT_SUCCESS(status)) {
+            file.close();
+            BCryptDestroyHash(hHash);
+            BCryptCloseAlgorithmProvider(hAlg, 0);
+            return "Error: Could not hash data";
+        }
+    }
+    status = BCryptHashData(hHash, reinterpret_cast<PUCHAR>(buffer), file.gcount(), 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        file.close();
+        BCryptDestroyHash(hHash);
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return "Error: Could not hash data";
+    }
+
+    status = BCryptFinishHash(hHash, hash, hashLength, 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        file.close();
+        BCryptDestroyHash(hHash);
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return "Error: Could not finalize hash";
+    }
+
+    std::stringstream ss;
+    for (int i = 0; i < hashLength; i++) {
+        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+    }
+    result = ss.str();
+
+    file.close();
+    BCryptDestroyHash(hHash);
+    BCryptCloseAlgorithmProvider(hAlg, 0);
+
+    return result;
+#else
     SHA_CTX sha1;
     SHA1_Init(&sha1);
 
@@ -111,4 +183,5 @@ std::string sha1FromFile(const std::string& filename) {
 
     file.close();
     return ss.str();
+#endif
 }
