@@ -16,7 +16,7 @@ private:
     Keyboard keyboard;
     Cpu cpu;
 
-    const std::string& rom;
+    const std::string &rom;
     bool encounteredError = false;
 public:
     Emulator(const std::string& rom, const RomSettings& romSettings);

@@ -26,7 +26,7 @@ std::string toString(const std::filesystem::path& path) {
     #endif
 }
 
-std::string getFileFromPath(std::string& path) {
+std::string getFileFromPath(const std::string& path) {
   if (const size_t lastSlashPos = path.find_last_of("/\\"); lastSlashPos != std::string::npos) {
         return path.substr(lastSlashPos + 1);
     }
