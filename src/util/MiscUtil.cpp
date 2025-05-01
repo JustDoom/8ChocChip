@@ -18,7 +18,7 @@ std::string toLowerCase(std::string string) {
     return string;
 }
 
-std::string toString(const std::filesystem::path& path) {
+std::string filesystemPathToString(const std::filesystem::path& path) {
     #ifdef _WIN32
         return path.string();
     #else
@@ -26,7 +26,7 @@ std::string toString(const std::filesystem::path& path) {
     #endif
 }
 
-std::string getFileFromPath(const std::string& path) {
+std::string getFileFromStringPath(const std::string& path) {
   if (const size_t lastSlashPos = path.find_last_of("/\\"); lastSlashPos != std::string::npos) {
         return path.substr(lastSlashPos + 1);
     }
@@ -39,7 +39,7 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
             continue;
         }
 
-        std::cout << "Processing file: " << toString(romFile.path()) << " - " << sha1FromFile(toString(romFile.path())) << std::endl;
+        std::cout << "Processing file: " << filesystemPathToString(romFile.path()) << " - " << sha1FromFile(filesystemPathToString(romFile.path())) << std::endl;
 
         // Check if the rom directory doesn't exist in romFiles, then add it
         if (romFiles.find(&romDirectories.back()) == romFiles.end()) {

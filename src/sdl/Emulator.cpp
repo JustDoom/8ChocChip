@@ -19,7 +19,7 @@ void Emulator::init() {
         std::cerr << "Can not find file " << this->rom << std::endl;
         return;
     }
-    SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromPath(this->rom)).c_str());
+    SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->rom)).c_str());
 
     // Setup the emulator
     this->cpu.loadSpritesIntoMemory();

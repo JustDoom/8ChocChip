@@ -127,12 +127,12 @@ void MainMenu::render() {
                     for (std::string& romPath : dir.second) {
                         if (&romPath == this->selectedRom) {
                             CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_HIGHLIGHT}) {
-                                CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                                CLAY_TEXT(toClayString(getFileFromStringPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
                                 Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
                             }
                         } else {
                             CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ROMS}) {
-                                CLAY_TEXT(toClayString(getFileFromPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                                CLAY_TEXT(toClayString(getFileFromStringPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
                                 Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
                             }
                         }

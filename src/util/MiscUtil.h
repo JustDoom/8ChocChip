@@ -9,8 +9,8 @@
 #include <vector>
 
 std::string toLowerCase(std::string string);
-std::string toString(const std::filesystem::path& path);
-std::string getFileFromPath(const std::string& path);
+std::string filesystemPathToString(const std::filesystem::path& path);
+std::string getFileFromStringPath(const std::string& path);
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories);
 void handleClayErrors(Clay_ErrorData errorData);
 void clearClayStringBuffers();
