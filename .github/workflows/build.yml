@@ -52,7 +52,6 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         choco install mingw -y
-        choco install openssl -y
 
     - name: Set reusable strings
       id: strings
@@ -66,7 +65,6 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        ${{ runner.os == 'Windows' && '-DOPENSSL_ROOT_DIR="C:/Program Files/OpenSSL"' || ''}}
         -S ${{ github.workspace }}
         ${{ runner.os == 'Windows' && '-G "MinGW Makefiles"' || '' }}
 
