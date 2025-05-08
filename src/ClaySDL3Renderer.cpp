@@ -238,12 +238,9 @@ void SDL_Clay_RenderClayCommands(SDL_Renderer* renderer, TTF_TextEngine* textEng
                 break;
             }
             case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
-                SDL_Surface *image = (SDL_Surface *)rcmd->renderData.image.imageData;
-                SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
+                auto* texture = static_cast<SDL_Texture *>(rcmd->renderData.image.imageData);
                 const SDL_FRect dest = { rect.x, rect.y, rect.w, rect.h };
-
                 SDL_RenderTexture(renderer, texture, NULL, &dest);
-                SDL_DestroyTexture(texture);
                 break;
             }
             default:

@@ -121,7 +121,7 @@ void MainMenu::render() {
                 .id = CLAY_ID("SideBar"),
                 .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
                 .backgroundColor = COLOR_BOX,
-                .scroll = { .vertical = true }
+                .clip = { .vertical = true, .childOffset = Clay_GetScrollOffset() }
             }) {
                 for (auto& dir : this->romFiles) {
                     for (std::string& romPath : dir.second) {
