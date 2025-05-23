@@ -39,6 +39,7 @@ There are a couple of things left to do until I would say it works well enough
 - [ ] MacOS 9
 - [ ] MacOS X
 - [ ] MacOS
+- [ ] [Nokia N-Gage](https://github.com/libsdl-org/SDL/pull/12148)
 
 ## Usage
 
