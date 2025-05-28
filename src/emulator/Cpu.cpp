@@ -1,5 +1,6 @@
 #include "Cpu.h"
 
+#include <cstring>
 #include <iostream>
 #include <random>
 
@@ -317,18 +318,14 @@ void Cpu::runInstruction() {
                     break;
                 }
                 case 0x55: {
-                    for (uint8_t i = 0; i <= x; i++) {
-                        this->memory[this->address + i] = this->registers[i];
-                    }
+                    std::memcpy(&memory[address], &registers[0], x + 1);
                     if (!this->romSettings.memoryLeaveIUnchanged) {
                         this->address += (this->romSettings.memoryIncrementByX ? x : x + 1);
                     }
                     break;
                 }
                 case 0x65: {
-                    for (uint8_t i = 0; i <= x; i++) {
-                        this->registers[i] = this->memory[this->address + i];
-                    }
+                    std::memcpy(&registers[0], &memory[address], x + 1);
                     if (!this->romSettings.memoryLeaveIUnchanged) {
                         this->address += (this->romSettings.memoryIncrementByX ? x : x + 1);
                     }
