@@ -271,7 +271,7 @@ void Cpu::runInstruction() {
                     if (this->keyboard->onNextKeyPress != nullptr) {
                         break;
                     }
-                    this->keyboard->setOnNextKeyPress([&](const uint8_t key) {
+                    this->keyboard->setOnNextKeyPress([this, x](const uint8_t key) {
                         this->registers[x] = key;
                         this->pc += 2;
                     });
