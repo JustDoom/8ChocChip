@@ -283,7 +283,7 @@ void Cpu::runInstruction() {
                     this->soundTimer = this->registers[x];
                     break;
                 case 0x1E:
-                    this->address += this->registers[x];
+                    this->address = this->address + this->registers[x] & 0xFFF;
                     break;
                 case 0x29:
                     this->address = 0x50 + (this->registers[x] & 0xF) * 5;
@@ -291,26 +291,25 @@ void Cpu::runInstruction() {
                 case 0x33: {
                     uint8_t value = this->registers[x];
 
-                    this->memory[this->address + 2] = value % 10;
+                    this->memory[this->address + 2 & 0xFFF] = value % 10;
                     value /= 10;
-
-                    this->memory[this->address + 1] = (value % 10);
+                    this->memory[this->address + 1 & 0xFFF] = value % 10;
                     value /= 10;
-
                     this->memory[this->address] = value % 10;
+
                     break;
                 }
                 case 0x55: {
-                    std::memcpy(&memory[address], &registers[0], x + 1);
+                    std::memcpy(&memory[address & 0xFFF], &registers[0], x + 1);
                     if (!this->romSettings.memoryLeaveIUnchanged) {
-                        this->address += (this->romSettings.memoryIncrementByX ? x : x + 1);
+                        this->address = this->address + (this->romSettings.memoryIncrementByX ? x : x + 1) & 0xFFF;
                     }
                     break;
                 }
                 case 0x65: {
-                    std::memcpy(&registers[0], &memory[address], x + 1);
+                    std::memcpy(&registers[0], &memory[address & 0xFFF], x + 1);
                     if (!this->romSettings.memoryLeaveIUnchanged) {
-                        this->address += (this->romSettings.memoryIncrementByX ? x : x + 1);
+                        this->address = this->address + (this->romSettings.memoryIncrementByX ? x : x + 1) & 0xFFF;
                     }
                     break;
                 }
