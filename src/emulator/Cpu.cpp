@@ -52,7 +52,7 @@ void Cpu::cycle() {
                 break;
             }
             runInstruction();
-            count++
+            count++;
         }
     }
 
