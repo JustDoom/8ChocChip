@@ -40,9 +40,11 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 }
 
 void Cpu::cycle() {
+    uint8_t count = 0;
     if (speedTest) {
         for (int i = 0; i < this->speed; i++) {
             runInstruction();
+            count++;
         }
     } else {
         for (int i = 0; i < this->speed; i++) {
@@ -50,10 +52,11 @@ void Cpu::cycle() {
                 break;
             }
             runInstruction();
+            count++
         }
     }
 
-    this->instructions += this->speed;
+    this->instructions += count;
     this->drawn = false;
 
     if (this->delay > 0) {
