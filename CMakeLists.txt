@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE INTERNAL "")
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -mtune=native -flto -finline-functions -fomit-frame-pointer -fstrict-aliasing -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -mtune=native -finline-functions -fomit-frame-pointer -fstrict-aliasing -ffast-math")
 
 set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 
