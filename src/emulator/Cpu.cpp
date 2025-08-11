@@ -40,7 +40,7 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 }
 
 void Cpu::cycle() {
-    uint8_t count = 0;
+    uint64_t count = 0;
     if (speedTest) {
         for (int i = 0; i < this->speed; i++) {
             runInstruction();
