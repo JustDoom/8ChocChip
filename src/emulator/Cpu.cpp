@@ -20,6 +20,8 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSett
     this->stack.fill(0);
 }
 
+const size_t Cpu::serializationDimension = 4096 + 16 + 32 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1 + 8;
+
 void Cpu::loadSpritesIntoMemory() {
     std::memcpy(&memory[0x50], this->SPRITES.data(), this->SPRITES.size());
 }
@@ -334,34 +336,105 @@ uint8_t Cpu::random8bit() {
 
 std::vector<uint8_t> Cpu::serialize() {
     std::vector<uint8_t> serializedData;
+    serializedData.reserve(this->serializationDimension);
+
+    serializedData.insert(serializedData.end(), memory.cbegin(), memory.cend());
+    serializedData.insert(serializedData.end(), registers.cbegin(), registers.cend());
     
-    serializedData.insert(serializedData.end(), memory.begin(), memory.end());
-    
-    for (int i = 0; i < sizeof(this->registers); i++) {
-        serializedData.push_back(this->registers[i] << 8);
-        serializedData.push_back(this->registers[i] & 0xFF);
-    }
-    
-    for (int i = 0; i < sizeof(this->stack); i++) {
-        serializedData.push_back(this->stack[i] << 8);
+    for (int i = 0; i < this->stack.size(); i++) {
+        serializedData.push_back(this->stack[i] >> 8);
         serializedData.push_back(this->stack[i] & 0xFF);
     }
 
-    serializedData.push_back(this->address << 8);
+    serializedData.push_back(this->address >> 8);
     serializedData.push_back(this->address & 0xFF);
 
-    serializedData.push_back(this->pc << 8);
+    serializedData.push_back(this->pc >> 8);
     serializedData.push_back(this->pc & 0xFF);
 
     serializedData.push_back(this->sp);
     serializedData.push_back(this->delay);
     serializedData.push_back(this->soundTimer);
     
-    serializedData.push_back(this->drawn);
-    serializedData.push_back(this->speed << 24);
-    serializedData.push_back(this->speed << 16);
-    serializedData.push_back(this->speed << 8);
+    serializedData.push_back(static_cast<uint8_t>(this->drawn));
+    serializedData.push_back(this->speed >> 24);
+    serializedData.push_back(this->speed >> 16);
+    serializedData.push_back(this->speed >> 8);
     serializedData.push_back(this->speed & 0xFF);
+    serializedData.push_back(this->seed);
+
+    serializedData.push_back(static_cast<uint8_t>((this->instructions >> 56) & 0xFF));
+    serializedData.push_back(static_cast<uint8_t>((this->instructions >> 48) & 0xFF));
+    serializedData.push_back(static_cast<uint8_t>((this->instructions >> 32) & 0xFF));
+    serializedData.push_back(static_cast<uint8_t>((this->instructions >> 24) & 0xFF));
+    serializedData.push_back(static_cast<uint8_t>((this->instructions >> 16) & 0xFF));
+    serializedData.push_back(static_cast<uint8_t>((this->instructions >> 8) & 0xFF));
+    serializedData.push_back(static_cast<uint8_t>((this->instructions & 0xFF)));
 
     return serializedData;
+}
+
+void Cpu::deserialize(std::vector<uint8_t> serialization) {
+    int current_position = 0;
+
+    copy(serialization.begin() + current_position, 
+         serialization.begin() + current_position + this->memory.size(), 
+         this->memory.begin());
+    current_position += this->memory.size();
+
+
+    copy(serialization.begin() + current_position,
+         serialization.begin() + current_position + this->registers.size(),
+        this->registers.begin());
+    current_position += this->registers.size();
+
+    for (int i = 0; i < stack.size(); i++) {
+        this->stack[i] = serialization[current_position] << 8;
+        this->stack[i] |= serialization[current_position + 1];
+        current_position += 2;
+    }
+
+    this->address = serialization[current_position] << 8;
+    this->address |= serialization[current_position + 1];
+    current_position += 2;
+
+    this->pc = serialization[current_position] << 8;
+    this->pc |= serialization[current_position + 1];
+    current_position += 2;
+
+    this->sp = serialization[current_position];
+    current_position++;
+    this->delay = serialization[current_position];
+    current_position++;
+    this->soundTimer = serialization[current_position];
+    current_position++;
+    
+    this->drawn = serialization[current_position];
+    current_position++;
+    this->speed = serialization[current_position] << 24;
+    current_position++;
+    this->speed |= serialization[current_position] << 16;
+    current_position++;
+    this->speed |= serialization[current_position] << 8;
+    current_position++;
+    this->speed |= serialization[current_position];
+    current_position++;
+    
+    this->seed = serialization[current_position];
+    current_position++;
+
+    this->instructions = static_cast<uint64_t>(serialization[current_position] << 56);
+    current_position++;
+    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 48);
+    current_position++;
+    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 32);
+    current_position++;
+    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 24);
+    current_position++;
+    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 16);
+    current_position++;
+    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 8);
+    current_position++;
+    this->instructions |= serialization[current_position] & 0xFF;
+    current_position++;
 }

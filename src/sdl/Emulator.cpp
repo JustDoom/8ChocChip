@@ -26,6 +26,8 @@ void Emulator::init() {
     // Setup the emulator
     this->cpu.loadSpritesIntoMemory();
     this->cpu.loadProgramIntoMemory(&file);
+
+    this->loadState();
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {
@@ -79,15 +81,44 @@ void Emulator::saveState() {
     }
     
     std::filesystem::path romFilePath(this->rom);
-    std::string stateFileName = romFilePath.stem().string() + ".state";
+    std::string stateFileName = romFilePath.filename().string() + ".state";
     std::string stateFilePath = (std::filesystem::path(home) / stateFileName).string();
     
     std::ofstream fileWriter;
     fileWriter.open(stateFilePath, std::ios::binary);
-    
-    fileWriter.write((char*)this->cpu.serialize().data(), this->cpu.serializationDimension);
-
+    auto serialization = this->cpu.serialize();
+    fileWriter.write((char*)serialization.data(), serialization.size());
     fileWriter.close();
+}
+
+void Emulator::loadState() {
+    if (!home) {
+        std::cerr << home << " environment variable not set. " << std::endl;
+        return;
+    }
+    
+    std::filesystem::path romFilePath(this->rom);
+    std::string stateFileName = romFilePath.filename().string() + ".state";
+    std::string stateFilePath = (std::filesystem::path(home) / stateFileName).string();
+
+    std::ifstream fileReader;
+    fileReader.open(stateFilePath, std::ios::binary);
+    
+    if (!fileReader.is_open()) {
+        std::cerr << "Status file not found for rom '" << this->rom << "'" << std::endl;
+        return;
+    }
+
+    std::vector<uint8_t> buffer(this->cpu.serializationDimension);
+
+    fileReader.seekg(0, std::ios::end);
+    size_t file_size = fileReader.tellg();
+    fileReader.seekg(0, std::ios::beg);
+    
+    fileReader.read(reinterpret_cast<char*>(&buffer[0]), file_size);
+    fileReader.close();
+
+    this->cpu.deserialize(buffer);
 }
 
 int Emulator::getInstructions() {

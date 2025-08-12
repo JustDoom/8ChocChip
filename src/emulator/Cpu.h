@@ -61,8 +61,9 @@ public:
 
     uint8_t random8bit();
 
-    static const size_t serializationDimension = 4096 + 16 + 32 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1;
     std::vector<uint8_t> serialize();
+    void deserialize(std::vector<uint8_t> serialization);
+    static const size_t serializationDimension;
 
     uint64_t instructions = 0;
 };
