@@ -331,3 +331,37 @@ uint8_t Cpu::random8bit() {
     this->seed = (this->seed * 1103515245 + 12345) & 0xFF;
     return this->seed;
 }
+
+std::vector<uint8_t> Cpu::serialize() {
+    std::vector<uint8_t> serializedData;
+    
+    serializedData.insert(serializedData.end(), memory.begin(), memory.end());
+    
+    for (int i = 0; i < sizeof(this->registers); i++) {
+        serializedData.push_back(this->registers[i] << 8);
+        serializedData.push_back(this->registers[i] & 0xFF);
+    }
+    
+    for (int i = 0; i < sizeof(this->stack); i++) {
+        serializedData.push_back(this->stack[i] << 8);
+        serializedData.push_back(this->stack[i] & 0xFF);
+    }
+
+    serializedData.push_back(this->address << 8);
+    serializedData.push_back(this->address & 0xFF);
+
+    serializedData.push_back(this->pc << 8);
+    serializedData.push_back(this->pc & 0xFF);
+
+    serializedData.push_back(this->sp);
+    serializedData.push_back(this->delay);
+    serializedData.push_back(this->soundTimer);
+    
+    serializedData.push_back(this->drawn);
+    serializedData.push_back(this->speed << 24);
+    serializedData.push_back(this->speed << 16);
+    serializedData.push_back(this->speed << 8);
+    serializedData.push_back(this->speed & 0xFF);
+
+    return serializedData;
+}

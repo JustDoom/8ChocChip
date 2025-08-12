@@ -1,6 +1,8 @@
 #include "Emulator.h"
+#include "../util/Constants.h"
 
 #include <iostream>
+#include <fstream>
 
 #include "../util/MiscUtil.h"
 
@@ -38,6 +40,9 @@ bool Emulator::handleEvent(SDL_Event& event) {
         case SDL_EVENT_KEY_UP:
             this->keyboard.handleKeyUp(event.key.scancode);
             break;
+        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            this->saveState();
+            break;
     }
 
     return true;
@@ -65,6 +70,24 @@ void Emulator::render() {
 
 void Emulator::resize(SDL_Event &event) {
 
+}
+
+void Emulator::saveState() {
+    if (!home) {
+        std::cerr << home << " environment variable not set. " << std::endl;
+        return;
+    }
+    
+    std::filesystem::path romFilePath(this->rom);
+    std::string stateFileName = romFilePath.stem().string() + ".state";
+    std::string stateFilePath = (std::filesystem::path(home) / stateFileName).string();
+    
+    std::ofstream fileWriter;
+    fileWriter.open(stateFilePath, std::ios::binary);
+    
+    fileWriter.write((char*)this->cpu.serialize().data(), this->cpu.serializationDimension);
+
+    fileWriter.close();
 }
 
 int Emulator::getInstructions() {

@@ -26,7 +26,8 @@ public:
     void update() override;
     void render() override;
     void resize(SDL_Event &event) override;
-
+    
+    void saveState();
     int getInstructions();
     void resetInstructions();
 };
