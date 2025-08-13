@@ -26,8 +26,6 @@ void Emulator::init() {
     // Setup the emulator
     this->cpu.loadSpritesIntoMemory();
     this->cpu.loadProgramIntoMemory(&file);
-
-    this->loadState();
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {

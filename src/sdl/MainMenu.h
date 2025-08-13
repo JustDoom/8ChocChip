@@ -32,6 +32,7 @@ private:
     std::vector<HoverData> dataList;
 
     std::string* selectedRom = nullptr;
+    std::string* selectedState = nullptr;
     RomSettings romSettings;
 
 public:
@@ -50,7 +51,10 @@ public:
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handleStateClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
+    static void SDLCALL loadStateCallback(void* userdata, const char* const* filelist, int filter);
+
 };
 
 #endif

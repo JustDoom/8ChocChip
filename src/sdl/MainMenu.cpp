@@ -257,6 +257,16 @@ void MainMenu::render() {
                         CLAY_TEXT(CLAY_STRING("Save"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         // Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
+
+                    CLAY_TEXT(CLAY_STRING("State"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                    CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
+                        if (this->selectedState == nullptr) {
+                            CLAY_TEXT(CLAY_STRING("Select state from file"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                        } else {
+                            CLAY_TEXT(toClayString(getFileFromStringPath(*this->selectedState)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                        }
+                        Clay_OnHover(handleStateClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                    }
                 }
             }
             CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
@@ -333,6 +343,17 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
     }
 }
 
+void MainMenu::handleStateClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        if (data->self->selectedState == nullptr) {
+            SDL_ShowOpenFileDialog(loadStateCallback, data->self, data->self->window, nullptr, 0, nullptr, false);
+        } else {
+            data->self->selectedState = nullptr;
+        }
+    }
+}
+
 void MainMenu::callback(void* userdata, const char* const* directory, int filter) {
     if (!directory) {
         SDL_Log("An error occured: %s", SDL_GetError());
@@ -365,4 +386,18 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     instance->romDirectories.emplace_back(directoryString);
     searchDirectory(directoryString, instance->romFiles, instance->romDirectories);
     SDL_UnlockMutex(instance->mutex);
+}
+
+void MainMenu::loadStateCallback(void* userdata, const char* const* selectedFile, int filter) {
+    if (!selectedFile) {
+        SDL_Log("An error occured: %s", SDL_GetError());
+        return;
+    }
+    if (!*selectedFile) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
+
+    auto* instance = static_cast<MainMenu*>(userdata);
+    instance->selectedState = new std::string(*selectedFile);
 }
