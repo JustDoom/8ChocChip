@@ -259,13 +259,19 @@ void MainMenu::render() {
                     }
 
                     CLAY_TEXT(CLAY_STRING("State"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
-                    CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->selectedState == nullptr) {
-                            CLAY_TEXT(CLAY_STRING("Select state from file"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                        } else {
-                            CLAY_TEXT(toClayString(getFileFromStringPath(*this->selectedState)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                    CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
+                        CLAY({.layout = { .sizing = { .width = CLAY_SIZING_PERCENT(0.95) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
+                            if (this->selectedState == nullptr) {
+                                CLAY_TEXT(CLAY_STRING("Select state from file"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                            } else {
+                                CLAY_TEXT(toClayString(getFileFromStringPath(*this->selectedState)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                            }
+                            Clay_OnHover(handleStateClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                         }
-                        Clay_OnHover(handleStateClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = {255, 0, 0, 255} }) {
+                            CLAY_TEXT(CLAY_STRING("X"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                            Clay_OnHover(handleStateReset, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        }
                     }
                 }
             }
@@ -350,11 +356,17 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
 void MainMenu::handleStateClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->self->selectedState == nullptr) {
-            SDL_ShowOpenFileDialog(loadStateCallback, data->self, data->self->window, nullptr, 0, nullptr, false);
-        } else {
-            data->self->selectedState = nullptr;
-        }
+        SDL_DialogFileFilter filters[] = {
+            {"8ChocChip State File", "state"}
+        };
+        SDL_ShowOpenFileDialog(loadStateCallback, data->self, data->self->window, filters, 1, nullptr, false);
+    }
+}
+
+void MainMenu::handleStateReset(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        data->self->selectedState = nullptr;
     }
 }
 
