@@ -17,9 +17,10 @@ private:
     Cpu cpu;
 
     const std::string &rom;
+    const std::string &state = "";
     bool encounteredError = false;
 public:
-    Emulator(const std::string& rom, const RomSettings& romSettings);
+    Emulator(const std::string& rom, const RomSettings& romSettings, const std::string& state);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;

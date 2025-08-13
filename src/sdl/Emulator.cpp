@@ -6,7 +6,7 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& rom, const RomSettings& romSettings) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {}
+Emulator::Emulator(const std::string& rom, const RomSettings& romSettings, const std::string& state) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom), state(state) {}
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
@@ -26,6 +26,10 @@ void Emulator::init() {
     // Setup the emulator
     this->cpu.loadSpritesIntoMemory();
     this->cpu.loadProgramIntoMemory(&file);
+
+    if (this->state != "") {
+        this->loadState();
+    }
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {
@@ -94,13 +98,9 @@ void Emulator::loadState() {
         std::cerr << home << " environment variable not set. " << std::endl;
         return;
     }
-    
-    std::filesystem::path romFilePath(this->rom);
-    std::string stateFileName = romFilePath.filename().string() + ".state";
-    std::string stateFilePath = (std::filesystem::path(home) / stateFileName).string();
 
     std::ifstream fileReader;
-    fileReader.open(stateFilePath, std::ios::binary);
+    fileReader.open(this->state, std::ios::binary);
     
     if (!fileReader.is_open()) {
         std::cerr << "Status file not found for rom '" << this->rom << "'" << std::endl;

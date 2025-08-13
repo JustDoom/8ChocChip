@@ -329,7 +329,11 @@ void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData point
         if (data->self->selectedRom == nullptr) {
             return;
         }
-        data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings))->init();
+        std::string selectedStateString = "";
+        if (data->self->selectedState) {
+            selectedStateString = *data->self->selectedState;
+        }
+        data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, selectedStateString))->init();
     }
 }
 
