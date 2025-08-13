@@ -21,6 +21,8 @@
 
 void EmulatorEntry::start(int argc, char **argv) {
     std::string rom;
+    std::string state;
+
     for (int i = 0; i < argc; i++) {
         std::string command = toLowerCase(argv[i]);
         if (command.rfind("--") != 0 && command.rfind('-') != 0) {
@@ -50,6 +52,10 @@ void EmulatorEntry::start(int argc, char **argv) {
         if (command == "--instructions" || command == "-ipf") {
             std::cout << argv[++i] << std::endl;
             ipf = std::stoi(argv[i]);
+        }
+        if (command == "--state" || command == "-s") {
+            state = argv[++i];
+            std::cout << "Using state " << state << std::endl;
         }
     }
 
@@ -110,7 +116,7 @@ void EmulatorEntry::start(int argc, char **argv) {
     if (rom.empty()) {
         windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows))->init();
     } else {
-        windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}, ""))->init(); // TODO: Handle Rom Settings
+        windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}, state))->init(); // TODO: Handle Rom Settings
     }
 
     bool quit = false;

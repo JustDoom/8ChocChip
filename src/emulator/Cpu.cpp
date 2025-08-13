@@ -423,17 +423,17 @@ void Cpu::deserialize(std::vector<uint8_t> serialization) {
     this->seed = serialization[current_position];
     current_position++;
 
-    this->instructions = static_cast<uint64_t>(serialization[current_position] << 56);
+    this->instructions = static_cast<uint64_t>(serialization[current_position]) << 56;
     current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 48);
+    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 48;
     current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 32);
+    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 32;
     current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 24);
+    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 24;
     current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 16);
+    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 16;
     current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position] << 8);
+    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 8;
     current_position++;
     this->instructions |= serialization[current_position] & 0xFF;
     current_position++;
