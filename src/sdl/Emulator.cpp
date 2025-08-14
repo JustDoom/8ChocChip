@@ -6,7 +6,11 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& rom, const RomSettings& romSettings, const std::string& state) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom), state(state) {}
+Emulator::Emulator(const std::string& rom, const RomSettings& romSettings, std::string statePath) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {
+    if (statePath != "") {
+        loadState(statePath);
+    }
+}
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
@@ -26,10 +30,6 @@ void Emulator::init() {
     // Setup the emulator
     this->cpu.loadSpritesIntoMemory();
     this->cpu.loadProgramIntoMemory(&file);
-
-    if (this->state != "") {
-        this->loadState();
-    }
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {
@@ -43,9 +43,6 @@ bool Emulator::handleEvent(SDL_Event& event) {
             break;
         case SDL_EVENT_KEY_UP:
             this->keyboard.handleKeyUp(event.key.scancode);
-            break;
-        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-            this->saveState();
             break;
     }
 
@@ -76,31 +73,27 @@ void Emulator::resize(SDL_Event &event) {
 
 }
 
-void Emulator::saveState() {
+void Emulator::saveState(std::string path) {
     if (!home) {
         std::cerr << home << " environment variable not set. " << std::endl;
         return;
     }
     
-    std::filesystem::path romFilePath(this->rom);
-    std::string stateFileName = romFilePath.filename().string() + ".state";
-    std::string stateFilePath = (std::filesystem::path(home) / stateFileName).string();
-    
     std::ofstream fileWriter;
-    fileWriter.open(stateFilePath, std::ios::binary);
+    fileWriter.open(path, std::ios::binary);
     auto serialization = this->cpu.serialize();
     fileWriter.write((char*)serialization.data(), serialization.size());
     fileWriter.close();
 }
 
-void Emulator::loadState() {
+void Emulator::loadState(std::string path) {
     if (!home) {
         std::cerr << home << " environment variable not set. " << std::endl;
         return;
     }
 
     std::ifstream fileReader;
-    fileReader.open(this->state, std::ios::binary);
+    fileReader.open(path, std::ios::binary);
     
     if (!fileReader.is_open()) {
         std::cerr << "Status file not found for rom '" << this->rom << "'" << std::endl;

@@ -17,10 +17,9 @@ private:
     Cpu cpu;
 
     const std::string &rom;
-    const std::string &state = "";
     bool encounteredError = false;
 public:
-    Emulator(const std::string& rom, const RomSettings& romSettings, const std::string& state);
+    Emulator(const std::string& rom, const RomSettings& romSettings, std::string statePath);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
@@ -28,8 +27,8 @@ public:
     void render() override;
     void resize(SDL_Event &event) override;
     
-    void saveState();
-    void loadState();
+    void saveState(std::string path);
+    void loadState(std::string path);
     int getInstructions();
     void resetInstructions();
 };
