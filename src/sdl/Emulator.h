@@ -27,6 +27,7 @@ public:
     void render() override;
     void resize(SDL_Event &event) override;
     
+    void handleSaveState();
     void saveState(std::string path);
     void loadState(std::string path);
     int getInstructions();

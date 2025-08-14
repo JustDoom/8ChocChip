@@ -39,7 +39,11 @@ bool Emulator::handleEvent(SDL_Event& event) {
 
     switch (event.type) {
         case SDL_EVENT_KEY_DOWN:
-            this->keyboard.handleKeyDown(event.key.scancode);
+            if (event.key.scancode == SDL_SCANCODE_F12) {
+                this->handleSaveState();
+            } else {
+                this->keyboard.handleKeyDown(event.key.scancode);
+            }
             break;
         case SDL_EVENT_KEY_UP:
             this->keyboard.handleKeyUp(event.key.scancode);
@@ -71,6 +75,18 @@ void Emulator::render() {
 
 void Emulator::resize(SDL_Event &event) {
 
+}
+
+void Emulator::handleSaveState() {
+    SDL_DialogFileFilter filters[] = {
+        {"8ChocChip State File", "state"}
+    };
+
+    bool isFileSelected = false;
+    SDL_ShowSaveFileDialog([](void* userData, const char* const* path, int filter) {
+        const auto data = reinterpret_cast<Emulator*>(userData);
+        data->saveState(std::string(path[0]));
+    }, this, this->window, filters, 1, nullptr);
 }
 
 void Emulator::saveState(std::string path) {
