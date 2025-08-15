@@ -18,6 +18,7 @@ private:
 
     const std::string &rom;
     bool encounteredError = false;
+    bool isStopped = false;
 public:
     Emulator(const std::string& rom, const RomSettings& romSettings, std::string statePath);
 

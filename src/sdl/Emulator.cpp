@@ -55,7 +55,7 @@ bool Emulator::handleEvent(SDL_Event& event) {
 
 void Emulator::update() {
     try {
-        if (!this->encounteredError) {
+        if (!this->encounteredError && !isStopped) {
             this->cpu.cycle();
         }
     } catch (uint16_t opcode) {
@@ -82,10 +82,15 @@ void Emulator::handleSaveState() {
         {"8ChocChip State File", "state"}
     };
 
-    bool isFileSelected = false;
+    this->isStopped = true;
     SDL_ShowSaveFileDialog([](void* userData, const char* const* path, int filter) {
+        if (!path || !*path) {
+            SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+            return;
+        }
         const auto data = reinterpret_cast<Emulator*>(userData);
         data->saveState(std::string(path[0]));
+        data->isStopped = false;
     }, this, this->window, filters, 1, nullptr);
 }
 
