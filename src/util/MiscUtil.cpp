@@ -40,6 +40,15 @@ std::string getFileFromStringPath(const std::string& path) {
     return path;
 }
 
+bool stringEndsWith(const std::string& str, const std::string endStr) {
+    if (endStr.size() >= str.size()) {
+        return false;
+    }
+
+    bool stringEndsWith = str.compare(str.size() - endStr.size(), endStr.size(), endStr) == 0;
+    return stringEndsWith;
+}
+
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories) {
     for (const auto& romFile: std::filesystem::directory_iterator(directory)) {
         if (romFile.is_directory() || romFile.file_size() > 3584) {

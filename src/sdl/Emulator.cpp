@@ -3,14 +3,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& rom, const RomSettings& romSettings, std::string statePath) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {
-    if (statePath != "") {
-        loadState(statePath);
-    }
-}
+Emulator::Emulator(const std::string& rom, const RomSettings& romSettings) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {}
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
@@ -28,8 +25,12 @@ void Emulator::init() {
     SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->rom)).c_str());
 
     // Setup the emulator
-    this->cpu.loadSpritesIntoMemory();
-    this->cpu.loadProgramIntoMemory(&file);
+    if (stringEndsWith(rom, ".state")) {
+        this->loadState();
+    } else {
+        this->cpu.loadSpritesIntoMemory();
+        this->cpu.loadProgramIntoMemory(&file);
+    }
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {
@@ -82,16 +83,24 @@ void Emulator::handleSaveState() {
         {"8ChocChip State File", "state"}
     };
 
+    std::string defaultLocation = this->rom;
+
     this->isStopped = true;
-    SDL_ShowSaveFileDialog([](void* userData, const char* const* path, int filter) {
-        if (!path || !*path) {
+    SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
+        if (!selectedPath || !*selectedPath) {
             SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
             return;
         }
+
+        std::filesystem::path path(*selectedPath);
+        if (path.extension() != ".state") {
+            path += ".state";
+        }
+
         const auto data = reinterpret_cast<Emulator*>(userData);
-        data->saveState(std::string(path[0]));
+        data->saveState(path.string());
         data->isStopped = false;
-    }, this, this->window, filters, 1, nullptr);
+    }, this, this->window, filters, 1, defaultLocation.c_str());
 }
 
 void Emulator::saveState(std::string path) {
@@ -107,14 +116,14 @@ void Emulator::saveState(std::string path) {
     fileWriter.close();
 }
 
-void Emulator::loadState(std::string path) {
+void Emulator::loadState() {
     if (!home) {
         std::cerr << home << " environment variable not set. " << std::endl;
         return;
     }
 
     std::ifstream fileReader;
-    fileReader.open(path, std::ios::binary);
+    fileReader.open(this->rom, std::ios::binary);
     
     if (!fileReader.is_open()) {
         std::cerr << "Status file not found for rom '" << this->rom << "'" << std::endl;

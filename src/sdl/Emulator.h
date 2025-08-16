@@ -15,12 +15,13 @@ private:
     Speaker speaker;
     Keyboard keyboard;
     Cpu cpu;
-
+    
     const std::string &rom;
     bool encounteredError = false;
     bool isStopped = false;
+    void loadState();
 public:
-    Emulator(const std::string& rom, const RomSettings& romSettings, std::string statePath);
+    Emulator(const std::string& path, const RomSettings& romSettings);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
@@ -30,7 +31,6 @@ public:
     
     void handleSaveState();
     void saveState(std::string path);
-    void loadState(std::string path);
     int getInstructions();
     void resetInstructions();
 };

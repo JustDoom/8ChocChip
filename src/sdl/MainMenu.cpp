@@ -332,14 +332,14 @@ void MainMenu::handleAddNewRom(Clay_ElementId elementId, const Clay_PointerData 
 void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->self->selectedRom == nullptr) {
+        if (data->self->selectedRom == nullptr && data->self->selectedState == nullptr) {
             return;
         }
-        std::string selectedStateString = "";
         if (data->self->selectedState) {
-            selectedStateString = *data->self->selectedState;
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings))->init();
+        } else {
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings))->init();
         }
-        data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, selectedStateString))->init();
     }
 }
 
