@@ -20,7 +20,7 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSett
     this->stack.fill(0);
 }
 
-const size_t Cpu::serializationDimension = 4096 + 16 + 32 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1 + 8;
+const size_t Cpu::serializationDimension = 4096 + 16 + 32 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1 + 8 + 2048;
 
 void Cpu::loadSpritesIntoMemory() {
     std::memcpy(&memory[0x50], this->SPRITES.data(), this->SPRITES.size());
@@ -371,6 +371,8 @@ std::vector<uint8_t> Cpu::serialize() {
     serializedData.push_back(static_cast<uint8_t>((this->instructions >> 8) & 0xFF));
     serializedData.push_back(static_cast<uint8_t>((this->instructions & 0xFF)));
 
+    serializedData.insert(serializedData.end(), renderer->display.cbegin(), renderer->display.cend());
+
     return serializedData;
 }
 
@@ -437,4 +439,8 @@ void Cpu::deserialize(std::vector<uint8_t> serialization) {
     current_position++;
     this->instructions |= serialization[current_position] & 0xFF;
     current_position++;
+
+    copy(serialization.begin() + current_position, 
+         serialization.begin() + current_position + this->renderer->display.size(), 
+         this->renderer->display.begin());
 }

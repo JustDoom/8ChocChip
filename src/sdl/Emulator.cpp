@@ -28,8 +28,8 @@ void Emulator::init() {
     if (stringEndsWith(rom, ".state")) {
         this->loadState();
     } else {
-        this->cpu.loadSpritesIntoMemory();
         this->cpu.loadProgramIntoMemory(&file);
+        this->cpu.loadSpritesIntoMemory();
     }
 }
 
@@ -42,9 +42,8 @@ bool Emulator::handleEvent(SDL_Event& event) {
         case SDL_EVENT_KEY_DOWN:
             if (event.key.scancode == SDL_SCANCODE_F12) {
                 this->handleSaveState();
-            } else {
-                this->keyboard.handleKeyDown(event.key.scancode);
             }
+            this->keyboard.handleKeyDown(event.key.scancode);
             break;
         case SDL_EVENT_KEY_UP:
             this->keyboard.handleKeyUp(event.key.scancode);
@@ -117,11 +116,6 @@ void Emulator::saveState(std::string path) {
 }
 
 void Emulator::loadState() {
-    if (!home) {
-        std::cerr << home << " environment variable not set. " << std::endl;
-        return;
-    }
-
     std::ifstream fileReader;
     fileReader.open(this->rom, std::ios::binary);
     
