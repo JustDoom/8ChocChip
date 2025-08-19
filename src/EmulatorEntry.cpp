@@ -67,6 +67,7 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
+    std::unordered_map<std::string*, std::vector<std::string>> stateFiles;
 
     if (std::ifstream file(configFilePath); file.good()) {
         nlohmann::json json;
@@ -87,7 +88,7 @@ void EmulatorEntry::start(int argc, char **argv) {
                 }
                 romDirectories.emplace_back(directory.get<std::string>());
 
-                searchDirectory(directory.get<std::string>(), romFiles, romDirectories);
+                searchDirectory(directory.get<std::string>(), romFiles, stateFiles, romDirectories);
             }
         }
     }
@@ -114,7 +115,7 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     std::vector<std::unique_ptr<Window>> windows;
     if (rom.empty()) {
-        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows))->init();
+        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, stateFiles, romDirectories, windows))->init();
     } else {
         windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}))->init(); // TODO: Handle Rom Settings
     }
