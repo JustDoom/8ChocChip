@@ -61,10 +61,7 @@ public:
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
-    static void handleStateClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
-    static void handleStateReset(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
-    static void SDLCALL loadStateCallback(void* userdata, const char* const* filelist, int filter);
 
 };
 

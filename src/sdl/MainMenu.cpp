@@ -360,23 +360,6 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
     }
 }
 
-void MainMenu::handleStateClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
-    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        const auto data = reinterpret_cast<HoverData*>(userData);
-        SDL_DialogFileFilter filters[] = {
-            {"8ChocChip State File", "state"}
-        };
-        SDL_ShowOpenFileDialog(loadStateCallback, data->self, data->self->window, filters, 1, nullptr, false);
-    }
-}
-
-void MainMenu::handleStateReset(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
-    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        const auto data = reinterpret_cast<HoverData*>(userData);
-        data->self->selectedState = nullptr;
-    }
-}
-
 void MainMenu::callback(void* userdata, const char* const* directory, int filter) {
     if (!directory) {
         SDL_Log("An error occured: %s", SDL_GetError());
@@ -409,18 +392,4 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     instance->romDirectories.emplace_back(directoryString);
     searchDirectory(directoryString, instance->romFiles, instance->stateFiles, instance->romDirectories);
     SDL_UnlockMutex(instance->mutex);
-}
-
-void MainMenu::loadStateCallback(void* userdata, const char* const* selectedFile, int filter) {
-    if (!selectedFile) {
-        SDL_Log("An error occured: %s", SDL_GetError());
-        return;
-    }
-    if (!*selectedFile) {
-        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
-        return;
-    }
-
-    auto* instance = static_cast<MainMenu*>(userdata);
-    instance->selectedState = new std::string(*selectedFile);
 }

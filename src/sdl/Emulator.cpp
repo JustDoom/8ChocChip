@@ -120,7 +120,7 @@ void Emulator::loadState() {
     fileReader.open(this->rom, std::ios::binary);
     
     if (!fileReader.is_open()) {
-        std::cerr << "Status file not found for rom '" << this->rom << "'" << std::endl;
+        std::cerr << "Error opening file '" << this->rom << "'" << std::endl;
         return;
     }
 
