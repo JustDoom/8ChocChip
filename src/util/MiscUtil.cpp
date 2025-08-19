@@ -58,6 +58,10 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
         std::cout << "Processing file: " << filesystemPathToString(romFile.path()) << " - " << sha1FromFile(filesystemPathToString(romFile.path())) << std::endl;
 
         if (!stringEndsWith(romFile.path(), ".state")) {
+            if (romFile.file_size() > 3584) {
+                continue;
+            }
+
             // Check if the rom directory doesn't exist in romFiles, then add it
             if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
                 romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
