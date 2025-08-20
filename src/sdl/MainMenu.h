@@ -11,7 +11,6 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
-#include "../emulator/Keybindings.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -34,10 +33,6 @@ private:
 
     std::string* selectedRom = nullptr;
     RomSettings romSettings;
-
-    Keybindings keybindings;
-    bool waitingForKeybinding = false;
-    std::string waitingKey = "";
 
     bool showKeybindsConfiguration = false;
 public:

@@ -1,5 +1,5 @@
-#ifndef KeybindingsMenu_H
-#define KeybindingsMenu_H
+#ifndef KEYBINDINGS_MENU_H
+#define KEYBINDINGS_MENU_H
 
 #include "Window.h"
 
