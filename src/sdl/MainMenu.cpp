@@ -13,6 +13,7 @@
 #include "../util/Constants.h"
 #include "../util/MiscUtil.h"
 #include "Emulator.h"
+#include "KeybindingsMenu.h"
 
 constexpr auto COLOR_BOX = (Clay_Color) {224, 215, 210, 255};
 constexpr auto COLOR_TITLE = (Clay_Color) {140, 100, 60, 255};
@@ -254,8 +255,13 @@ void MainMenu::render() {
 
                     CLAY_TEXT(CLAY_STRING("Keybinds"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        CLAY_TEXT(CLAY_STRING("Save"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                        // Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        CLAY_TEXT(CLAY_STRING("Configure"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, const intptr_t userData) {
+                            if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                const auto data = reinterpret_cast<HoverData*>(userData);
+                                data->self->windows.emplace_back(std::make_unique<KeybindingsMenu>(data->self->fonts[0]))->init();
+                            }
+                        }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                 }
             }

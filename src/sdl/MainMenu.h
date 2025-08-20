@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "../emulator/Keybindings.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -34,6 +35,11 @@ private:
     std::string* selectedRom = nullptr;
     RomSettings romSettings;
 
+    Keybindings keybindings;
+    bool waitingForKeybinding = false;
+    std::string waitingKey = "";
+
+    bool showKeybindsConfiguration = false;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,
@@ -51,6 +57,7 @@ public:
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
+    
 };
 
 #endif
