@@ -86,6 +86,9 @@ void Emulator::handleSaveState() {
 
     this->isStopped = true;
     SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
+        const auto data = reinterpret_cast<Emulator*>(userData);
+        data->isStopped = false;
+        
         if (!selectedPath || !*selectedPath) {
             SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
             return;
@@ -96,9 +99,7 @@ void Emulator::handleSaveState() {
             path += ".state";
         }
 
-        const auto data = reinterpret_cast<Emulator*>(userData);
         data->saveState(path.string());
-        data->isStopped = false;
     }, this, this->window, filters, 1, defaultLocation.c_str());
 }
 
