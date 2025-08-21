@@ -55,7 +55,7 @@ bool Emulator::handleEvent(SDL_Event& event) {
 
 void Emulator::update() {
     try {
-        if (!this->encounteredError && !isStopped) {
+        if (!this->encounteredError && !this->isStopped) {
             this->cpu.cycle();
         }
     } catch (uint16_t opcode) {
@@ -104,11 +104,6 @@ void Emulator::handleSaveState() {
 }
 
 void Emulator::saveState(std::string path) {
-    if (!home) {
-        std::cerr << home << " environment variable not set. " << std::endl;
-        return;
-    }
-    
     std::ofstream fileWriter;
     fileWriter.open(path, std::ios::binary);
     auto serialization = this->cpu.serialize();

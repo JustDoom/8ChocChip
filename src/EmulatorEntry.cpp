@@ -21,7 +21,6 @@
 
 void EmulatorEntry::start(int argc, char **argv) {
     std::string rom;
-    std::string state;
 
     for (int i = 0; i < argc; i++) {
         std::string command = toLowerCase(argv[i]);
@@ -52,10 +51,6 @@ void EmulatorEntry::start(int argc, char **argv) {
         if (command == "--instructions" || command == "-ipf") {
             std::cout << argv[++i] << std::endl;
             ipf = std::stoi(argv[i]);
-        }
-        if (command == "--state" || command == "-s") {
-            state = argv[++i];
-            std::cout << "Using state " << state << std::endl;
         }
     }
 

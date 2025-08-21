@@ -54,7 +54,7 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
         if (romFile.is_directory()) {
             continue;
         }
-        
+
         std::cout << "Processing file: " << filesystemPathToString(romFile.path()) << " - " << sha1FromFile(filesystemPathToString(romFile.path())) << std::endl;
 
         if (!stringEndsWith(romFile.path(), ".state")) {
