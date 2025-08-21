@@ -339,7 +339,7 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
 
 void MainMenu::callback(void* userdata, const char* const* directory, int filter) {
     if (!directory) {
-        SDL_Log("An error occured: %s", SDL_GetError());
+        SDL_Log("An error occurred: %s", SDL_GetError());
         return;
     }
     if (!*directory) {
@@ -349,8 +349,13 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
 
     auto* instance = static_cast<MainMenu*>(userdata);
 
-    std::cout << *directory << std::endl;
     std::string directoryString = *directory;
+    std::cout << "Selected directory \"" << directoryString << "\"" << std::endl;
+
+    if (directoryString.empty()) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
 
     SDL_LockMutex(instance->mutex);
 
