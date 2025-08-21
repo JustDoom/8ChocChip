@@ -374,17 +374,17 @@ std::vector<uint8_t> Cpu::serialize() {
     return serializedData;
 }
 
-void Cpu::deserialize(std::vector<uint8_t> serialization) {
+void Cpu::deserialize(uint8_t* serialization) {
     int current_position = 0;
 
-    copy(serialization.begin() + current_position, 
-         serialization.begin() + current_position + this->memory.size(), 
+    std::copy(serialization + current_position, 
+         serialization + current_position + this->memory.size(), 
          this->memory.begin());
     current_position += this->memory.size();
 
 
-    copy(serialization.begin() + current_position,
-         serialization.begin() + current_position + this->registers.size(),
+    std::copy(serialization + current_position,
+         serialization + current_position + this->registers.size(),
         this->registers.begin());
     current_position += this->registers.size();
 
@@ -438,7 +438,7 @@ void Cpu::deserialize(std::vector<uint8_t> serialization) {
     this->instructions |= serialization[current_position] & 0xFF;
     current_position++;
 
-    copy(serialization.begin() + current_position, 
-         serialization.begin() + current_position + this->renderer->display.size(), 
+    copy(serialization + current_position, 
+         serialization + current_position + this->renderer->display.size(), 
          this->renderer->display.begin());
 }

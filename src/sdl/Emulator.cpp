@@ -129,7 +129,7 @@ void Emulator::loadState() {
     fileReader.read(reinterpret_cast<char*>(&buffer[0]), file_size);
     fileReader.close();
 
-    this->cpu.deserialize(buffer);
+    this->cpu.deserialize(buffer.data());
 }
 
 int Emulator::getInstructions() {
