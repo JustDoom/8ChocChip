@@ -28,7 +28,7 @@ void EmulatorEntry::start(int argc, char **argv) {
             continue;
         }
 
-        if (command == "--rom" || command == "-r") {
+        if (command == "--path" || command == "-p") {
             if (i + 1 < argc) {
                 rom = argv[++i];
                 continue;
@@ -38,7 +38,7 @@ void EmulatorEntry::start(int argc, char **argv) {
             return;
         }
         if (command == "--help" || command == "-h") {
-            std::cerr << "Usage: 8ChocChip --rom <pathtorom>" << std::endl;
+            std::cerr << "Usage: 8ChocChip --path <pathtorom/pathtostate>" << std::endl;
             return;
         }
         if (command == "--debug" || command == "-d") {
