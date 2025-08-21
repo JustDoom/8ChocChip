@@ -123,8 +123,8 @@ void MainMenu::render() {
                 .backgroundColor = COLOR_BOX,
                 .clip = { .vertical = true, .childOffset = Clay_GetScrollOffset() }
             }) {
-                if (this->romDirectories.empty()) {
-                    CLAY_TEXT(CLAY_STRING("Add a directory for roms"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24, .textAlignment = CLAY_TEXT_ALIGN_CENTER }));
+                if (this->romDirectories.empty() || this->romFiles.empty()) {
+                    CLAY_TEXT(CLAY_STRING("No roms found"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24, .textAlignment = CLAY_TEXT_ALIGN_CENTER }));
                 } else {
                     for (auto& dir : this->romFiles) {
                         for (std::string& romPath : dir.second) {
