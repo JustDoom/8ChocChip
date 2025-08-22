@@ -8,6 +8,8 @@
 #include "../util/MiscUtil.h"
 #include "../util/Constants.h"
 
+bool keybindingsMenuClicked = false;
+
 KeybindingsMenu::KeybindingsMenu(TTF_Font* font) {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
@@ -40,16 +42,37 @@ bool KeybindingsMenu::handleEvent(SDL_Event& event) {
 
     if (event.window.windowID == this->windowId) {        
         // TODO manage events
+        switch(event.type) {
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    keybindingsMenuClicked = true;
+                }
+            break;
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    keybindingsMenuClicked = false;
+                }
+            break;
+        }
     }
 
     return true;
 }
 
 void KeybindingsMenu::update() {
-
+    if (!this->mouseFocus) {
+        keybindingsMenuClicked = false;
+        return;
+    }
 }
 
 void KeybindingsMenu::render() {
+    float x,y;
+    SDL_GetMouseState(&x, &y);
+    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
+    Clay_SetPointerState((Clay_Vector2) { x, y }, keybindingsMenuClicked);
+    Clay_UpdateScrollContainers(false, (Clay_Vector2) { 0, 0 }, 0.0166f);
+
     Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
     Clay_BeginLayout();
     
@@ -57,73 +80,79 @@ void KeybindingsMenu::render() {
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("1"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("1")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("1"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("2"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("2")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("2"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("3"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("3")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("3"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("C"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("C")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("C"))));
             }
         }
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("4"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("4")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("4"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("5"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("5")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("5"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("6"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("6")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("6"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("D"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("D")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("D"))));
             }
         }
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("7"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("7")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("7"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("8"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("8")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("8"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("9"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("9")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("9"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("E"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("E")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("E"))));
             }
         }
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("A"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("A")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("A"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("0"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("0")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("0"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("B"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("B")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("B"))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
                 CLAY_TEXT(CLAY_STRING("F"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                Clay_OnHover(nullptr, reinterpret_cast<intptr_t>(new std::string("F")));
+                Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string("F"))));
+            }
+        }
+
+        if (this->keyWaitingFor) {
+            CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
+                CLAY_TEXT(toClayString("Waiting for key " + *this->keyWaitingFor), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
             }
         }
     }
@@ -137,6 +166,8 @@ void KeybindingsMenu::render() {
     clearClayStringBuffers();
 
     SDL_RenderPresent(this->renderer);
+
+    this->dataList.clear();
 }
 
 void KeybindingsMenu::resize(SDL_Event& event) {
@@ -146,5 +177,12 @@ void KeybindingsMenu::resize(SDL_Event& event) {
 void KeybindingsMenu::close() {
     TTF_DestroyRendererTextEngine(this->textEngine);
     Window::close();
+}
+
+void KeybindingsMenu::handleKeybindClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<KeybindingHoverData*>(userData);
+        data->self->keyWaitingFor = data->key;
+    }
 }
 

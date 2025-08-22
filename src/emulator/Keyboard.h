@@ -9,7 +9,7 @@ class Keyboard {
 public:
     std::unordered_map<uint8_t, bool> keysPressed;
     std::function<void(unsigned char)> onNextKeyPress;
-    std::unordered_map<uint8_t, unsigned char> KEYMAP = {
+    std::unordered_map<uint8_t, unsigned char> keymap = {
         {30, 0x1}, // 1
         {31, 0x2}, // 2
         {32, 0x3}, // 3
