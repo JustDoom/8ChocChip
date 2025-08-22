@@ -129,18 +129,22 @@ void MainMenu::render() {
                 .backgroundColor = COLOR_BOX,
                 .clip = { .vertical = true, .childOffset = Clay_GetScrollOffset() }
             }) {
-                std::unordered_map<std::string *, std::vector<std::string>>& files = (this->fileType == ROM) ? romFiles : stateFiles;
-                for (auto& dir : files) {
-                    for (std::string& romPath : dir.second) {
-                        if (&romPath == this->selectedRom) {
-                            CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_HIGHLIGHT}) {
-                                CLAY_TEXT(toClayString(getFileFromStringPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
-                                Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
-                            }
-                        } else {
-                            CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ROMS}) {
-                                CLAY_TEXT(toClayString(getFileFromStringPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
-                                Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                std::unordered_map<std::string *, std::vector<std::string>>& files = (this->fileType == ROM) ? this->romFiles : this->stateFiles;
+                if (this->romDirectories.empty() || files.empty()) {
+                    CLAY_TEXT(CLAY_STRING("No files found"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24, .textAlignment = CLAY_TEXT_ALIGN_CENTER }));
+                } else {
+                    for (auto& dir : files) {
+                        for (std::string& romPath : dir.second) {
+                            if (&romPath == this->selectedRom) {
+                                CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_HIGHLIGHT}) {
+                                    CLAY_TEXT(toClayString(getFileFromStringPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                                    Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                                }
+                            } else {
+                                CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_ROMS}) {
+                                    CLAY_TEXT(toClayString(getFileFromStringPath(romPath)), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24, .wrapMode = CLAY_TEXT_WRAP_NONE }));
+                                    Clay_OnHover(handleRomClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, &romPath)));
+                                }
                             }
                         }
                     }
@@ -362,7 +366,7 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
 
 void MainMenu::callback(void* userdata, const char* const* directory, int filter) {
     if (!directory) {
-        SDL_Log("An error occured: %s", SDL_GetError());
+        SDL_Log("An error occurred: %s", SDL_GetError());
         return;
     }
     if (!*directory) {
@@ -372,8 +376,13 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
 
     auto* instance = static_cast<MainMenu*>(userdata);
 
-    std::cout << *directory << std::endl;
     std::string directoryString = *directory;
+    std::cout << "Selected directory \"" << directoryString << "\"" << std::endl;
+
+    if (directoryString.empty()) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
 
     SDL_LockMutex(instance->mutex);
 

@@ -50,6 +50,11 @@ bool stringEndsWith(const std::string& str, const std::string endStr) {
 }
 
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::unordered_map<std::string*, std::vector<std::string>>& stateFiles, std::vector<std::string>& romDirectories) {
+    if (std::ifstream file(directory); !file.good()) {
+        std::cerr << "Unable to find directory " << directory << std::endl;
+        return;
+    }
+
     for (const auto& romFile: std::filesystem::directory_iterator(directory)) {
         if (romFile.is_directory()) {
             continue;

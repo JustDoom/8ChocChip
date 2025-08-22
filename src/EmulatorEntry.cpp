@@ -54,6 +54,7 @@ void EmulatorEntry::start(int argc, char **argv) {
         }
     }
 
+    // TODO: Move config stuff to its own file
     if (!home) {
         std::cerr << home << " environment variable not set. " << std::endl;
         return;
