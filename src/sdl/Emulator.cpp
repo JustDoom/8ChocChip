@@ -4,7 +4,9 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& rom, const RomSettings& romSettings) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {}
+Emulator::Emulator(const std::string& rom, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), rom(rom) {
+    this->keyboard.keymap = keymap;
+}
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);

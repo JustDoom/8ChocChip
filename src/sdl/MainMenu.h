@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "../util/Constants.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -34,7 +35,7 @@ private:
     std::string* selectedRom = nullptr;
     RomSettings romSettings;
 
-    bool showKeybindsConfiguration = false;
+    std::unordered_map<uint8_t, unsigned char> keymap = defaultKeymap;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,

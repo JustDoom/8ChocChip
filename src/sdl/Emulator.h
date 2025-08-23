@@ -19,7 +19,7 @@ private:
     const std::string &rom;
     bool encounteredError = false;
 public:
-    Emulator(const std::string& rom, const RomSettings& romSettings);
+    Emulator(const std::string& rom, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
