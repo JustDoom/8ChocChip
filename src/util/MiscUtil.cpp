@@ -45,8 +45,7 @@ bool stringEndsWith(const std::string& str, const std::string endStr) {
         return false;
     }
 
-    bool stringEndsWith = str.compare(str.size() - endStr.size(), endStr.size(), endStr) == 0;
-    return stringEndsWith;
+    return str.compare(str.size() - endStr.size(), endStr.size(), endStr) == 0;
 }
 
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::unordered_map<std::string*, std::vector<std::string>>& stateFiles, std::vector<std::string>& romDirectories) {
@@ -62,7 +61,7 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
 
         std::cout << "Processing file: " << filesystemPathToString(romFile.path()) << " - " << sha1FromFile(filesystemPathToString(romFile.path())) << std::endl;
 
-        if (!stringEndsWith(romFile.path(), ".state")) {
+        if (!stringEndsWith(romFile.path().string(), ".state")) {
             if (romFile.file_size() > 3584) {
                 continue;
             }
