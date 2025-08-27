@@ -18,7 +18,7 @@ There are a couple of things left to do until I would say it works well enough
 - [x] Windows Support
 - [ ] MacOS Support
 - [x] Switch to SDL from SFML
-- [ ] Save state
+- [x] Save state
 - [ ] Configurable keys
 - [ ] Database for auto setting selector
 - [ ] Other Chip8 variants
