@@ -23,9 +23,13 @@ private:
     std::vector<KeybindingHoverData> dataList;
     uint8_t* keyWaitingFor = nullptr;
     std::unordered_map<uint8_t, unsigned char>* keymap;
+    bool* isMenuOpen;
 
+    SDL_Mutex* mutex;
+
+    char getKeyboardCharacter(int key_code);
 public:
-    KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap);
+    KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap, bool* isMenuOpen);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;

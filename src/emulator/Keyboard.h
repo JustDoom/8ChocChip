@@ -11,7 +11,7 @@ class Keyboard {
 public:
     std::unordered_map<uint8_t, bool> keysPressed;
     std::function<void(unsigned char)> onNextKeyPress;
-    std::unordered_map<uint8_t, unsigned char> keymap = defaultKeymap;
+    std::unordered_map<uint8_t, unsigned char> keymap = default_keymap;
 
     void setOnNextKeyPress(std::function<void(unsigned char)> callback);
     void handleKeyDown(uint8_t keyCode);

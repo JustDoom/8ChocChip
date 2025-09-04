@@ -12,7 +12,7 @@ inline std::string configFilePath;
 inline bool debug = false;
 inline bool speedTest = false;
 inline uint64_t ipf = 15;
-inline std::unordered_map<uint8_t, unsigned char> defaultKeymap = {
+inline std::unordered_map<uint8_t, unsigned char> default_keymap = {
     {30, 0x1}, // 1
     {31, 0x2}, // 2
     {32, 0x3}, // 3

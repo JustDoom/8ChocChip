@@ -1,8 +1,14 @@
 #include "KeybindingsMenu.h"
 
 #include <iostream>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "../ClaySDL3Renderer.h"
 #include "../util/MiscUtil.h"
@@ -10,13 +16,18 @@
 
 bool keybindingsMenuClicked = false;
 
-KeybindingsMenu::KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap) {
+KeybindingsMenu::KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap, bool* isMenuOpen) {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
     this->keymap = keymap;
 
     this->width = 200;
     this->height = 250;
+
+    this->isMenuOpen = isMenuOpen;
+    *this->isMenuOpen = true;
+
+    this->mutex = SDL_CreateMutex();
 }
 
 void KeybindingsMenu::init() {
@@ -56,15 +67,17 @@ bool KeybindingsMenu::handleEvent(SDL_Event& event) {
             break;
             case SDL_EVENT_KEY_DOWN:
                 if (this->keyWaitingFor) {
-                    // The user pressed the new keybind for the chosen key
-                    for (auto& item : *keymap) {
-                        if (item.second == *this->keyWaitingFor) {
-                            keymap->erase(item.first);
-                            break;
+                    if (event.key.scancode != SDL_SCANCODE_ESCAPE) {
+                        // The user pressed the new keybind for the chosen key
+                        for (auto& item : *keymap) {
+                            if (item.second == *this->keyWaitingFor) {
+                                keymap->erase(item.first);
+                                break;
+                            }
                         }
+                        unsigned char pressed_key = *this->keyWaitingFor;
+                        keymap->insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
                     }
-                    unsigned char pressed_key = *this->keyWaitingFor;
-                    keymap->insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
                     this->keyWaitingFor = nullptr;
                 }
             break;
@@ -90,7 +103,7 @@ void KeybindingsMenu::render() {
 
     Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
     Clay_BeginLayout();
-    
+
     CLAY({ .id = CLAY_ID("KeybindsConfiguration"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM }, .backgroundColor = {250, 250, 250, 250} }) {
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
@@ -195,6 +208,23 @@ void KeybindingsMenu::resize(SDL_Event& event) {
 void KeybindingsMenu::close() {
     TTF_DestroyRendererTextEngine(this->textEngine);
     Window::close();
+    *this->isMenuOpen = false;
+
+    SDL_LockMutex(this->mutex);
+
+    nlohmann::json json;
+    if (std::ifstream file(configFilePath); file.good()) {
+        json = nlohmann::json::parse(file);
+        file.close();
+    }
+
+    json["keymap"] = *this->keymap;
+
+    std::ofstream fileWrite(configFilePath);
+    fileWrite << json.dump(4);
+    fileWrite.close();
+
+    SDL_UnlockMutex(this->mutex);
 }
 
 void KeybindingsMenu::handleKeybindClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
@@ -207,7 +237,7 @@ void KeybindingsMenu::handleKeybindClick(Clay_ElementId elementId, Clay_PointerD
 void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<KeybindingHoverData*>(userData);
-        *data->self->keymap = defaultKeymap;
+        *data->self->keymap = default_keymap;
     }
 }
 

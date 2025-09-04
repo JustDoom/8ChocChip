@@ -36,6 +36,7 @@ private:
     RomSettings romSettings;
 
     std::unordered_map<uint8_t, unsigned char> keymap;
+    bool isKeymapMenuOpen = false;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,
