@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -14,16 +15,17 @@ class KeybindingsMenu;
 
 struct KeybindingHoverData {
     KeybindingsMenu* self;
-    std::string* key;
+    uint8_t* key;
 };
 
 class KeybindingsMenu final : public Window {
 private:
     std::vector<KeybindingHoverData> dataList;
-    std::string* keyWaitingFor = nullptr;
+    uint8_t* keyWaitingFor = nullptr;
+    std::unordered_map<uint8_t, unsigned char>* keymap;
 
 public:
-    KeybindingsMenu(TTF_Font* font);
+    KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
@@ -33,6 +35,7 @@ public:
     void close() override;
 
     static void handleKeybindClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handleResetKeybindings(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
 };
 
 #endif

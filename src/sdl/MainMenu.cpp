@@ -25,10 +25,12 @@ bool clicked = false;
 Clay_Vector2 wheel{};
 
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
-                   std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
+                   std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows,
+                   std::unordered_map<uint8_t, unsigned char> keymap) :
     romDirectories(romDirectories), romFiles(romFiles), windows(windows), mutex(SDL_CreateMutex()) {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
+    this->keymap = keymap;
 }
 
 void MainMenu::init() {
@@ -259,7 +261,7 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->windows.emplace_back(std::make_unique<KeybindingsMenu>(data->self->fonts[0]))->init();
+                                data->self->windows.emplace_back(std::make_unique<KeybindingsMenu>(data->self->fonts[0], &data->self->keymap))->init();
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }

@@ -35,11 +35,12 @@ private:
     std::string* selectedRom = nullptr;
     RomSettings romSettings;
 
-    std::unordered_map<uint8_t, unsigned char> keymap = defaultKeymap;
+    std::unordered_map<uint8_t, unsigned char> keymap;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories,
-        std::vector<std::unique_ptr<Window>>& windows);
+        std::vector<std::unique_ptr<Window>>& windows, 
+        std::unordered_map<uint8_t, unsigned char> keymap);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;

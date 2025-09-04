@@ -185,3 +185,31 @@ std::string sha1FromFile(const std::string& filename) {
     return ss.str();
 #endif
 }
+
+char intToHexCipher(int n) {
+    if (n <= 9) {
+        return '0' + n;
+    } else if (n <= 0xF) {
+        switch(n) {
+            case 0xA:
+                return 'A';
+            break;
+            case 0xB:
+                return 'B';
+            break;
+            case 0xC:
+                return 'C';
+            break;
+            case 0xD:
+                return 'D';
+            break;
+            case 0xE:
+                return 'E';
+            break;
+            case 0xF:
+                return 'F';
+            break;
+        }
+    }
+    return '?';
+}

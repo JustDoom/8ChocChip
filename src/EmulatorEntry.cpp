@@ -108,7 +108,7 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     std::vector<std::unique_ptr<Window>> windows;
     if (rom.empty()) {
-        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows))->init();
+        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows, defaultKeymap))->init();
     } else {
         // FIXME maybe load from file or something like that
         windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}, defaultKeymap))->init(); // TODO: Handle Rom Settings
