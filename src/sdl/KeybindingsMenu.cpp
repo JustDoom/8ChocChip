@@ -45,6 +45,8 @@ void KeybindingsMenu::init() {
     SDL_GetWindowSize(this->window, &width, &height);
     Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { handleClayErrors });
     Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
+
+    SDL_SetWindowResizable(this->window, false);
 }
 
 bool KeybindingsMenu::handleEvent(SDL_Event& event) {
@@ -67,18 +69,20 @@ bool KeybindingsMenu::handleEvent(SDL_Event& event) {
             break;
             case SDL_EVENT_KEY_DOWN:
                 if (this->keyWaitingFor) {
-                    if (event.key.scancode != SDL_SCANCODE_ESCAPE) {
-                        // The user pressed the new keybind for the chosen key
-                        for (auto& item : *keymap) {
-                            if (item.second == *this->keyWaitingFor) {
-                                keymap->erase(item.first);
-                                break;
+                    if (event.key.scancode >= SDL_SCANCODE_A && event.key.scancode <= SDL_SCANCODE_0) {
+                        if (event.key.scancode != SDL_SCANCODE_ESCAPE) {
+                            // The user pressed the new keybind for the chosen key
+                            for (auto& item : *keymap) {
+                                if (item.second == *this->keyWaitingFor) {
+                                    keymap->erase(item.first);
+                                    break;
+                                }
                             }
+                            unsigned char pressed_key = *this->keyWaitingFor;
+                            keymap->insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
                         }
-                        unsigned char pressed_key = *this->keyWaitingFor;
-                        keymap->insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
+                        this->keyWaitingFor = nullptr;
                     }
-                    this->keyWaitingFor = nullptr;
                 }
             break;
         }
@@ -215,10 +219,6 @@ void KeybindingsMenu::render() {
     SDL_RenderPresent(this->renderer);
 
     this->dataList.clear();
-}
-
-void KeybindingsMenu::resize(SDL_Event& event) {
-
 }
 
 void KeybindingsMenu::close() {
