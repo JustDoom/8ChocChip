@@ -103,77 +103,93 @@ void KeybindingsMenu::render() {
 
     Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
     Clay_BeginLayout();
-
+    
     CLAY({ .id = CLAY_ID("KeybindsConfiguration"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM }, .backgroundColor = {250, 250, 250, 250} }) {
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("1"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x1);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x1))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("2"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x2);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x2))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("3"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x3);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x3))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("C"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0xC);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0xC))));
             }
         }
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("4"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x4);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x4))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("5"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x5);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x5))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("6"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x6);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x6))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("D"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0xD);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0xD))));
             }
         }
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("7"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x7);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x7))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("8"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x8);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x8))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("9"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x9);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x9))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("E"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0xE);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0xE))));
             }
         }
         CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("A"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0xA);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0xA))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("0"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0x0);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0x0))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("B"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0xB);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0xB))));
             }
             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {90, 60, 40, 255} }) {
-                CLAY_TEXT(CLAY_STRING("F"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                char keyboardCharacter = this->getKeyboardCharacter(0xF);
+                CLAY_TEXT(toClayString(&keyboardCharacter), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 Clay_OnHover(handleKeybindClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new uint8_t(0xF))));
             }
         }
@@ -241,3 +257,19 @@ void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, Clay_Poin
     }
 }
 
+char KeybindingsMenu::getKeyboardCharacter(int key_code) {
+    int key_scancode = -1;
+    for (auto keyMapIterator = this->keymap->begin(); keyMapIterator != this->keymap->end(); keyMapIterator++) {
+        if (keyMapIterator->second == key_code) {
+            key_scancode = keyMapIterator->first;
+        }
+    }
+
+    if (key_scancode == -1) {
+        return '?';
+    }
+
+    char character = toupper(SDL_GetKeyFromScancode(SDL_Scancode(key_scancode), SDL_KMOD_NONE, false));
+
+    return character;
+}
