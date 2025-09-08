@@ -37,7 +37,7 @@ public:
     void render() override;
     void close() override;
 
-    static void handleKeybindClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handleKeybindingClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleResetKeybindings(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
 };
 

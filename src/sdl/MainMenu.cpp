@@ -267,7 +267,7 @@ void MainMenu::render() {
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
 
-                    CLAY_TEXT(CLAY_STRING("Keybinds"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                    CLAY_TEXT(CLAY_STRING("Keybindings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
                         CLAY_TEXT(CLAY_STRING("Configure"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
