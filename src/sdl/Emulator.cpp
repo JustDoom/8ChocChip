@@ -1,6 +1,9 @@
 #include "Emulator.h"
+#include "../util/Constants.h"
 
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 
 #include "../util/MiscUtil.h"
 
@@ -24,8 +27,12 @@ void Emulator::init() {
     SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->rom)).c_str());
 
     // Setup the emulator
-    this->cpu.loadSpritesIntoMemory();
-    this->cpu.loadProgramIntoMemory(&file);
+    if (stringEndsWith(rom, ".state")) {
+        this->loadState();
+    } else {
+        this->cpu.loadProgramIntoMemory(&file);
+        this->cpu.loadSpritesIntoMemory();
+    }
 }
 
 bool Emulator::handleEvent(SDL_Event& event) {
@@ -35,6 +42,9 @@ bool Emulator::handleEvent(SDL_Event& event) {
 
     switch (event.type) {
         case SDL_EVENT_KEY_DOWN:
+            if (event.key.scancode == SDL_SCANCODE_F12) {
+                this->handleSaveState();
+            }
             this->keyboard.handleKeyDown(event.key.scancode);
             break;
         case SDL_EVENT_KEY_UP:
@@ -47,7 +57,7 @@ bool Emulator::handleEvent(SDL_Event& event) {
 
 void Emulator::update() {
     try {
-        if (!this->encounteredError) {
+        if (!this->encounteredError && !this->isStopped) {
             this->cpu.cycle();
         }
     } catch (uint16_t opcode) {
@@ -67,6 +77,61 @@ void Emulator::render() {
 
 void Emulator::resize(SDL_Event &event) {
 
+}
+
+void Emulator::handleSaveState() {
+    SDL_DialogFileFilter filters[] = {
+        {"8ChocChip State File", "state"}
+    };
+
+    std::string defaultLocation = this->rom;
+
+    this->isStopped = true;
+    SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
+        const auto data = reinterpret_cast<Emulator*>(userData);
+        data->isStopped = false;
+        
+        if (!selectedPath || !*selectedPath) {
+            SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+            return;
+        }
+
+        std::filesystem::path path(*selectedPath);
+        if (path.extension() != ".state") {
+            path += ".state";
+        }
+
+        data->saveState(path.string());
+    }, this, this->window, filters, 1, defaultLocation.c_str());
+}
+
+void Emulator::saveState(std::string path) {
+    std::ofstream fileWriter;
+    fileWriter.open(path, std::ios::binary);
+    auto serialization = this->cpu.serialize();
+    fileWriter.write((char*)serialization.data(), serialization.size());
+    fileWriter.close();
+}
+
+void Emulator::loadState() {
+    std::ifstream fileReader;
+    fileReader.open(this->rom, std::ios::binary);
+    
+    if (!fileReader.is_open()) {
+        std::cerr << "Error opening file '" << this->rom << "'" << std::endl;
+        return;
+    }
+
+    std::vector<uint8_t> buffer(this->cpu.serializationDimension);
+
+    fileReader.seekg(0, std::ios::end);
+    size_t file_size = fileReader.tellg();
+    fileReader.seekg(0, std::ios::beg);
+    
+    fileReader.read(reinterpret_cast<char*>(&buffer[0]), file_size);
+    fileReader.close();
+
+    this->cpu.deserialize(buffer.data());
 }
 
 int Emulator::getInstructions() {

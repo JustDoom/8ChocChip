@@ -21,13 +21,14 @@
 
 void EmulatorEntry::start(int argc, char **argv) {
     std::string rom;
+
     for (int i = 0; i < argc; i++) {
         std::string command = toLowerCase(argv[i]);
         if (command.rfind("--") != 0 && command.rfind('-') != 0) {
             continue;
         }
 
-        if (command == "--rom" || command == "-r") {
+        if (command == "--path" || command == "-p") {
             if (i + 1 < argc) {
                 rom = argv[++i];
                 continue;
@@ -37,7 +38,7 @@ void EmulatorEntry::start(int argc, char **argv) {
             return;
         }
         if (command == "--help" || command == "-h") {
-            std::cerr << "Usage: 8ChocChip --rom <pathtorom>" << std::endl;
+            std::cerr << "Usage: 8ChocChip --path <pathtorom/pathtostate>" << std::endl;
             return;
         }
         if (command == "--debug" || command == "-d") {
@@ -53,6 +54,7 @@ void EmulatorEntry::start(int argc, char **argv) {
         }
     }
 
+    // TODO: Move config stuff to its own file
     if (!home) {
         std::cerr << home << " environment variable not set. " << std::endl;
         return;
@@ -61,6 +63,7 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     std::vector<std::string> romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
+    std::unordered_map<std::string*, std::vector<std::string>> stateFiles;
 
     std::unordered_map<uint8_t, unsigned char> keymap = default_keymap;
     if (std::ifstream file(configFilePath); file.good()) {
@@ -82,7 +85,7 @@ void EmulatorEntry::start(int argc, char **argv) {
                 }
                 romDirectories.emplace_back(directory.get<std::string>());
 
-                searchDirectory(directory.get<std::string>(), romFiles, romDirectories);
+                searchDirectory(directory.get<std::string>(), romFiles, stateFiles, romDirectories);
             }
         }
         if (json["keymap"] != nullptr) {
@@ -112,7 +115,7 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     std::vector<std::unique_ptr<Window>> windows;
     if (rom.empty()) {
-        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows, keymap))->init();
+        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, stateFiles, romDirectories, windows, keymap))->init();
     } else {
         // FIXME maybe load from file or something like that
         windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}, default_keymap))->init(); // TODO: Handle Rom Settings
