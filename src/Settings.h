@@ -4,7 +4,7 @@
 struct RomSettings {
     int tickSpeed;
 
-    // Quirks
+    // FIXME remove Quirks and add struct reference
     bool shift = false;
     bool memoryIncrementByX = false;
     bool memoryLeaveIUnchanged = false;

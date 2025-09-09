@@ -26,7 +26,7 @@ Clay_Vector2 wheel{};
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()) {
+    romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()), database() {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
 }
@@ -167,9 +167,11 @@ void MainMenu::render() {
             CLAY({ .id = CLAY_ID("MainContent"),
                 .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
                 .backgroundColor = COLOR_BOX }) {
-                if (this->selectedRom != nullptr) {
-                    CLAY_TEXT(CLAY_STRING("Settings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                if (this->selectedRom != nullptr) {                    
+                    std::string programSha1 = sha1FromFile(*this->selectedRom);
+                    ProgramData programData = this->database.getProgramData(programSha1);
 
+                    CLAY_TEXT(CLAY_STRING("Settings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY_TEXT(CLAY_STRING("Quirks"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
                         if (this->romSettings.shift) {

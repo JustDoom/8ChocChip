@@ -89,6 +89,7 @@ void EmulatorEntry::start(int argc, char **argv) {
         }
     }
 
+    std::filesystem::path databaseFilePath = std::filesystem::current_path() / ".." / ".." / "dependencies" / "chip-8-database" / "database";
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL could not initialize. SDL_Error: " << SDL_GetError() << std::endl;
         return;

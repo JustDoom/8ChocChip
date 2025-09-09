@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "Database.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -42,6 +43,8 @@ private:
     RomSettings romSettings;
 
     FileType fileType = ROM;
+
+    Database database;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, 
