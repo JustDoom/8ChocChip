@@ -7,16 +7,6 @@
 
 #include "../Settings.h"
 
-struct Quirks {
-    bool shift = false;
-    bool memoryIncrementByX = false;
-    bool memoryLeaveIUnchanged = false;
-    bool wrap = false;
-    bool jump = false;
-    bool vblank = true;
-    bool logic = true;
-};
-
 struct PlatformData {
     std::string id;
     std::string name;
@@ -52,6 +42,8 @@ public:
 
     ProgramData getProgramData(std::string sha1);
     RomData getRomData(std::string sha1);
+    std::vector<std::string> getRomPlatforms(std::string sha1);
+    PlatformData getPlatformData(std::string platformId);
 };
 
 #endif

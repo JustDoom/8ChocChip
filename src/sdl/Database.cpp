@@ -103,3 +103,26 @@ RomData Database::getRomData(std::string sha1) {
 
     return RomData{};
 }
+
+std::vector<std::string> Database::getRomPlatforms(std::string sha1) {
+    std::vector<PlatformData> platformsData;
+    for (ProgramData programData : this->programs) {
+        for (auto it = programData.roms.begin(); it != programData.roms.end(); it++) {
+            if (it->first == sha1) {
+                return it->second.platforms;
+            }
+        }
+    }
+
+    return { "originalChip8" };
+}
+
+PlatformData Database::getPlatformData(std::string platformId) {
+    for (PlatformData platform : this->platforms) {
+        if (platform.id == platformId) {
+            return platform;
+        }
+    }
+
+    return PlatformData{};
+}
