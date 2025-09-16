@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "../util/Constants.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -42,12 +43,17 @@ private:
     RomSettings romSettings;
 
     FileType fileType = ROM;
+
+    std::unordered_map<uint8_t, unsigned char> keymap;
+    bool isKeymapMenuOpen = false;
+
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, 
         std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
         std::vector<std::string>& romDirectories,
-        std::vector<std::unique_ptr<Window>>& windows);
+        std::vector<std::unique_ptr<Window>>& windows,
+        std::unordered_map<uint8_t, unsigned char> keymap);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
@@ -62,7 +68,6 @@ public:
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
-
 };
 
 #endif

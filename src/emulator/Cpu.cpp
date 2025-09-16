@@ -6,7 +6,7 @@
 
 #include "../util/Constants.h"
 
-Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings) : renderer(renderer), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
+Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : renderer(renderer), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -18,6 +18,8 @@ Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSett
     this->memory.fill(0);
     this->registers.fill(0);
     this->stack.fill(0);
+
+    this->keyboard->keymap = keymap;
 }
 
 void Cpu::loadSpritesIntoMemory() {

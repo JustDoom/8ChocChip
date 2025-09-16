@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Keyboard.h"
 
 void Keyboard::setOnNextKeyPress(std::function<void(unsigned char)> callback) {
@@ -9,7 +11,7 @@ bool Keyboard::isKeyPressed(const int keyCode) {
 }
 
 void Keyboard::handleKeyDown(const uint8_t keyCode) {
-    if (const auto keyMapIter = this->KEYMAP.find(keyCode); keyMapIter != this->KEYMAP.end()) {
+    if (const auto keyMapIter = this->keymap.find(keyCode); keyMapIter != this->keymap.end()) {
         const uint8_t key = keyMapIter->second;
         this->keysPressed[key] = true;
         if (this->onNextKeyPress) {
@@ -20,7 +22,7 @@ void Keyboard::handleKeyDown(const uint8_t keyCode) {
 }
 
 void Keyboard::handleKeyUp(const uint8_t keyCode) {
-    if (const auto keyMapIter = this->KEYMAP.find(keyCode); keyMapIter != this->KEYMAP.end()) {
+    if (const auto keyMapIter = this->keymap.find(keyCode); keyMapIter != this->keymap.end()) {
         const uint8_t key = keyMapIter->second;
         this->keysPressed[key] = false;
     }

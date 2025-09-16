@@ -51,7 +51,7 @@ private:
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 public:
-    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, RomSettings romSettings);
+    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
 
     void loadSpritesIntoMemory();
     void loadProgramIntoMemory(std::ifstream* file);

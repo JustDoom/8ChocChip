@@ -65,6 +65,7 @@ void EmulatorEntry::start(int argc, char **argv) {
     std::unordered_map<std::string*, std::vector<std::string>> romFiles;
     std::unordered_map<std::string*, std::vector<std::string>> stateFiles;
 
+    std::unordered_map<uint8_t, unsigned char> keymap = default_keymap;
     if (std::ifstream file(configFilePath); file.good()) {
         nlohmann::json json;
         try {
@@ -86,6 +87,9 @@ void EmulatorEntry::start(int argc, char **argv) {
 
                 searchDirectory(directory.get<std::string>(), romFiles, stateFiles, romDirectories);
             }
+        }
+        if (json["keymap"] != nullptr) {
+            keymap = json["keymap"];
         }
     }
 
@@ -111,9 +115,10 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     std::vector<std::unique_ptr<Window>> windows;
     if (rom.empty()) {
-        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, stateFiles, romDirectories, windows))->init();
+        windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, stateFiles, romDirectories, windows, keymap))->init();
     } else {
-        windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}))->init(); // TODO: Handle Rom Settings
+        // FIXME maybe load from file or something like that
+        windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}, default_keymap))->init(); // TODO: Handle Rom Settings
     }
 
     bool quit = false;
