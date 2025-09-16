@@ -260,7 +260,6 @@ void MainMenu::render() {
                         }
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-                                std::cout << "coap" << std::endl;
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.logic = !data->self->romSettings.logic;
                             }
