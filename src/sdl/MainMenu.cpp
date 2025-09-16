@@ -435,6 +435,14 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
         file.close();
     }
 
+    for (const auto& element : json["directories"]) {
+        if (element == directoryString) {
+            SDL_Log("The user already has this directory added.");
+            SDL_UnlockMutex(instance->mutex);
+            return;
+        }
+    }
+
     json["directories"].push_back(directoryString);
 
     std::ofstream fileWrite(configFilePath);
