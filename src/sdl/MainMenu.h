@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "Database.h"
 
 #include "../../dependencies/clay/clay.h"
 
@@ -39,9 +40,12 @@ private:
 
     std::string* selectedRom = nullptr;
     std::string* selectedState = nullptr;
+    std::string* selectedPlatformId = nullptr;
     RomSettings romSettings;
 
     FileType fileType = ROM;
+
+    Database database;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, 
@@ -58,6 +62,7 @@ public:
 
     static void handleSwitchFileType(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handlePlatformClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);

@@ -26,7 +26,7 @@ Clay_Vector2 wheel{};
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()) {
+    romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()), database() {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
 }
@@ -167,12 +167,35 @@ void MainMenu::render() {
             CLAY({ .id = CLAY_ID("MainContent"),
                 .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
                 .backgroundColor = COLOR_BOX }) {
-                if (this->selectedRom != nullptr) {
+                if (this->selectedRom != nullptr) {                    
+                    std::string programSha1 = sha1FromFile(*this->selectedRom);
+                    std::vector<std::string> programPlatforms = this->database.getRomPlatforms(programSha1);
+
                     CLAY_TEXT(CLAY_STRING("Settings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+
+                    if (this->selectedPlatformId == nullptr || std::find(programPlatforms.begin(), programPlatforms.end(), *this->selectedPlatformId) == programPlatforms.end()) {
+                        this->selectedPlatformId = &programPlatforms.at(0);
+                    }
+
+                    CLAY_TEXT(CLAY_STRING("Platform"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                    CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
+                        for (std::string platformId : programPlatforms) {
+                            Clay_Color backgroundColor = {255, 255, 255, 255}, textColor = {0, 0, 0, 255};
+                            if (platformId == *this->selectedPlatformId) {
+                                backgroundColor = COLOR_BUTTON;
+                                textColor = {255, 255, 255, 255};
+                            }
+
+                            CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = backgroundColor }) {
+                                CLAY_TEXT(toClayString(platformId), CLAY_TEXT_CONFIG({ .textColor = textColor, .fontSize = 24 }));
+                                Clay_OnHover(this->handlePlatformClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string(platformId))));
+                            }
+                        }
+                    }
 
                     CLAY_TEXT(CLAY_STRING("Quirks"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.shift) {
+                        if (this->romSettings.quirks.shift) {
                             CLAY_TEXT(CLAY_STRING("Shift - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("Shift - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -180,12 +203,12 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.shift = !data->self->romSettings.shift;
+                                data->self->romSettings.quirks.shift = !data->self->romSettings.quirks.shift;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.memoryIncrementByX) {
+                        if (this->romSettings.quirks.memoryIncrementByX) {
                             CLAY_TEXT(CLAY_STRING("memoryIncrementByX - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("memoryIncrementByX - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -193,12 +216,12 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.memoryIncrementByX = !data->self->romSettings.memoryIncrementByX;
+                                data->self->romSettings.quirks.memoryIncrementByX = !data->self->romSettings.quirks.memoryIncrementByX;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.memoryLeaveIUnchanged) {
+                        if (this->romSettings.quirks.memoryLeaveIUnchanged) {
                             CLAY_TEXT(CLAY_STRING("memoryLeaveIUnchanged - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("memoryLeaveIUnchanged - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -206,12 +229,12 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.memoryLeaveIUnchanged = !data->self->romSettings.memoryLeaveIUnchanged;
+                                data->self->romSettings.quirks.memoryLeaveIUnchanged = !data->self->romSettings.quirks.memoryLeaveIUnchanged;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.wrap) {
+                        if (this->romSettings.quirks.wrap) {
                             CLAY_TEXT(CLAY_STRING("wrap - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("wrap - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -219,12 +242,12 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.wrap = !data->self->romSettings.wrap;
+                                data->self->romSettings.quirks.wrap = !data->self->romSettings.quirks.wrap;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.jump) {
+                        if (this->romSettings.quirks.jump) {
                             CLAY_TEXT(CLAY_STRING("jump - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("jump - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -232,12 +255,12 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.jump = !data->self->romSettings.jump;
+                                data->self->romSettings.quirks.jump = !data->self->romSettings.quirks.jump;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.vblank) {
+                        if (this->romSettings.quirks.vblank) {
                             CLAY_TEXT(CLAY_STRING("vblank - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("vblank - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -245,12 +268,12 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.vblank = !data->self->romSettings.vblank;
+                                data->self->romSettings.quirks.vblank = !data->self->romSettings.quirks.vblank;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        if (this->romSettings.logic) {
+                        if (this->romSettings.quirks.logic) {
                             CLAY_TEXT(CLAY_STRING("logic - Enabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         } else {
                             CLAY_TEXT(CLAY_STRING("logic - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
@@ -258,7 +281,7 @@ void MainMenu::render() {
                         Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
-                                data->self->romSettings.logic = !data->self->romSettings.logic;
+                                data->self->romSettings.quirks.logic = !data->self->romSettings.quirks.logic;
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
@@ -329,6 +352,16 @@ void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData p
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
         data->self->selectedRom = data->data;
+    }
+}
+
+void MainMenu::handlePlatformClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+        const auto data = reinterpret_cast<HoverData*>(userData);
+        data->self->selectedPlatformId = data->data;
+
+        PlatformData selectedPlatformData = data->self->database.getPlatformData(*data->self->selectedPlatformId);
+        data->self->romSettings.quirks = selectedPlatformData.quirks;
     }
 }
 
