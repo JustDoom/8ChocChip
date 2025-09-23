@@ -16,10 +16,24 @@
 
 bool keybindingsMenuClicked = false;
 
-KeybindingsMenu::KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap, bool* isMenuOpen) {
+KeybindingsMenu::KeybindingsMenu(TTF_Font* font, std::string romSha1, bool* isMenuOpen) {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
-    this->keymap = keymap;
+
+    this->romSha1 = romSha1;
+
+    nlohmann::json json;
+    if (std::ifstream file(configFilePath); file.good()) {
+        json = nlohmann::json::parse(file);
+        file.close();
+    }
+
+    if (json.contains("keymaps") && json["keymaps"].contains(this->romSha1)) {
+        std::unordered_map<uint8_t, unsigned char> romKeymap = json["keymaps"].at(this->romSha1);
+        this->keymap = romKeymap;
+    } else {
+        this->keymap = defaultKeymap;
+    }
 
     this->width = 200;
     this->height = 250;
@@ -72,14 +86,14 @@ bool KeybindingsMenu::handleEvent(SDL_Event& event) {
                     if (event.key.scancode >= SDL_SCANCODE_A && event.key.scancode <= SDL_SCANCODE_0) {
                         if (event.key.scancode != SDL_SCANCODE_ESCAPE) {
                             // The user pressed the new keybind for the chosen key
-                            for (auto& item : *keymap) {
+                            for (auto& item : keymap) {
                                 if (item.second == *this->keyWaitingFor) {
-                                    keymap->erase(item.first);
+                                    keymap.erase(item.first);
                                     break;
                                 }
                             }
                             unsigned char pressed_key = *this->keyWaitingFor;
-                            keymap->insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
+                            keymap.insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
                         }
                         this->keyWaitingFor = nullptr;
                     }
@@ -234,7 +248,14 @@ void KeybindingsMenu::close() {
         file.close();
     }
 
-    json["keymap"] = *this->keymap;
+    if (!json.contains("keymaps")){
+        json["keymaps"] = nlohmann::json::object();
+    }
+    if (!json["keymaps"].contains(this->romSha1)) {
+        json["keymaps"][this->romSha1] = std::unordered_map<uint8_t, unsigned char>();
+    }
+
+    json["keymaps"].at(this->romSha1) = this->keymap;
 
     std::ofstream fileWrite(configFilePath);
     fileWrite << json.dump(4);
@@ -253,13 +274,13 @@ void KeybindingsMenu::handleKeybindingClick(Clay_ElementId elementId, Clay_Point
 void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<KeybindingHoverData*>(userData);
-        *data->self->keymap = default_keymap;
+        data->self->keymap = defaultKeymap;
     }
 }
 
 char KeybindingsMenu::getKeyboardCharacter(int key_code) {
     int key_scancode = -1;
-    for (auto keyMapIterator = this->keymap->begin(); keyMapIterator != this->keymap->end(); keyMapIterator++) {
+    for (auto keyMapIterator = this->keymap.begin(); keyMapIterator != this->keymap.end(); keyMapIterator++) {
         if (keyMapIterator->second == key_code) {
             key_scancode = keyMapIterator->first;
         }

@@ -7,27 +7,27 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& rom, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), rom(rom) {
+Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path) {
     this->keyboard.keymap = keymap;
 }
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
 
-    if (this->rom.empty()) {
+    if (this->path.empty()) {
         std::cerr << "No ROM file has been specified :(" << std::endl;
         return;
     }
 
-    std::ifstream file(this->rom, std::ios::binary | std::ios::ate);
+    std::ifstream file(this->path, std::ios::binary | std::ios::ate);
     if (!file.good()) {
-        std::cerr << "Can not find file " << this->rom << std::endl;
+        std::cerr << "Can not find file " << this->path << std::endl;
         return;
     }
-    SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->rom)).c_str());
+    SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->path)).c_str());
 
     // Setup the emulator
-    if (stringEndsWith(rom, ".state")) {
+    if (stringEndsWith(this->path, ".state")) {
         this->loadState();
     } else {
         this->cpu.loadProgramIntoMemory(&file);
@@ -84,7 +84,7 @@ void Emulator::handleSaveState() {
         {"8ChocChip State File", "state"}
     };
 
-    std::string defaultLocation = this->rom;
+    std::string defaultLocation = this->path;
 
     this->isStopped = true;
     SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
@@ -115,10 +115,10 @@ void Emulator::saveState(std::string path) {
 
 void Emulator::loadState() {
     std::ifstream fileReader;
-    fileReader.open(this->rom, std::ios::binary);
+    fileReader.open(this->path, std::ios::binary);
     
     if (!fileReader.is_open()) {
-        std::cerr << "Error opening file '" << this->rom << "'" << std::endl;
+        std::cerr << "Error opening file '" << this->path << "'" << std::endl;
         return;
     }
 

@@ -44,16 +44,16 @@ private:
 
     FileType fileType = ROM;
 
-    std::unordered_map<uint8_t, unsigned char> keymap;
     bool isKeymapMenuOpen = false;
-
+    bool showStates = false;
+    
+    std::unordered_map<uint8_t, unsigned char> getSelectedRomKeymap();
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, 
         std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
         std::vector<std::string>& romDirectories,
-        std::vector<std::unique_ptr<Window>>& windows,
-        std::unordered_map<uint8_t, unsigned char> keymap);
+        std::vector<std::unique_ptr<Window>>& windows);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;
@@ -62,7 +62,6 @@ public:
     void resize(SDL_Event& event) override;
     void close() override;
 
-    static void handleSwitchFileType(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);

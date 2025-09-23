@@ -22,14 +22,15 @@ class KeybindingsMenu final : public Window {
 private:
     std::vector<KeybindingHoverData> dataList;
     uint8_t* keyWaitingFor = nullptr;
-    std::unordered_map<uint8_t, unsigned char>* keymap;
+    std::unordered_map<uint8_t, unsigned char> keymap;
     bool* isMenuOpen;
+    std::string romSha1;
 
     SDL_Mutex* mutex;
 
     char getKeyboardCharacter(int key_code);
 public:
-    KeybindingsMenu(TTF_Font* font, std::unordered_map<uint8_t, unsigned char>* keymap, bool* isMenuOpen);
+    KeybindingsMenu(TTF_Font* font, std::string romSha1, bool* isMenuOpen);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;

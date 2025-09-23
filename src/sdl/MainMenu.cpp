@@ -26,12 +26,10 @@ Clay_Vector2 wheel{};
 
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
-                   std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows,
-                   std::unordered_map<uint8_t, unsigned char> keymap) :
+                   std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
     romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()) {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
-    this->keymap = keymap;
 }
 
 void MainMenu::init() {
@@ -123,7 +121,6 @@ void MainMenu::render() {
                 } else {
                     CLAY_TEXT(CLAY_STRING("Chip8 States"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 }
-                Clay_OnHover(handleSwitchFileType, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this)));
             }
 
             CLAY({
@@ -273,20 +270,51 @@ void MainMenu::render() {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 if (!data->self->isKeymapMenuOpen) {
-                                    data->self->windows.emplace_back(std::make_unique<KeybindingsMenu>(data->self->fonts[0], &data->self->keymap, &data->self->isKeymapMenuOpen))->init();
+                                    std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
+                                    data->self->windows.emplace_back(std::make_unique<KeybindingsMenu>(data->self->fonts[0], selectedRomSha1, &data->self->isKeymapMenuOpen))->init();
                                 }
                             }
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                    }
+
+                    CLAY_TEXT(CLAY_STRING("State"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                    CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
+                        CLAY_TEXT(CLAY_STRING("Choose a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                            if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                const auto data = reinterpret_cast<HoverData*>(userData);
+                                    data->self->showStates = !data->self->showStates;
+                            }
+                        }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                    }
+                    if (this->showStates) {
+                        for (const auto& it : this->stateFiles) {
+                            for (const std::string& path : it.second) {
+                                CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = {255, 255, 255, 255} }) {
+                                    if (this->selectedState != nullptr && path == *this->selectedState) {
+                                        CLAY_TEXT(toClayString(path), CLAY_TEXT_CONFIG({ .textColor = COLOR_BUTTON, .fontSize = 24 }));
+                                    } else {
+                                        CLAY_TEXT(toClayString(path), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                                    }
+                                    Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                                        if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                            const auto data = reinterpret_cast<HoverData*>(userData);
+                                            if (data->self->selectedState != nullptr && *data->data == *data->self->selectedState) {
+                                                data->self->selectedState = nullptr;
+                                            } else {
+                                                data->self->selectedState = data->data;
+                                            }
+                                        }
+                                    }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string(path))));
+                                }
+                            }
+                        }
                     }
                 }
             }
             CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
                 if (this->selectedRom == nullptr) {
-                    if (this->fileType == ROM) {
-                        CLAY_TEXT(CLAY_STRING("Please select a ROM"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                    } else {
-                        CLAY_TEXT(CLAY_STRING("Please select a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                    }
+                    CLAY_TEXT(CLAY_STRING("Please select a ROM"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 } else {
                     CLAY_TEXT(CLAY_STRING("Play"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                     Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
@@ -324,17 +352,6 @@ void MainMenu::close() {
     Window::close();
 }
 
-void MainMenu::handleSwitchFileType(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
-    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->self->fileType == ROM) {
-            data->self->fileType = STATE;
-        } else {
-            data->self->fileType = ROM;
-        }
-    }
-}
-
 void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
@@ -352,14 +369,35 @@ void MainMenu::handleAddNewRom(Clay_ElementId elementId, const Clay_PointerData 
 void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->self->selectedRom == nullptr && data->self->selectedState == nullptr) {
+        if (data->self->selectedRom == nullptr) {
             return;
         }
-        if (data->self->selectedState) {
-            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, data->self->keymap))->init();
+        std::unordered_map<uint8_t, unsigned char> romKeymap = data->self->getSelectedRomKeymap();
+        if (data->self->selectedState != nullptr) {
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap))->init();
         } else {
-            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, data->self->keymap))->init();
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, romKeymap))->init();
         }
+    }
+}
+
+std::unordered_map<uint8_t, unsigned char> MainMenu::getSelectedRomKeymap() {
+    nlohmann::json json;
+    if (std::ifstream file(configFilePath); file.good()) {
+        json = nlohmann::json::parse(file);
+        file.close();
+    }
+
+    if (this->selectedRom == nullptr) {
+        return defaultKeymap;
+    }
+
+    std::string selectedRomSha1 = sha1FromFile(*this->selectedRom);
+    if (json.contains("keymaps") && json["keymaps"].contains(selectedRomSha1)) {
+        std::unordered_map<uint8_t, unsigned char> romKeymap = json["keymaps"].at(selectedRomSha1);
+        return romKeymap;
+    } else {
+        return defaultKeymap;
     }
 }
 

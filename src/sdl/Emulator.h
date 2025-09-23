@@ -16,7 +16,7 @@ private:
     Keyboard keyboard;
     Cpu cpu;
     
-    const std::string &rom;
+    const std::string &path;
     bool encounteredError = false;
     bool isStopped = false;
     void loadState();
