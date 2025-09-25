@@ -10,6 +10,11 @@
 #include <vector>
 
 Database::Database() {
+    if (!std::filesystem::exists(databasesFolderPath)) {
+        std::cerr << "Unable to find database folder at " << databasesFolderPath << std::endl;
+        return;
+    }
+
     loadPlatforms();
     loadPrograms();
 }

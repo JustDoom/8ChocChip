@@ -32,8 +32,8 @@ struct ProgramData {
 
 class Database {
 private:
-    std::vector<PlatformData> platforms;
-    std::vector<ProgramData> programs;
+    std::vector<PlatformData> platforms = {};
+    std::vector<ProgramData> programs = {};
 
     void loadPlatforms();
     void loadPrograms();
