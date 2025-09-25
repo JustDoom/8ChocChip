@@ -345,6 +345,7 @@ void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData p
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
         data->self->selectedRom = data->data;
+        data->self->selectedState = nullptr;
     }
 }
 
