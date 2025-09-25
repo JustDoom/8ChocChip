@@ -17,13 +17,12 @@ private:
     Cpu cpu;
     
     const std::string &path;
-    const std::string sha1;
+    std::string sha1;
     bool encounteredError = false;
     bool isStopped = false;
     void loadState();
 public:
     Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
-    Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap, std::string romSha1);
 
     void init() override;
     bool handleEvent(SDL_Event& event) override;

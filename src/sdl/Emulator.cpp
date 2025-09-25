@@ -8,10 +8,29 @@
 #include "../util/MiscUtil.h"
 
 Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
-    this->keyboard.keymap = keymap;
-}
-
-Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap, std::string romSha1) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(romSha1) {
+    if (this->path.ends_with(".state")) {
+        std::ifstream fileReader;
+        fileReader.open(path, std::ios::binary);
+        
+        if (!fileReader.is_open()) {
+            std::cerr << "Error opening file '" << path << "'" << std::endl;
+            return;
+        }
+    
+        std::vector<uint8_t> buffer(sha1Dimension);
+    
+        fileReader.seekg(0, std::ios::end);
+        size_t file_size = fileReader.tellg();
+        fileReader.seekg(Cpu::serializationDimension - 1, std::ios::beg);
+        
+        fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
+        fileReader.close();
+    
+        std::string stateSha1(buffer.begin(), buffer.end());
+        this->sha1 = stateSha1;
+    } else {
+        this->sha1 = sha1FromFile(this->path);
+    }
     this->keyboard.keymap = keymap;
 }
 
