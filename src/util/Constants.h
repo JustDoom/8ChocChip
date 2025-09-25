@@ -30,5 +30,6 @@ inline std::unordered_map<uint8_t, unsigned char> defaultKeymap = {
     {6, 0xB}, // C
     {25, 0xF}  // V
 };
+inline int sha1Dimension = 40;
 
 #endif

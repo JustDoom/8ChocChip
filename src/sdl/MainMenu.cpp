@@ -467,12 +467,11 @@ void MainMenu::selectStateCallback(void* userdata, const char* const* selectedFi
         return;
     }
 
-    int sha1Dimension = 40;
     std::vector<uint8_t> buffer(sha1Dimension);
 
     fileReader.seekg(0, std::ios::end);
     size_t file_size = fileReader.tellg();
-    fileReader.seekg(Cpu::serializationDimension, std::ios::beg);
+    fileReader.seekg(Cpu::serializationDimension - 1, std::ios::beg);
     
     fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
     fileReader.close();
@@ -481,7 +480,11 @@ void MainMenu::selectStateCallback(void* userdata, const char* const* selectedFi
 
     if (stateSha1.compare(sha1FromFile(*instance->selectedRom)) != 0) {
         std::cerr << "The selected state does not belong to the selected ROM!" << std::endl;
+        std::cerr << "State SHA1: " << stateSha1 << std::endl;
+        std::cerr << "ROM SHA1: " << sha1FromFile(*instance->selectedRom) << std::endl;
+        // TODO integrate with database to show the ROM name
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "The selected state does not belong to the selected ROM!", instance->window);
+    } else {
+        instance->selectedState = new std::string(selectedFilePathString);
     }
-
-    instance->selectedState = new std::string(selectedFilePathString);
 }
