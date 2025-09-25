@@ -17,6 +17,7 @@ private:
     Cpu cpu;
     
     const std::string &path;
+    const std::string sha1;
     bool encounteredError = false;
     bool isStopped = false;
     void loadState();

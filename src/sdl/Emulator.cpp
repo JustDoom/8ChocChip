@@ -7,7 +7,7 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path) {
+Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
     this->keyboard.keymap = keymap;
 }
 
@@ -109,6 +109,11 @@ void Emulator::saveState(std::string path) {
     std::ofstream fileWriter;
     fileWriter.open(path, std::ios::binary);
     auto serialization = this->cpu.serialize();
+    
+    // After the CPU serialization, I insert the SHA1 of the ROM to check it when selecting a state
+    // in the main dialog
+    serialization.insert(serialization.end(), this->sha1.cbegin(), this->sha1.cend());
+    
     fileWriter.write((char*)serialization.data(), serialization.size());
     fileWriter.close();
 }

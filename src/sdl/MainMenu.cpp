@@ -279,35 +279,24 @@ void MainMenu::render() {
 
                     CLAY_TEXT(CLAY_STRING("State"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        CLAY_TEXT(CLAY_STRING("Choose a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
-                            if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-                                const auto data = reinterpret_cast<HoverData*>(userData);
-                                    data->self->showStates = !data->self->showStates;
-                            }
-                        }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
-                    }
-                    if (this->showStates) {
-                        for (const auto& it : this->stateFiles) {
-                            for (const std::string& path : it.second) {
-                                CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = {255, 255, 255, 255} }) {
-                                    if (this->selectedState != nullptr && path == *this->selectedState) {
-                                        CLAY_TEXT(toClayString(path), CLAY_TEXT_CONFIG({ .textColor = COLOR_BUTTON, .fontSize = 24 }));
-                                    } else {
-                                        CLAY_TEXT(toClayString(path), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
-                                    }
-                                    Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
-                                        if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-                                            const auto data = reinterpret_cast<HoverData*>(userData);
-                                            if (data->self->selectedState != nullptr && *data->data == *data->self->selectedState) {
-                                                data->self->selectedState = nullptr;
-                                            } else {
-                                                data->self->selectedState = data->data;
-                                            }
-                                        }
-                                    }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string(path))));
+                        if (this->selectedState == nullptr) {
+                            CLAY_TEXT(CLAY_STRING("Choose a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                            Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                                if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                    SDL_DialogFileFilter stateFilter[] = { {"Chip8 State Files", "state"} };
+                                    const auto data = reinterpret_cast<HoverData*>(userData);
+                                    SDL_ShowOpenFileDialog(selectStateCallback, data->self, reinterpret_cast<MainMenu*>(userData)->window, stateFilter, 1, home, false);
                                 }
-                            }
+                            }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        } else {
+                            std::string selectedStateName = getFileFromStringPath(*this->selectedState);
+                            CLAY_TEXT(toClayString(selectedStateName), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                            Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {                                
+                                if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                    const auto data = reinterpret_cast<HoverData*>(userData);
+                                    data->self->selectedState = nullptr;
+                                }
+                            }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                         }
                     }
                 }
@@ -374,6 +363,7 @@ void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData point
         }
         std::unordered_map<uint8_t, unsigned char> romKeymap = data->self->getSelectedRomKeymap();
         if (data->self->selectedState != nullptr) {
+            std::cout << *data->self->selectedState << std::endl;
             data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap))->init();
         } else {
             data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, romKeymap))->init();
@@ -449,4 +439,49 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     instance->romDirectories.emplace_back(directoryString);
     searchDirectory(directoryString, instance->romFiles, instance->stateFiles, instance->romDirectories);
     SDL_UnlockMutex(instance->mutex);
+}
+
+void MainMenu::selectStateCallback(void* userdata, const char* const* selectedFile, int filter) {
+    if (!selectedFile) {
+        SDL_Log("An error occurred: %s", SDL_GetError());
+        return;
+    }
+    if (!*selectedFile) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
+
+    auto* instance = static_cast<MainMenu*>(userdata);
+
+    std::string selectedFilePathString = *selectedFile;
+    if (selectedFilePathString.empty()) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
+
+    std::ifstream fileReader;
+    fileReader.open(selectedFilePathString, std::ios::binary);
+    
+    if (!fileReader.is_open()) {
+        std::cerr << "Error opening file '" << selectedFilePathString << "'" << std::endl;
+        return;
+    }
+
+    int sha1Dimension = 40;
+    std::vector<uint8_t> buffer(sha1Dimension);
+
+    fileReader.seekg(0, std::ios::end);
+    size_t file_size = fileReader.tellg();
+    fileReader.seekg(Cpu::serializationDimension, std::ios::beg);
+    
+    fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
+    fileReader.close();
+
+    std::string stateSha1(buffer.begin(), buffer.end());
+
+    if (stateSha1.compare(sha1FromFile(*instance->selectedRom)) != 0) {
+        std::cerr << "The selected state does not belong to the selected ROM!" << std::endl;
+    }
+
+    instance->selectedState = new std::string(selectedFilePathString);
 }

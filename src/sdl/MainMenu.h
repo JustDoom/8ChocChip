@@ -45,7 +45,6 @@ private:
     FileType fileType = ROM;
 
     bool isKeymapMenuOpen = false;
-    bool showStates = false;
     
     std::unordered_map<uint8_t, unsigned char> getSelectedRomKeymap();
 public:
@@ -67,6 +66,7 @@ public:
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
+    static void SDLCALL selectStateCallback(void* userdata, const char* const* filelist, int filter);
 };
 
 #endif
