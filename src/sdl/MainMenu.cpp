@@ -25,9 +25,8 @@ bool clicked = false;
 Clay_Vector2 wheel{};
 
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
-                   std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()) {
+    romDirectories(romDirectories), romFiles(romFiles), windows(windows), mutex(SDL_CreateMutex()) {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
 }
@@ -116,11 +115,7 @@ void MainMenu::render() {
             .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
         }) {
             CLAY({ .id = CLAY_ID("SideBarTitle"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_TITLE }) {
-                if (this->fileType == ROM) {
-                    CLAY_TEXT(CLAY_STRING("Chip8 Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                } else {
-                    CLAY_TEXT(CLAY_STRING("Chip8 States"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                }
+                CLAY_TEXT(CLAY_STRING("Chip8 Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
             }
 
             CLAY({
@@ -129,11 +124,10 @@ void MainMenu::render() {
                 .backgroundColor = COLOR_BOX,
                 .clip = { .vertical = true, .childOffset = Clay_GetScrollOffset() }
             }) {
-                std::unordered_map<std::string *, std::vector<std::string>>& files = (this->fileType == ROM) ? this->romFiles : this->stateFiles;
-                if (this->romDirectories.empty() || files.empty()) {
+                if (this->romDirectories.empty() || this->romFiles.empty()) {
                     CLAY_TEXT(CLAY_STRING("No files found"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24, .textAlignment = CLAY_TEXT_ALIGN_CENTER }));
                 } else {
-                    for (auto& dir : files) {
+                    for (auto& dir : this->romFiles) {
                         for (std::string& romPath : dir.second) {
                             if (&romPath == this->selectedRom) {
                                 CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_HIGHLIGHT}) {
@@ -396,9 +390,8 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
         data->self->romFiles.clear();
-        data->self->stateFiles.clear();
         for (const auto& dir : data->self->romDirectories) {
-            searchDirectory(dir, data->self->romFiles, data->self->stateFiles, data->self->romDirectories);
+            searchDirectory(dir, data->self->romFiles, data->self->romDirectories);
         }
     }
 }
@@ -438,7 +431,7 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     fileWrite.close();
 
     instance->romDirectories.emplace_back(directoryString);
-    searchDirectory(directoryString, instance->romFiles, instance->stateFiles, instance->romDirectories);
+    searchDirectory(directoryString, instance->romFiles, instance->romDirectories);
     SDL_UnlockMutex(instance->mutex);
 }
 

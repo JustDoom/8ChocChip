@@ -48,7 +48,7 @@ bool stringEndsWith(const std::string& str, const std::string endStr) {
     return str.compare(str.size() - endStr.size(), endStr.size(), endStr) == 0;
 }
 
-void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::unordered_map<std::string*, std::vector<std::string>>& stateFiles, std::vector<std::string>& romDirectories) {
+void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories) {
     if (std::ifstream file(directory); !file.good()) {
         std::cerr << "Unable to find directory " << directory << std::endl;
         return;
@@ -61,28 +61,17 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
 
         std::cout << "Processing file: " << filesystemPathToString(romFile.path()) << " - " << sha1FromFile(filesystemPathToString(romFile.path())) << std::endl;
 
-        if (!stringEndsWith(romFile.path().string(), ".state")) {
-            if (romFile.file_size() > 3584) {
-                continue;
-            }
-
-            // Check if the rom directory doesn't exist in romFiles, then add it
-            if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
-                romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
-            }
-
-            // Add the file path to the romFiles entry
-            romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
-        } else {
-            // It is a state file
-            if (stateFiles.find(&romDirectories.back()) == stateFiles.end()) {
-                stateFiles.emplace(&romDirectories.back(), std::vector<std::string>());
-            }
-
-            // Add the file path to the stateFiles entry
-            stateFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
+        if (romFile.file_size() > 3584) {
+            continue;
         }
-        
+
+        // Check if the rom directory doesn't exist in romFiles, then add it
+        if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+            romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
+        }
+
+        // Add the file path to the romFiles entry
+        romFiles.find(&romDirectories.back())->second.emplace_back(romFile.path().string());
     }
 }
 
