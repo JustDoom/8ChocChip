@@ -11,6 +11,10 @@ Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std:
     this->keyboard.keymap = keymap;
 }
 
+Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap, std::string romSha1) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(romSha1) {
+    this->keyboard.keymap = keymap;
+}
+
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
 

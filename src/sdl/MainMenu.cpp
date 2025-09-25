@@ -364,7 +364,7 @@ void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData point
         std::unordered_map<uint8_t, unsigned char> romKeymap = data->self->getSelectedRomKeymap();
         if (data->self->selectedState != nullptr) {
             std::cout << *data->self->selectedState << std::endl;
-            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap))->init();
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap, sha1FromFile(*data->self->selectedRom)))->init();
         } else {
             data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, romKeymap))->init();
         }
