@@ -351,7 +351,17 @@ void MainMenu::handleSwitchFileType(Clay_ElementId elementId, const Clay_Pointer
 void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
-        data->self->selectedRom = data->data;
+        if (data->data != data->self->selectedRom) {
+            data->self->selectedRom = data->data;
+
+            std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
+            std::vector<std::string> programPlatforms = data->self->database.getRomPlatforms(selectedRomSha1);
+            if (!programPlatforms.empty()) {
+                data->self->selectedPlatformId = &programPlatforms.at(0);
+                PlatformData selectedPlatformData = data->self->database.getPlatformData(*data->self->selectedPlatformId);
+                data->self->romSettings.quirks = selectedPlatformData.quirks;
+            }
+        }
     }
 }
 
