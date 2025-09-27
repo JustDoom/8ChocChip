@@ -174,7 +174,7 @@ void MainMenu::render() {
                     CLAY_TEXT(CLAY_STRING("Settings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
 
                     if (this->selectedPlatformId == nullptr || std::find(programPlatforms.begin(), programPlatforms.end(), *this->selectedPlatformId) == programPlatforms.end()) {
-                        this->selectedPlatformId = &programPlatforms.at(0);
+                        this->selectedPlatformId = new std::string(programPlatforms.at(0));
                     }
 
                     CLAY_TEXT(CLAY_STRING("Platform"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
