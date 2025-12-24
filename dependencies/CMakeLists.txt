@@ -1,7 +1,9 @@
 set(CLAY_INCLUDE_ALL_EXAMPLES OFF CACHE BOOL "Build all examples" FORCE)
 add_subdirectory(clay)
 
-set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+set(JSON_Install OFF CACHE BOOL "" FORCE)
+set(JSON_MultipleHeaders OFF CACHE BOOL "" FORCE)
 add_subdirectory(json)
 
 if(SDL_VENDORED)
