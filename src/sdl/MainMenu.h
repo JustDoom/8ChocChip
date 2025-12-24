@@ -11,15 +11,11 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "../util/Constants.h"
 
 #include "../../dependencies/clay/clay.h"
 
 class MainMenu;
-
-enum FileType {
-    ROM,
-    STATE
-};
 
 struct HoverData {
     MainMenu* self;
@@ -30,7 +26,6 @@ class MainMenu final : public Window {
 private:
     std::vector<std::string>& romDirectories;
     std::unordered_map<std::string*, std::vector<std::string>>& romFiles;
-    std::unordered_map<std::string*, std::vector<std::string>>& stateFiles;
     std::vector<std::unique_ptr<Window>>& windows;
 
     InputHandler inputHandler{};
@@ -41,11 +36,12 @@ private:
     std::string* selectedState = nullptr;
     RomSettings romSettings;
 
-    FileType fileType = ROM;
+    bool isKeymapMenuOpen = false;
+    
+    std::unordered_map<uint8_t, unsigned char> getSelectedRomKeymap();
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, 
-        std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
         std::vector<std::string>& romDirectories,
         std::vector<std::unique_ptr<Window>>& windows);
 
@@ -56,13 +52,12 @@ public:
     void resize(SDL_Event& event) override;
     void close() override;
 
-    static void handleSwitchFileType(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void SDLCALL callback(void* userdata, const char* const* filelist, int filter);
-
+    static void SDLCALL selectStateCallback(void* userdata, const char* const* filelist, int filter);
 };
 
 #endif

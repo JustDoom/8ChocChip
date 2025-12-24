@@ -7,25 +7,50 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& rom, const RomSettings& romSettings) : cpu(&renderWrapper, &keyboard, &speaker, romSettings), rom(rom) {}
+Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
+    if (this->path.ends_with(".state")) {
+        std::ifstream fileReader;
+        fileReader.open(path, std::ios::binary);
+        
+        if (!fileReader.is_open()) {
+            std::cerr << "Error opening file '" << path << "'" << std::endl;
+            return;
+        }
+    
+        std::vector<uint8_t> buffer(sha1Dimension);
+    
+        fileReader.seekg(0, std::ios::end);
+        size_t file_size = fileReader.tellg();
+        fileReader.seekg(Cpu::serializationDimension - 1, std::ios::beg);
+        
+        fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
+        fileReader.close();
+    
+        std::string stateSha1(buffer.begin(), buffer.end());
+        this->sha1 = stateSha1;
+    } else {
+        this->sha1 = sha1FromFile(this->path);
+    }
+    this->keyboard.keymap = keymap;
+}
 
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
 
-    if (this->rom.empty()) {
+    if (this->path.empty()) {
         std::cerr << "No ROM file has been specified :(" << std::endl;
         return;
     }
 
-    std::ifstream file(this->rom, std::ios::binary | std::ios::ate);
+    std::ifstream file(this->path, std::ios::binary | std::ios::ate);
     if (!file.good()) {
-        std::cerr << "Can not find file " << this->rom << std::endl;
+        std::cerr << "Can not find file " << this->path << std::endl;
         return;
     }
-    SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->rom)).c_str());
+    SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->path)).c_str());
 
     // Setup the emulator
-    if (stringEndsWith(rom, ".state")) {
+    if (stringEndsWith(this->path, ".state")) {
         this->loadState();
     } else {
         this->cpu.loadProgramIntoMemory(&file);
@@ -82,7 +107,7 @@ void Emulator::handleSaveState() {
         {"8ChocChip State File", "state"}
     };
 
-    std::string defaultLocation = this->rom;
+    std::string defaultLocation = this->path;
 
     this->isStopped = true;
     SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
@@ -107,20 +132,25 @@ void Emulator::saveState(std::string path) {
     std::ofstream fileWriter;
     fileWriter.open(path, std::ios::binary);
     auto serialization = this->cpu.serialize();
+    
+    // After the CPU serialization, I insert the SHA1 of the ROM to check it when selecting a state
+    // in the main dialog
+    serialization.insert(serialization.end(), this->sha1.cbegin(), this->sha1.cend());
+    
     fileWriter.write((char*)serialization.data(), serialization.size());
     fileWriter.close();
 }
 
 void Emulator::loadState() {
     std::ifstream fileReader;
-    fileReader.open(this->rom, std::ios::binary);
+    fileReader.open(this->path, std::ios::binary);
     
     if (!fileReader.is_open()) {
-        std::cerr << "Error opening file '" << this->rom << "'" << std::endl;
+        std::cerr << "Error opening file '" << this->path << "'" << std::endl;
         return;
     }
 
-    std::vector<uint8_t> buffer(this->cpu.serializationDimension);
+    std::vector<uint8_t> buffer(Cpu::serializationDimension + sha1Dimension);
 
     fileReader.seekg(0, std::ios::end);
     size_t file_size = fileReader.tellg();
