@@ -82,8 +82,8 @@ void Cpu::runInstruction() {
     const uint16_t opcode = (this->memory[this->pc] << 8) | second;
     this->pc += 2;
 
-    const uint8_t x = (opcode & 0x0F00) >> 8;
-    const uint8_t y = (opcode & 0x00F0) >> 4;
+    const uint8_t x = (opcode >> 8) & 0xF;
+    const uint8_t y = (opcode >> 4) & 0xF;
 
     switch (opcode & 0xF000) {
         case 0x0000:
