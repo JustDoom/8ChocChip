@@ -11,6 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
+#include "Database.h"
 #include "../util/Constants.h"
 
 #include "../../dependencies/clay/clay.h"
@@ -34,8 +35,10 @@ private:
 
     std::string* selectedRom = nullptr;
     std::string* selectedState = nullptr;
+    std::string* selectedPlatformId = nullptr;
     RomSettings romSettings;
 
+    Database database;
     bool isKeymapMenuOpen = false;
     
     std::unordered_map<uint8_t, unsigned char> getSelectedRomKeymap();
@@ -53,6 +56,7 @@ public:
     void close() override;
 
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
+    static void handlePlatformClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleAddNewRom(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handlePlay(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);
     static void handleRefresh(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);

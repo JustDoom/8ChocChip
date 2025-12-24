@@ -1,10 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-struct RomSettings {
-    int tickSpeed;
-
-    // Quirks
+struct Quirks {
     bool shift = false;
     bool memoryIncrementByX = false;
     bool memoryLeaveIUnchanged = false;
@@ -12,6 +9,12 @@ struct RomSettings {
     bool jump = false;
     bool vblank = true;
     bool logic = true;
+};
+
+struct RomSettings {
+    int tickSpeed;
+
+    Quirks quirks{};
 };
 
 #endif

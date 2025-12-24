@@ -135,21 +135,21 @@ void Cpu::runInstruction() {
                     break;
                 case 0x1: {
                     this->registers[x] |= this->registers[y];
-                    if (this->romSettings.logic) {
+                    if (this->romSettings.quirks.logic) {
                         this->registers[0xF] = 0;
                     }
                     break;
                 }
                 case 0x2: {
                     this->registers[x] &= this->registers[y];
-                    if (this->romSettings.logic) {
+                    if (this->romSettings.quirks.logic) {
                         this->registers[0xF] = 0;
                     }
                     break;
                 }
                 case 0x3: {
                     this->registers[x] ^= this->registers[y];
-                    if (this->romSettings.logic) {
+                    if (this->romSettings.quirks.logic) {
                         this->registers[0xF] = 0;
                     }
                     break;
@@ -167,7 +167,7 @@ void Cpu::runInstruction() {
                     break;
                 }
                 case 0x6: {
-                    if (!this->romSettings.shift) {
+                    if (!this->romSettings.quirks.shift) {
                         this->registers[x] = this->registers[y];
                     }
                     const uint8_t value = (this->registers[x] & 0x1);
@@ -182,7 +182,7 @@ void Cpu::runInstruction() {
                     break;
                 }
                 case 0xE: {
-                    if (!this->romSettings.shift) {
+                    if (!this->romSettings.quirks.shift) {
                         this->registers[x] = this->registers[y];
                     }
                     const uint8_t value = (this->registers[x] & 0x80) >> 7;
@@ -204,7 +204,7 @@ void Cpu::runInstruction() {
             this->address = (opcode & 0xFFF);
             break;
         case 0xB000:
-            if (this->romSettings.jump) {
+            if (this->romSettings.quirks.jump) {
                 this->pc = (opcode & 0xFFF) + this->registers[x];
             } else {
                 this->pc = (opcode & 0xFFF) + this->registers[0];
@@ -244,7 +244,7 @@ void Cpu::runInstruction() {
                     sprite <<= 1;
                 }
             }
-            if (this->romSettings.vblank) {
+            if (this->romSettings.quirks.vblank) {
                 this->drawn = true;
             }
             break;
@@ -306,15 +306,15 @@ void Cpu::runInstruction() {
                 }
                 case 0x55: {
                     std::memcpy(&memory[address & 0xFFF], &registers[0], x + 1);
-                    if (!this->romSettings.memoryLeaveIUnchanged) {
-                        this->address = this->address + (this->romSettings.memoryIncrementByX ? x : x + 1) & 0xFFF;
+                    if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
+                        this->address = this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1) & 0xFFF;
                     }
                     break;
                 }
                 case 0x65: {
                     std::memcpy(&registers[0], &memory[address & 0xFFF], x + 1);
-                    if (!this->romSettings.memoryLeaveIUnchanged) {
-                        this->address = this->address + (this->romSettings.memoryIncrementByX ? x : x + 1) & 0xFFF;
+                    if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
+                        this->address = this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1) & 0xFFF;
                     }
                     break;
                 }
