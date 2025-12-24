@@ -363,7 +363,7 @@ void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData p
         const auto data = reinterpret_cast<HoverData*>(userData);
         if (data->data != data->self->selectedRom) {
             data->self->selectedRom = data->data;
-            ata->self->selectedState = nullptr;
+            data->self->selectedState = nullptr;
 
             std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
             std::vector<std::string> programPlatforms = data->self->database.getRomPlatforms(selectedRomSha1);

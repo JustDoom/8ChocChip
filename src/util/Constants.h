@@ -3,6 +3,7 @@
 
 #include <string>
 #include <filesystem>
+#include <unordered_map>
 
 #ifdef _WIN32
     #define HOME_VARIABLE "USERPROFILE"
