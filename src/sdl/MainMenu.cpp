@@ -13,6 +13,7 @@
 #include "../util/Constants.h"
 #include "../util/MiscUtil.h"
 #include "Emulator.h"
+#include "KeybindingsMenu.h"
 
 constexpr auto COLOR_BOX = (Clay_Color) {224, 215, 210, 255};
 constexpr auto COLOR_TITLE = (Clay_Color) {140, 100, 60, 255};
@@ -24,9 +25,8 @@ bool clicked = false;
 Clay_Vector2 wheel{};
 
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
-                   std::unordered_map<std::string *, std::vector<std::string>> &stateFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
-    romDirectories(romDirectories), romFiles(romFiles), stateFiles(stateFiles), windows(windows), mutex(SDL_CreateMutex()), database() {
+    romDirectories(romDirectories), romFiles(romFiles), windows(windows), mutex(SDL_CreateMutex()), database() {
     this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
     this->fonts[0] = font;
 }
@@ -115,12 +115,7 @@ void MainMenu::render() {
             .layout = { .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM },
         }) {
             CLAY({ .id = CLAY_ID("SideBarTitle"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = COLOR_TITLE }) {
-                if (this->fileType == ROM) {
-                    CLAY_TEXT(CLAY_STRING("Chip8 Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                } else {
-                    CLAY_TEXT(CLAY_STRING("Chip8 States"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                }
-                Clay_OnHover(handleSwitchFileType, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this)));
+                CLAY_TEXT(CLAY_STRING("Chip8 Roms"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
             }
 
             CLAY({
@@ -129,11 +124,10 @@ void MainMenu::render() {
                 .backgroundColor = COLOR_BOX,
                 .clip = { .vertical = true, .childOffset = Clay_GetScrollOffset() }
             }) {
-                std::unordered_map<std::string *, std::vector<std::string>>& files = (this->fileType == ROM) ? this->romFiles : this->stateFiles;
-                if (this->romDirectories.empty() || files.empty()) {
+                if (this->romDirectories.empty() || this->romFiles.empty()) {
                     CLAY_TEXT(CLAY_STRING("No files found"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24, .textAlignment = CLAY_TEXT_ALIGN_CENTER }));
                 } else {
-                    for (auto& dir : files) {
+                    for (auto& dir : this->romFiles) {
                         for (std::string& romPath : dir.second) {
                             if (&romPath == this->selectedRom) {
                                 CLAY({.layout = {.sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }, .padding = Clay_Padding({.left = 8, .top = 16, .bottom = 16}),.childGap = 16,.childAlignment = { .y = CLAY_ALIGN_Y_CENTER }},.backgroundColor = COLOR_HIGHLIGHT}) {
@@ -286,20 +280,47 @@ void MainMenu::render() {
                         }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
                     }
 
-                    CLAY_TEXT(CLAY_STRING("Keybinds"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                    CLAY_TEXT(CLAY_STRING("Keybindings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
-                        CLAY_TEXT(CLAY_STRING("Save"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                        // Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        CLAY_TEXT(CLAY_STRING("Configure"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                            if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                const auto data = reinterpret_cast<HoverData*>(userData);
+                                if (!data->self->isKeymapMenuOpen) {
+                                    std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
+                                    data->self->windows.emplace_back(std::make_unique<KeybindingsMenu>(data->self->fonts[0], selectedRomSha1, &data->self->isKeymapMenuOpen))->init();
+                                }
+                            }
+                        }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                    }
+
+                    CLAY_TEXT(CLAY_STRING("State"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
+                    CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
+                        if (this->selectedState == nullptr) {
+                            CLAY_TEXT(CLAY_STRING("Choose a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                            Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                                if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                    SDL_DialogFileFilter stateFilter[] = { {"Chip8 State Files", "state"} };
+                                    const auto data = reinterpret_cast<HoverData*>(userData);
+                                    SDL_ShowOpenFileDialog(selectStateCallback, data->self, reinterpret_cast<MainMenu*>(userData)->window, stateFilter, 1, home, false);
+                                }
+                            }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        } else {
+                            std::string selectedStateName = getFileFromStringPath(*this->selectedState);
+                            CLAY_TEXT(toClayString(selectedStateName), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
+                            Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {                                
+                                if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
+                                    const auto data = reinterpret_cast<HoverData*>(userData);
+                                    data->self->selectedState = nullptr;
+                                }
+                            }, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
+                        }
                     }
                 }
             }
             CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
                 if (this->selectedRom == nullptr) {
-                    if (this->fileType == ROM) {
-                        CLAY_TEXT(CLAY_STRING("Please select a ROM"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                    } else {
-                        CLAY_TEXT(CLAY_STRING("Please select a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                    }
+                    CLAY_TEXT(CLAY_STRING("Please select a ROM"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                 } else {
                     CLAY_TEXT(CLAY_STRING("Play"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                     Clay_OnHover(handlePlay, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, nullptr)));
@@ -337,22 +358,12 @@ void MainMenu::close() {
     Window::close();
 }
 
-void MainMenu::handleSwitchFileType(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
-    if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->self->fileType == ROM) {
-            data->self->fileType = STATE;
-        } else {
-            data->self->fileType = ROM;
-        }
-    }
-}
-
 void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
         if (data->data != data->self->selectedRom) {
             data->self->selectedRom = data->data;
+            ata->self->selectedState = nullptr;
 
             std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
             std::vector<std::string> programPlatforms = data->self->database.getRomPlatforms(selectedRomSha1);
@@ -385,14 +396,36 @@ void MainMenu::handleAddNewRom(Clay_ElementId elementId, const Clay_PointerData 
 void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->self->selectedRom == nullptr && data->self->selectedState == nullptr) {
+        if (data->self->selectedRom == nullptr) {
             return;
         }
-        if (data->self->selectedState) {
-            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings))->init();
+        std::unordered_map<uint8_t, unsigned char> romKeymap = data->self->getSelectedRomKeymap();
+        if (data->self->selectedState != nullptr) {
+            std::cout << *data->self->selectedState << std::endl;
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap))->init();
         } else {
-            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings))->init();
+            data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, romKeymap))->init();
         }
+    }
+}
+
+std::unordered_map<uint8_t, unsigned char> MainMenu::getSelectedRomKeymap() {
+    nlohmann::json json;
+    if (std::ifstream file(configFilePath); file.good()) {
+        json = nlohmann::json::parse(file);
+        file.close();
+    }
+
+    if (this->selectedRom == nullptr) {
+        return defaultKeymap;
+    }
+
+    std::string selectedRomSha1 = sha1FromFile(*this->selectedRom);
+    if (json.contains("keymaps") && json["keymaps"].contains(selectedRomSha1)) {
+        std::unordered_map<uint8_t, unsigned char> romKeymap = json["keymaps"].at(selectedRomSha1);
+        return romKeymap;
+    } else {
+        return defaultKeymap;
     }
 }
 
@@ -400,9 +433,8 @@ void MainMenu::handleRefresh(Clay_ElementId elementId, const Clay_PointerData po
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
         data->self->romFiles.clear();
-        data->self->stateFiles.clear();
         for (const auto& dir : data->self->romDirectories) {
-            searchDirectory(dir, data->self->romFiles, data->self->stateFiles, data->self->romDirectories);
+            searchDirectory(dir, data->self->romFiles, data->self->romDirectories);
         }
     }
 }
@@ -450,6 +482,54 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     fileWrite.close();
 
     instance->romDirectories.emplace_back(directoryString);
-    searchDirectory(directoryString, instance->romFiles, instance->stateFiles, instance->romDirectories);
+    searchDirectory(directoryString, instance->romFiles, instance->romDirectories);
     SDL_UnlockMutex(instance->mutex);
+}
+
+void MainMenu::selectStateCallback(void* userdata, const char* const* selectedFile, int filter) {
+    if (!selectedFile) {
+        SDL_Log("An error occurred: %s", SDL_GetError());
+        return;
+    }
+    if (!*selectedFile) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
+
+    auto* instance = static_cast<MainMenu*>(userdata);
+
+    std::string selectedFilePathString = *selectedFile;
+    if (selectedFilePathString.empty()) {
+        SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
+        return;
+    }
+
+    std::ifstream fileReader;
+    fileReader.open(selectedFilePathString, std::ios::binary);
+    
+    if (!fileReader.is_open()) {
+        std::cerr << "Error opening file '" << selectedFilePathString << "'" << std::endl;
+        return;
+    }
+
+    std::vector<uint8_t> buffer(sha1Dimension);
+
+    fileReader.seekg(0, std::ios::end);
+    size_t file_size = fileReader.tellg();
+    fileReader.seekg(Cpu::serializationDimension - 1, std::ios::beg);
+    
+    fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
+    fileReader.close();
+
+    std::string stateSha1(buffer.begin(), buffer.end());
+
+    if (stateSha1.compare(sha1FromFile(*instance->selectedRom)) != 0) {
+        std::cerr << "The selected state does not belong to the selected ROM!" << std::endl;
+        std::cerr << "State SHA1: " << stateSha1 << std::endl;
+        std::cerr << "ROM SHA1: " << sha1FromFile(*instance->selectedRom) << std::endl;
+        // TODO integrate with database to show the ROM name
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "The selected state does not belong to the selected ROM!", instance->window);
+    } else {
+        instance->selectedState = new std::string(selectedFilePathString);
+    }
 }

@@ -9,4 +9,6 @@ target_sources(8ChocChip PRIVATE
         Window.h
         Database.cpp
         Database.h
+        KeybindingsMenu.h
+        KeybindingsMenu.cpp
 )
