@@ -30,10 +30,10 @@ public:
 
     virtual void init();
     virtual void init(int width, int height);
-    virtual bool handleEvent(SDL_Event& event);
+    virtual bool handleEvent(SDL_Event* event);
     virtual void update();
     virtual void render() = 0;
-    virtual void resize(SDL_Event& event);
+    virtual void resize(SDL_Event* event);
     virtual void close();
 
     bool isShown() const;

@@ -33,7 +33,7 @@ public:
     KeybindingsMenu(TTF_Font* font, std::string romSha1, bool* isMenuOpen);
 
     void init() override;
-    bool handleEvent(SDL_Event& event) override;
+    bool handleEvent(SDL_Event* event) override;
     void update() override;
     void render() override;
     void close() override;

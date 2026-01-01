@@ -63,28 +63,28 @@ void KeybindingsMenu::init() {
     SDL_SetWindowResizable(this->window, false);
 }
 
-bool KeybindingsMenu::handleEvent(SDL_Event& event) {
+bool KeybindingsMenu::handleEvent(SDL_Event* event) {
     if (!Window::handleEvent(event)) {
         return false;
     }
 
-    if (event.window.windowID == this->windowId) {        
+    if (event->window.windowID == this->windowId) {
         // TODO manage events
-        switch(event.type) {
+        switch(event->type) {
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                if (event.button.button == SDL_BUTTON_LEFT) {
+                if (event->button.button == SDL_BUTTON_LEFT) {
                     keybindingsMenuClicked = true;
                 }
             break;
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                if (event.button.button == SDL_BUTTON_LEFT) {
+                if (event->button.button == SDL_BUTTON_LEFT) {
                     keybindingsMenuClicked = false;
                 }
             break;
             case SDL_EVENT_KEY_DOWN:
                 if (this->keyWaitingFor) {
-                    if (event.key.scancode >= SDL_SCANCODE_A && event.key.scancode <= SDL_SCANCODE_0) {
-                        if (event.key.scancode != SDL_SCANCODE_ESCAPE) {
+                    if (event->key.scancode >= SDL_SCANCODE_A && event->key.scancode <= SDL_SCANCODE_0) {
+                        if (event->key.scancode != SDL_SCANCODE_ESCAPE) {
                             // The user pressed the new keybind for the chosen key
                             for (auto& item : keymap) {
                                 if (item.second == *this->keyWaitingFor) {
@@ -93,7 +93,7 @@ bool KeybindingsMenu::handleEvent(SDL_Event& event) {
                                 }
                             }
                             unsigned char pressed_key = *this->keyWaitingFor;
-                            keymap.insert_or_assign(static_cast<uint8_t>(event.key.scancode), pressed_key);
+                            keymap.insert_or_assign(static_cast<uint8_t>(event->key.scancode), pressed_key);
                         }
                         this->keyWaitingFor = nullptr;
                     }

@@ -49,21 +49,21 @@ void MainMenu::init() {
     Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
 }
 
-bool MainMenu::handleEvent(SDL_Event &event) {
+bool MainMenu::handleEvent(SDL_Event* event) {
     if (!Window::handleEvent(event)) {
         return false;
     }
 
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_DOWN:
-            this->inputHandler.addKey(event.key.scancode);
+            this->inputHandler.addKey(event->key.scancode);
         break;
         case SDL_EVENT_KEY_UP:
-            this->inputHandler.removeKey(event.key.scancode);
+            this->inputHandler.removeKey(event->key.scancode);
         break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
-            this->inputHandler.removeButton(event.button.button);
-        if (event.button.button == SDL_BUTTON_LEFT) {
+            this->inputHandler.removeButton(event->button.button);
+        if (event->button.button == SDL_BUTTON_LEFT) {
             clicked = false;
         }
         break;
@@ -71,14 +71,14 @@ bool MainMenu::handleEvent(SDL_Event &event) {
             // Clay_SetPointerState((Clay_Vector2) { event.motion.x, event.motion.y }, event.motion.state & SDL_BUTTON_LMASK);
         break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            this->inputHandler.addButton(event.button.button);
-            if (event.button.button == SDL_BUTTON_LEFT) {
+            this->inputHandler.addButton(event->button.button);
+            if (event->button.button == SDL_BUTTON_LEFT) {
                 clicked = true;
             }
         break;
         case SDL_EVENT_MOUSE_WHEEL:
-            wheel.x = event.wheel.x * 2;
-            wheel.y = event.wheel.y * 2;
+            wheel.x = event->wheel.x * 2;
+            wheel.y = event->wheel.y * 2;
         break;
     }
 
@@ -341,9 +341,9 @@ void MainMenu::render() {
     this->dataList.clear();
 }
 
-void MainMenu::resize(SDL_Event& event) {
-    this->width = event.window.data1;
-    this->height = event.window.data2;
+void MainMenu::resize(SDL_Event* event) {
+    this->width = event->window.data1;
+    this->height = event->window.data2;
 }
 
 void MainMenu::close() {

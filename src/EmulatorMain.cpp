@@ -1,4 +1,4 @@
-#include "EmulatorEntry.h"
+#include "EmulatorMain.h"
 
 #include <filesystem>
 #include <fstream>
@@ -19,9 +19,7 @@
 #define CLAY_IMPLEMENTATION
 #include "../dependencies/clay/clay.h"
 
-void EmulatorEntry::start(int argc, char **argv) {
-    std::string rom;
-
+bool EmulatorMain::initialise(int argc, char **argv) {
     for (int i = 0; i < argc; i++) {
         std::string command = toLowerCase(argv[i]);
         if (command.rfind("--") != 0 && command.rfind('-') != 0) {
@@ -35,11 +33,11 @@ void EmulatorEntry::start(int argc, char **argv) {
             }
 
             std::cerr << "Please include the path to the file" << std::endl;
-            return;
+            return false;
         }
         if (command == "--help" || command == "-h") {
             std::cerr << "Usage: 8ChocChip --path <pathtorom/pathtostate>" << std::endl;
-            return;
+            return false;
         }
         if (command == "--debug" || command == "-d") {
             debug = true;
@@ -57,12 +55,9 @@ void EmulatorEntry::start(int argc, char **argv) {
     // TODO: Move config stuff to its own file
     if (!home) {
         std::cerr << home << " environment variable not set. " << std::endl;
-        return;
+        return false;
     }
     configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
-
-    std::vector<std::string> romDirectories;
-    std::unordered_map<std::string*, std::vector<std::string>> romFiles;
 
     std::unordered_map<uint8_t, unsigned char> keymap = defaultKeymap;
     if (std::ifstream file(configFilePath); file.good()) {
@@ -72,7 +67,7 @@ void EmulatorEntry::start(int argc, char **argv) {
         } catch (const nlohmann::json::parse_error& error) {
             // TODO: Better warning
             std::cerr << "Unable to parse the config, please make sure it contains valid JSON";
-            return;
+            return false;
         }
         file.close();
         std::cout << json << std::endl;
@@ -94,7 +89,7 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL could not initialize. SDL_Error: " << SDL_GetError() << std::endl;
-        return;
+        return false;
     }
 
     if (!SDL_InitSubSystem(SDL_INIT_AUDIO)) {
@@ -103,16 +98,15 @@ void EmulatorEntry::start(int argc, char **argv) {
 
     if (!TTF_Init()) {
         SDL_Log("Couldn't initialize TTF: %s\n", SDL_GetError());
-        return;
+        return false;
     }
 
-    TTF_Font *font = TTF_OpenFont("assets/font.ttf", 22);
+    font = TTF_OpenFont("assets/font.ttf", 22);
     if (!font) {
         SDL_Log("Failed to load font: %s\n", SDL_GetError());
-        return;
+        return false;
     }
 
-    std::vector<std::unique_ptr<Window>> windows;
     if (rom.empty()) {
         windows.emplace_back(std::make_unique<MainMenu>(font, romFiles, romDirectories, windows))->init();
     } else {
@@ -120,80 +114,81 @@ void EmulatorEntry::start(int argc, char **argv) {
         windows.emplace_back(std::make_unique<Emulator>(rom, RomSettings{}, defaultKeymap))->init(); // TODO: Handle Rom Settings
     }
 
-    bool quit = false;
-    SDL_Event event;
-
-    Timer fpsTimer;
-    Timer capTimer;
-    Timer fpsPrintTimer;
-
-    int countedFrames = 0;
     fpsTimer.start();
     fpsPrintTimer.start();
 
-    while (!quit) {
-        capTimer.start();
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT) {
-                quit = true;
-            }
+    return true;
+}
 
-            for (const auto& window : windows) {
-                window->handleEvent(event);
-            }
+void EmulatorMain::event(SDL_Event* event) {
+    if (event->type == SDL_EVENT_QUIT) {
+        running = false;
+    }
+
+    for (const auto& window : windows) {
+        window->handleEvent(event);
+    }
+}
+
+void EmulatorMain::run() {
+    capTimer.start();
+
+    // Do not change, this makes multiple windows not crash
+    for (int i = 0; i < windows.size(); ++i) {
+        if (windows[i]->isDestroyed()) {
+            windows.erase(windows.begin() + i);
+            continue;
         }
+        windows[i]->update();
+        windows[i]->render();
+    }
 
-        // Do not change, this makes multiple windows not crash
-        for (int i = 0; i < windows.size(); ++i) {
-            if (windows[i]->isDestroyed()) {
-                windows.erase(windows.begin() + i);
-                continue;
-            }
-            windows[i]->update();
-            windows[i]->render();
-        }
-
-        bool allWindowsClosed = true;
-        for (const auto& window : windows) {
-            if (window->isShown()){
-                allWindowsClosed = false;
-                break;
-            }
-        }
-
-        if (allWindowsClosed || windows.empty()) {
-            quit = true;
-        }
-
-        float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
-        if (avgFPS > 2000000) {
-            avgFPS = 0;
-        }
-
-        if (debug && fpsPrintTimer.getTicks() >= 1000) {
-            if (!windows.empty()) {
-                std::cout << "FPS: " << avgFPS << std::endl;
-                for (int i = 0; i < windows.size(); i++) {
-                    auto *emulatorPtr = dynamic_cast<Emulator *>(windows[i].get());
-                    if (emulatorPtr) {
-                        std::cout << "Window " << i << " - " << emulatorPtr->getInstructions() << std::endl;
-                        emulatorPtr->resetInstructions();
-                    } else {
-                         std::cout << "Window " << i << " - Failed to cast Window to Emulator. Might just be the main menu or settings window" << std::endl;
-                    }
-                }
-            }
-            fpsPrintTimer.start();
-        }
-
-        ++countedFrames;
-        int frameTicks = capTimer.getTicks();
-        if (frameTicks < 1000 / 60) {
-            SDL_Delay(1000 / 60 - frameTicks);
+    bool allWindowsClosed = true;
+    for (const auto& window : windows) {
+        if (window->isShown()){
+            allWindowsClosed = false;
+            break;
         }
     }
 
+    if (allWindowsClosed || windows.empty()) {
+        running = false;
+    }
+
+    float avgFPS = countedFrames / (fpsTimer.getTicks() / 1000.f);
+    if (avgFPS > 2000000) {
+        avgFPS = 0;
+    }
+
+    if (debug && fpsPrintTimer.getTicks() >= 1000) {
+        if (!windows.empty()) {
+            std::cout << "FPS: " << avgFPS << std::endl;
+            for (int i = 0; i < windows.size(); i++) {
+                auto *emulatorPtr = dynamic_cast<Emulator *>(windows[i].get());
+                if (emulatorPtr) {
+                    std::cout << "Window " << i << " - " << emulatorPtr->getInstructions() << std::endl;
+                    emulatorPtr->resetInstructions();
+                } else {
+                    std::cout << "Window " << i << " - Failed to cast Window to Emulator. Might just be the main menu or settings window" << std::endl;
+                }
+            }
+        }
+        fpsPrintTimer.start();
+    }
+
+    ++countedFrames;
+    int frameTicks = capTimer.getTicks();
+    if (frameTicks < 1000 / 60) {
+        SDL_Delay(1000 / 60 - frameTicks);
+    }
+}
+
+void EmulatorMain::quit() {
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_Quit();
+}
+
+bool EmulatorMain::isRunning() const {
+    return this->running;
 }

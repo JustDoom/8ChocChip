@@ -58,20 +58,20 @@ void Emulator::init() {
     }
 }
 
-bool Emulator::handleEvent(SDL_Event& event) {
+bool Emulator::handleEvent(SDL_Event* event) {
     if (!Window::handleEvent(event)) {
         return false;
     }
 
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_DOWN:
-            if (event.key.scancode == SDL_SCANCODE_F12) {
+            if (event->key.scancode == SDL_SCANCODE_F12) {
                 this->handleSaveState();
             }
-            this->keyboard.handleKeyDown(event.key.scancode);
+            this->keyboard.handleKeyDown(event->key.scancode);
             break;
         case SDL_EVENT_KEY_UP:
-            this->keyboard.handleKeyUp(event.key.scancode);
+            this->keyboard.handleKeyUp(event->key.scancode);
             break;
     }
 
@@ -98,7 +98,7 @@ void Emulator::render() {
     SDL_RenderPresent(this->renderer);
 }
 
-void Emulator::resize(SDL_Event &event) {
+void Emulator::resize(SDL_Event* event) {
 
 }
 

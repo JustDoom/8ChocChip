@@ -49,10 +49,10 @@ public:
         std::vector<std::unique_ptr<Window>>& windows);
 
     void init() override;
-    bool handleEvent(SDL_Event& event) override;
+    bool handleEvent(SDL_Event* event) override;
     void update() override;
     void render() override;
-    void resize(SDL_Event& event) override;
+    void resize(SDL_Event* event) override;
     void close() override;
 
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);

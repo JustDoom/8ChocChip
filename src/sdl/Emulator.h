@@ -25,10 +25,10 @@ public:
     Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
 
     void init() override;
-    bool handleEvent(SDL_Event& event) override;
+    bool handleEvent(SDL_Event* event) override;
     void update() override;
     void render() override;
-    void resize(SDL_Event &event) override;
+    void resize(SDL_Event* event) override;
     
     void handleSaveState();
     void saveState(std::string path);

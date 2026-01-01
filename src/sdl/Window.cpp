@@ -34,9 +34,9 @@ void Window::init(const int width, const int height) {
     SDL_GetWindowSize(this->window, &this->originalSize.x, &this->originalSize.y);
 }
 
-bool Window::handleEvent(SDL_Event &event) {
-    if (event.window.windowID == this->windowId) { // TODO: Maybe let it go one more frame?
-        switch (event.type) {
+bool Window::handleEvent(SDL_Event* event) {
+    if (event->window.windowID == this->windowId) { // TODO: Maybe let it go one more frame?
+        switch (event->type) {
             case SDL_EVENT_WINDOW_SHOWN:
                 this->shown = true;
             break;
@@ -86,7 +86,7 @@ bool Window::handleEvent(SDL_Event &event) {
 void Window::update() {
 }
 
-void Window::resize(SDL_Event &event) {
+void Window::resize(SDL_Event* event) {
 
 }
 
