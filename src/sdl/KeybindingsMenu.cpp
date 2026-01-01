@@ -9,6 +9,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <utility>
 
 #include "../ClaySDL3Renderer.h"
 #include "../util/MiscUtil.h"
@@ -17,10 +18,9 @@
 bool keybindingsMenuClicked = false;
 
 KeybindingsMenu::KeybindingsMenu(TTF_Font* font, std::string romSha1, bool* isMenuOpen) {
-    this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
+    this->fonts = static_cast<TTF_Font**>(SDL_calloc(1, sizeof(TTF_Font*)));
     this->fonts[0] = font;
-
-    this->romSha1 = romSha1;
+    this->romSha1 = std::move(romSha1);
 
     nlohmann::json json;
     if (std::ifstream file(configFilePath); file.good()) {
@@ -49,7 +49,7 @@ void KeybindingsMenu::init() {
 
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
-    uint64_t totalMemorySize = Clay_MinMemorySize();
+    const uint64_t totalMemorySize = Clay_MinMemorySize();
     Clay_Arena clayMemory = (Clay_Arena) {
         .capacity = totalMemorySize,
         .memory = (char*) SDL_malloc(totalMemorySize)
@@ -57,7 +57,7 @@ void KeybindingsMenu::init() {
 
     int width, height;
     SDL_GetWindowSize(this->window, &width, &height);
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { handleClayErrors });
+    Clay_Initialize(clayMemory, (Clay_Dimensions) { static_cast<float>(width), static_cast<float>(height) }, (Clay_ErrorHandler) { handleClayErrors });
     Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
 
     SDL_SetWindowResizable(this->window, false);
@@ -115,11 +115,11 @@ void KeybindingsMenu::update() {
 void KeybindingsMenu::render() {
     float x,y;
     SDL_GetMouseState(&x, &y);
-    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
+    Clay_SetLayoutDimensions((Clay_Dimensions) { static_cast<float>(this->width), static_cast<float>(this->height) });
     Clay_SetPointerState((Clay_Vector2) { x, y }, keybindingsMenuClicked);
     Clay_UpdateScrollContainers(false, (Clay_Vector2) { 0, 0 }, 0.0166f);
 
-    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
+    Clay_SetLayoutDimensions((Clay_Dimensions) { static_cast<float>(this->width), static_cast<float>(this->height) });
     Clay_BeginLayout();
     
     CLAY({ .id = CLAY_ID("KeybindingsConfiguration"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM }, .backgroundColor = {250, 250, 250, 250} }) {
@@ -264,14 +264,14 @@ void KeybindingsMenu::close() {
     SDL_UnlockMutex(this->mutex);
 }
 
-void KeybindingsMenu::handleKeybindingClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+void KeybindingsMenu::handleKeybindingClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<KeybindingHoverData*>(userData);
         data->self->keyWaitingFor = data->key;
     }
 }
 
-void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<KeybindingHoverData*>(userData);
         data->self->keymap = defaultKeymap;
@@ -280,9 +280,9 @@ void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, Clay_Poin
 
 char KeybindingsMenu::getKeyboardCharacter(int key_code) {
     int key_scancode = -1;
-    for (auto keyMapIterator = this->keymap.begin(); keyMapIterator != this->keymap.end(); keyMapIterator++) {
-        if (keyMapIterator->second == key_code) {
-            key_scancode = keyMapIterator->first;
+    for (auto & keyMapIterator : this->keymap) {
+        if (keyMapIterator.second == key_code) {
+            key_scancode = keyMapIterator.first;
         }
     }
 
@@ -290,7 +290,5 @@ char KeybindingsMenu::getKeyboardCharacter(int key_code) {
         return '?';
     }
 
-    char character = toupper(SDL_GetKeyFromScancode(SDL_Scancode(key_scancode), SDL_KMOD_NONE, false));
-
-    return character;
+    return toupper(SDL_GetKeyFromScancode(SDL_Scancode(key_scancode), SDL_KMOD_NONE, false));
 }

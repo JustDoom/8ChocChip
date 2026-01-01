@@ -27,7 +27,7 @@ Clay_Vector2 wheel{};
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
     romDirectories(romDirectories), romFiles(romFiles), windows(windows), mutex(SDL_CreateMutex()), database() {
-    this->fonts = (TTF_Font**) SDL_calloc(1, sizeof(TTF_Font *));
+    this->fonts = static_cast<TTF_Font**>(SDL_calloc(1, sizeof(TTF_Font*)));
     this->fonts[0] = font;
 }
 
@@ -37,15 +37,15 @@ void MainMenu::init() {
     this->renderer = this->renderer;
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
-    uint64_t totalMemorySize = Clay_MinMemorySize();
-    Clay_Arena clayMemory = (Clay_Arena) {
+    const uint64_t totalMemorySize = Clay_MinMemorySize();
+    const auto clayMemory = (Clay_Arena) {
         .capacity = totalMemorySize,
-        .memory = (char*) SDL_malloc(totalMemorySize)
+        .memory = static_cast<char*>(SDL_malloc(totalMemorySize))
     };
 
     int width, height;
     SDL_GetWindowSize(this->window, &width, &height);
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { handleClayErrors });
+    Clay_Initialize(clayMemory, (Clay_Dimensions) { static_cast<float>(width), static_cast<float>(height) }, (Clay_ErrorHandler) { handleClayErrors });
     Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
 }
 
@@ -102,7 +102,7 @@ void MainMenu::update() {
 void MainMenu::render() {
     float x, y;
     SDL_GetMouseState(&x, &y);
-    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) this->width, (float) this->height });
+    Clay_SetLayoutDimensions((Clay_Dimensions) { static_cast<float>(this->width), static_cast<float>(this->height) });
     Clay_SetPointerState((Clay_Vector2) { x, y }, clicked);
     Clay_UpdateScrollContainers(false, (Clay_Vector2) { wheel.x, wheel.y }, 0.0166f);
     wheel.x = 0;
@@ -173,7 +173,7 @@ void MainMenu::render() {
 
                     CLAY_TEXT(CLAY_STRING("Platform"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childGap = 8} }) {
-                        for (std::string platformId : programPlatforms) {
+                        for (const std::string& platformId : programPlatforms) {
                             Clay_Color backgroundColor = {255, 255, 255, 255}, textColor = {0, 0, 0, 255};
                             if (platformId == *this->selectedPlatformId) {
                                 backgroundColor = COLOR_BUTTON;
@@ -182,7 +182,7 @@ void MainMenu::render() {
 
                             CLAY({ .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = backgroundColor }) {
                                 CLAY_TEXT(toClayString(platformId), CLAY_TEXT_CONFIG({ .textColor = textColor, .fontSize = 24 }));
-                                Clay_OnHover(this->handlePlatformClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string(platformId))));
+                                Clay_OnHover(handlePlatformClick, reinterpret_cast<intptr_t>(&this->dataList.emplace_back(this, new std::string(platformId))));
                             }
                         }
                     }
@@ -194,7 +194,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("Shift - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.shift = !data->self->romSettings.quirks.shift;
@@ -207,7 +207,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("memoryIncrementByX - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.memoryIncrementByX = !data->self->romSettings.quirks.memoryIncrementByX;
@@ -220,7 +220,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("memoryLeaveIUnchanged - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.memoryLeaveIUnchanged = !data->self->romSettings.quirks.memoryLeaveIUnchanged;
@@ -233,7 +233,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("wrap - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.wrap = !data->self->romSettings.quirks.wrap;
@@ -246,7 +246,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("jump - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.jump = !data->self->romSettings.quirks.jump;
@@ -259,7 +259,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("vblank - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.vblank = !data->self->romSettings.quirks.vblank;
@@ -272,7 +272,7 @@ void MainMenu::render() {
                         } else {
                             CLAY_TEXT(CLAY_STRING("logic - Disabled"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
                         }
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 data->self->romSettings.quirks.logic = !data->self->romSettings.quirks.logic;
@@ -283,7 +283,7 @@ void MainMenu::render() {
                     CLAY_TEXT(CLAY_STRING("Keybindings"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24 }));
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
                         CLAY_TEXT(CLAY_STRING("Configure"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                        Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                        Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                             if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                 const auto data = reinterpret_cast<HoverData*>(userData);
                                 if (!data->self->isKeymapMenuOpen) {
@@ -298,9 +298,9 @@ void MainMenu::render() {
                     CLAY({.layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = COLOR_BUTTON }) {
                         if (this->selectedState == nullptr) {
                             CLAY_TEXT(CLAY_STRING("Choose a state"), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                            Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+                            Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                                 if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-                                    SDL_DialogFileFilter stateFilter[] = { {"Chip8 State Files", "state"} };
+                                    constexpr SDL_DialogFileFilter stateFilter[] = { {"Chip8 State Files", "state"} };
                                     const auto data = reinterpret_cast<HoverData*>(userData);
                                     SDL_ShowOpenFileDialog(selectStateCallback, data->self, reinterpret_cast<MainMenu*>(userData)->window, stateFilter, 1, home, false);
                                 }
@@ -308,7 +308,7 @@ void MainMenu::render() {
                         } else {
                             std::string selectedStateName = getFileFromStringPath(*this->selectedState);
                             CLAY_TEXT(toClayString(selectedStateName), CLAY_TEXT_CONFIG({ .textColor = {255, 255, 255, 255}, .fontSize = 24 }));
-                            Clay_OnHover([](Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {                                
+                            Clay_OnHover([](Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
                                 if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
                                     const auto data = reinterpret_cast<HoverData*>(userData);
                                     data->self->selectedState = nullptr;
@@ -360,29 +360,24 @@ void MainMenu::close() {
 
 void MainMenu::handleRomClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
-        const auto data = reinterpret_cast<HoverData*>(userData);
-        if (data->data != data->self->selectedRom) {
+        if (const auto data = reinterpret_cast<HoverData*>(userData); data->data != data->self->selectedRom) {
             data->self->selectedRom = data->data;
             data->self->selectedState = nullptr;
 
-            std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
-            std::vector<std::string> programPlatforms = data->self->database.getRomPlatforms(selectedRomSha1);
-            if (!programPlatforms.empty()) {
+            const std::string selectedRomSha1 = sha1FromFile(*data->self->selectedRom);
+            if (std::vector<std::string> programPlatforms = data->self->database.getRomPlatforms(selectedRomSha1); !programPlatforms.empty()) {
                 data->self->selectedPlatformId = &programPlatforms.at(0);
-                PlatformData selectedPlatformData = data->self->database.getPlatformData(*data->self->selectedPlatformId);
-                data->self->romSettings.quirks = selectedPlatformData.quirks;
+                data->self->romSettings.quirks = data->self->database.getPlatformData(*data->self->selectedPlatformId).quirks;
             }
         }
     }
 }
 
-void MainMenu::handlePlatformClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData) {
+void MainMenu::handlePlatformClick(Clay_ElementId elementId, const Clay_PointerData pointerData, const intptr_t userData) {
     if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
         const auto data = reinterpret_cast<HoverData*>(userData);
         data->self->selectedPlatformId = data->data;
-
-        PlatformData selectedPlatformData = data->self->database.getPlatformData(*data->self->selectedPlatformId);
-        data->self->romSettings.quirks = selectedPlatformData.quirks;
+        data->self->romSettings.quirks = data->self->database.getPlatformData(*data->self->selectedPlatformId).quirks;
     }
 }
 
@@ -409,7 +404,7 @@ void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData point
     }
 }
 
-std::unordered_map<uint8_t, unsigned char> MainMenu::getSelectedRomKeymap() {
+std::unordered_map<uint8_t, unsigned char> MainMenu::getSelectedRomKeymap() const {
     nlohmann::json json;
     if (std::ifstream file(configFilePath); file.good()) {
         json = nlohmann::json::parse(file);
@@ -420,8 +415,7 @@ std::unordered_map<uint8_t, unsigned char> MainMenu::getSelectedRomKeymap() {
         return defaultKeymap;
     }
 
-    std::string selectedRomSha1 = sha1FromFile(*this->selectedRom);
-    if (json.contains("keymaps") && json["keymaps"].contains(selectedRomSha1)) {
+    if (std::string selectedRomSha1 = sha1FromFile(*this->selectedRom); json.contains("keymaps") && json["keymaps"].contains(selectedRomSha1)) {
         std::unordered_map<uint8_t, unsigned char> romKeymap = json["keymaps"].at(selectedRomSha1);
         return romKeymap;
     } else {
@@ -452,7 +446,7 @@ void MainMenu::callback(void* userdata, const char* const* directory, int filter
     auto* instance = static_cast<MainMenu*>(userdata);
 
     std::string directoryString = *directory;
-    std::cout << "Selected directory \"" << directoryString << "\"" << std::endl;
+    SDL_Log("Selected directory \"%s\"", directoryString.c_str());
 
     if (directoryString.empty()) {
         SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
@@ -508,7 +502,7 @@ void MainMenu::selectStateCallback(void* userdata, const char* const* selectedFi
     fileReader.open(selectedFilePathString, std::ios::binary);
     
     if (!fileReader.is_open()) {
-        std::cerr << "Error opening file '" << selectedFilePathString << "'" << std::endl;
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Error opening file '%s'", selectedFilePathString.c_str());
         return;
     }
 
@@ -521,12 +515,10 @@ void MainMenu::selectStateCallback(void* userdata, const char* const* selectedFi
     fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
     fileReader.close();
 
-    std::string stateSha1(buffer.begin(), buffer.end());
-
-    if (stateSha1.compare(sha1FromFile(*instance->selectedRom)) != 0) {
-        std::cerr << "The selected state does not belong to the selected ROM!" << std::endl;
-        std::cerr << "State SHA1: " << stateSha1 << std::endl;
-        std::cerr << "ROM SHA1: " << sha1FromFile(*instance->selectedRom) << std::endl;
+    if (std::string stateSha1(buffer.begin(), buffer.end()); stateSha1 != sha1FromFile(*instance->selectedRom)) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "The selected state does not belong to the selected ROM!");
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "State SHA1: %s", stateSha1.c_str());
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "ROM SHA1: %s", sha1FromFile(*instance->selectedRom).c_str());
         // TODO integrate with database to show the ROM name
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "The selected state does not belong to the selected ROM!", instance->window);
     } else {

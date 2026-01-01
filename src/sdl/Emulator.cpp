@@ -7,13 +7,13 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
+Emulator::Emulator(const std::string& path, const RomSettings& romSettings, const std::unordered_map<uint8_t, unsigned char>& keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
     if (this->path.ends_with(".state")) {
         std::ifstream fileReader;
         fileReader.open(path, std::ios::binary);
         
         if (!fileReader.is_open()) {
-            std::cerr << "Error opening file '" << path << "'" << std::endl;
+            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Error opening file '%s'", path.c_str());
             return;
         }
     
@@ -25,7 +25,7 @@ Emulator::Emulator(const std::string& path, const RomSettings& romSettings, std:
         
         fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
         fileReader.close();
-    
+
         std::string stateSha1(buffer.begin(), buffer.end());
         this->sha1 = stateSha1;
     } else {
@@ -84,7 +84,7 @@ void Emulator::update() {
             this->cpu.cycle();
         }
     } catch (uint16_t opcode) {
-        std::cout << "Program cancelled, Unknown opcode - " << opcode << std::endl;
+        SDL_Log("Program cancelled, Unknown opcode - %s", opcode);
         this->encounteredError = true;
         SDL_SetWindowTitle(this->window, ("Program cancelled, Unknown opcode - " + std::to_string(opcode)).c_str());
     }
@@ -103,15 +103,15 @@ void Emulator::resize(SDL_Event* event) {
 }
 
 void Emulator::handleSaveState() {
-    SDL_DialogFileFilter filters[] = {
+    constexpr SDL_DialogFileFilter filters[] = {
         {"8ChocChip State File", "state"}
     };
 
-    std::string defaultLocation = this->path;
+    const std::string defaultLocation = this->path;
 
     this->isStopped = true;
     SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
-        const auto data = reinterpret_cast<Emulator*>(userData);
+        const auto data = static_cast<Emulator*>(userData);
         data->isStopped = false;
         
         if (!selectedPath || !*selectedPath) {
@@ -128,7 +128,7 @@ void Emulator::handleSaveState() {
     }, this, this->window, filters, 1, defaultLocation.c_str());
 }
 
-void Emulator::saveState(std::string path) {
+void Emulator::saveState(const std::string& path) {
     std::ofstream fileWriter;
     fileWriter.open(path, std::ios::binary);
     auto serialization = this->cpu.serialize();
@@ -137,7 +137,7 @@ void Emulator::saveState(std::string path) {
     // in the main dialog
     serialization.insert(serialization.end(), this->sha1.cbegin(), this->sha1.cend());
     
-    fileWriter.write((char*)serialization.data(), serialization.size());
+    fileWriter.write(reinterpret_cast<char*>(serialization.data()), serialization.size());
     fileWriter.close();
 }
 
@@ -162,7 +162,7 @@ void Emulator::loadState() {
     this->cpu.deserialize(buffer.data());
 }
 
-int Emulator::getInstructions() {
+int Emulator::getInstructions() const {
     return this->cpu.instructions;
 }
 

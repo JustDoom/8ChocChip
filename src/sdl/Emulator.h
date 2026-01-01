@@ -22,7 +22,7 @@ private:
     bool isStopped = false;
     void loadState();
 public:
-    Emulator(const std::string& path, const RomSettings& romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
+    Emulator(const std::string& path, const RomSettings& romSettings, const std::unordered_map<uint8_t, unsigned char>& keymap);
 
     void init() override;
     bool handleEvent(SDL_Event* event) override;
@@ -31,8 +31,8 @@ public:
     void resize(SDL_Event* event) override;
     
     void handleSaveState();
-    void saveState(std::string path);
-    int getInstructions();
+    void saveState(const std::string& path);
+    int getInstructions() const;
     void resetInstructions();
 };
 

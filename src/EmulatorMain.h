@@ -28,7 +28,7 @@ public:
     bool initialise(int argc, char** argv);
     void run();
     void event(SDL_Event* event);
-    void quit();
+    void quit() const;
 
     bool isRunning() const;
 };

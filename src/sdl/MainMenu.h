@@ -41,7 +41,7 @@ private:
     Database database;
     bool isKeymapMenuOpen = false;
     
-    std::unordered_map<uint8_t, unsigned char> getSelectedRomKeymap();
+    std::unordered_map<uint8_t, unsigned char> getSelectedRomKeymap() const;
 public:
     MainMenu(TTF_Font* font, std::unordered_map<std::string *,
         std::vector<std::string>>& romFiles, 
