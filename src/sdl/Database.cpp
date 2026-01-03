@@ -20,7 +20,7 @@ Database::Database() {
 }
 
 void Database::loadPlatforms() {
-    std::string platformsDatabasePath = databasesFolderPath / std::filesystem::path("platforms.json");
+    std::string platformsDatabasePath = (std::filesystem::path(databasesFolderPath) / "platforms.json").string();
 
     nlohmann::json json;
     if (std::ifstream file(platformsDatabasePath); file.good()) {
@@ -54,7 +54,7 @@ void Database::loadPlatforms() {
 }
 
 void Database::loadPrograms() {
-    std::string programsDatabasePath = databasesFolderPath / std::filesystem::path("programs.json");
+    std::string programsDatabasePath = (std::filesystem::path(databasesFolderPath) / "programs.json").string();
 
     nlohmann::json json;
     if (std::ifstream file(programsDatabasePath); file.good()) {

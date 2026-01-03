@@ -13,7 +13,7 @@
 
 inline const char* home = std::getenv(HOME_VARIABLE);
 inline std::string configFilePath;
-inline std::string databasesFolderPath = std::filesystem::current_path() / ".." / ".." / "dependencies" / "chip-8-database" / "database";
+inline std::string databasesFolderPath = (std::filesystem::current_path() / ".." / ".." / "dependencies" / "chip-8-database" / "database").string();
 inline bool debug = false;
 inline bool speedTest = false;
 inline uint64_t ipf = 15;
