@@ -28,7 +28,7 @@ private:
 
     SDL_Mutex* mutex;
 
-    char getKeyboardCharacter(int key_code);
+    char getKeyboardCharacter(int key_code) const;
 public:
     KeybindingsMenu(TTF_Font* font, std::string romSha1, bool* isMenuOpen);
 

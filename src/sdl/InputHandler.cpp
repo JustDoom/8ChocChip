@@ -5,12 +5,12 @@
 
 void InputHandler::addKey(SDL_Keycode key) {
     removeKey(key); // Do this because when a button is held down it adds many into the list and breaks functionality\
-    // If the key is already in the list this will remove it, if not it wont do anything
+    // If the key is already in the list this will remove it, if not it won't do anything
     this->keys.emplace_back(key);
 }
 
 void InputHandler::removeKey(const SDL_Keycode key) {
-    if (const auto it = std::find(this->keys.begin(), this->keys.end(), key); it != this->keys.end()) {
+    if (const auto it = std::ranges::find(this->keys, key); it != this->keys.end()) {
         this->keys.erase(it);
     }
 }
@@ -23,11 +23,11 @@ void InputHandler::updateLastKeys() {
 }
 
 bool InputHandler::isJustPressed(const SDL_Keycode key) {
-    return std::count(this->keys.begin(), this->keys.end(), key) > 0 && std::count(this->lastKeys.begin(), this->lastKeys.end(), key) == 0;
+    return std::ranges::count(this->keys, key) > 0 && std::ranges::count(this->lastKeys, key) == 0;
 }
 
 bool InputHandler::isPressed(const SDL_Keycode key) {
-    return std::count(this->keys.begin(), this->keys.end(), key);
+    return std::ranges::count(this->keys, key);
 }
 
 void InputHandler::addButton(SDL_Keycode button) {
@@ -36,7 +36,7 @@ void InputHandler::addButton(SDL_Keycode button) {
 }
 
 void InputHandler::removeButton(const SDL_Keycode button) {
-    if (const auto it = std::find(this->mouse.begin(), this->mouse.end(), button); it != this->mouse.end()) {
+    if (const auto it = std::ranges::find(this->mouse, button); it != this->mouse.end()) {
         this->mouse.erase(it);
     }
 }
@@ -49,9 +49,9 @@ void InputHandler::updateLastMouse() {
 }
 
 bool InputHandler::isJustClicked(const SDL_Keycode button) {
-    return std::count(this->mouse.begin(), this->mouse.end(), button) && !std::count(this->lastMouse.begin(), this->lastMouse.end(), button);
+    return std::ranges::count(this->mouse, button) && !std::ranges::count(this->lastMouse, button);
 }
 
 bool InputHandler::isClicked(const SDL_Keycode button) {
-    return std::count(this->mouse.begin(), this->mouse.end(), button);
+    return std::ranges::count(this->mouse, button);
 }

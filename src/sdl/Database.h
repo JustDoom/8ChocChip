@@ -40,10 +40,10 @@ private:
 public:
     Database();
 
-    ProgramData getProgramData(std::string sha1);
-    RomData getRomData(std::string sha1);
-    std::vector<std::string> getRomPlatforms(std::string sha1);
-    PlatformData getPlatformData(std::string platformId);
+    ProgramData getProgramData(const std::string& sha1) const;
+    RomData getRomData(const std::string& sha1) const;
+    std::vector<std::string> getRomPlatforms(const std::string& sha1) const;
+    PlatformData getPlatformData(const std::string& platformId) const;
 };
 
 #endif

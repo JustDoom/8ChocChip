@@ -153,7 +153,7 @@ void Emulator::loadState() {
     std::vector<uint8_t> buffer(Cpu::serializationDimension + sha1Dimension);
 
     fileReader.seekg(0, std::ios::end);
-    size_t file_size = fileReader.tellg();
+    const size_t file_size = fileReader.tellg();
     fileReader.seekg(0, std::ios::beg);
     
     fileReader.read(reinterpret_cast<char*>(&buffer[0]), file_size);

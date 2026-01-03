@@ -278,7 +278,7 @@ void KeybindingsMenu::handleResetKeybindings(Clay_ElementId elementId, const Cla
     }
 }
 
-char KeybindingsMenu::getKeyboardCharacter(int key_code) {
+char KeybindingsMenu::getKeyboardCharacter(int key_code) const {
     int key_scancode = -1;
     for (auto & keyMapIterator : this->keymap) {
         if (keyMapIterator.second == key_code) {
@@ -290,5 +290,5 @@ char KeybindingsMenu::getKeyboardCharacter(int key_code) {
         return '?';
     }
 
-    return toupper(SDL_GetKeyFromScancode(SDL_Scancode(key_scancode), SDL_KMOD_NONE, false));
+    return toupper(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(key_scancode), SDL_KMOD_NONE, false));
 }

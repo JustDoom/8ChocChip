@@ -28,7 +28,7 @@ void Database::loadPlatforms() {
         file.close();
     }
 
-    for (const auto rawPlatformData : json) {
+    for (const auto& rawPlatformData : json) {
         PlatformData data;
         data.id = rawPlatformData.at("id");
         data.name = rawPlatformData.at("name");
@@ -62,7 +62,7 @@ void Database::loadPrograms() {
         file.close();
     }
 
-    for (const auto rawProgramData : json) {
+    for (const auto& rawProgramData : json) {
         ProgramData data;
         data.title = rawProgramData.at("title");
         if (rawProgramData.find("description") != rawProgramData.end()) {
@@ -85,7 +85,7 @@ void Database::loadPrograms() {
     }
 }
 
-ProgramData Database::getProgramData(std::string sha1) {
+ProgramData Database::getProgramData(const std::string& sha1) const {
     for (ProgramData programData : this->programs) {
         for (auto it = programData.roms.begin(); it != programData.roms.end(); it++) {
             if (it->first == sha1) {
@@ -97,11 +97,11 @@ ProgramData Database::getProgramData(std::string sha1) {
     return ProgramData{};
 }
 
-RomData Database::getRomData(std::string sha1) {
-    for (ProgramData programData : this->programs) {
-        for (auto it = programData.roms.begin(); it != programData.roms.end(); it++) {
-            if (it->first == sha1) {
-                return it->second;
+RomData Database::getRomData(const std::string& sha1) const {
+    for (const ProgramData& programData : this->programs) {
+        for (auto& rom : programData.roms) {
+            if (rom.first == sha1) {
+                return rom.second;
             }
         }
     }
@@ -109,12 +109,12 @@ RomData Database::getRomData(std::string sha1) {
     return RomData{};
 }
 
-std::vector<std::string> Database::getRomPlatforms(std::string sha1) {
+std::vector<std::string> Database::getRomPlatforms(const std::string& sha1) const {
     std::vector<PlatformData> platformsData;
-    for (ProgramData programData : this->programs) {
-        for (auto it = programData.roms.begin(); it != programData.roms.end(); it++) {
-            if (it->first == sha1) {
-                return it->second.platforms;
+    for (const ProgramData& programData : this->programs) {
+        for (auto& rom : programData.roms) {
+            if (rom.first == sha1) {
+                return rom.second.platforms;
             }
         }
     }
@@ -122,7 +122,7 @@ std::vector<std::string> Database::getRomPlatforms(std::string sha1) {
     return { "originalChip8" };
 }
 
-PlatformData Database::getPlatformData(std::string platformId) {
+PlatformData Database::getPlatformData(const std::string& platformId) const {
     for (PlatformData platform : this->platforms) {
         if (platform.id == platformId) {
             return platform;

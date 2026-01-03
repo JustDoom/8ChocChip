@@ -21,7 +21,7 @@
 std::vector<std::unique_ptr<char[]>> clayStringBuffers;
 
 std::string toLowerCase(std::string string) {
-    std::transform(string.begin(), string.end(), string.begin(), [](const unsigned char c) { return std::tolower(c); });
+    std::ranges::transform(string, string.begin(), [](const unsigned char c) { return std::tolower(c); });
     return string;
 }
 
@@ -40,7 +40,7 @@ std::string getFileFromStringPath(const std::string& path) {
     return path;
 }
 
-bool stringEndsWith(const std::string& str, const std::string endStr) {
+bool stringEndsWith(const std::string& str, const std::string& endStr) {
     if (endStr.size() >= str.size()) {
         return false;
     }
@@ -49,8 +49,8 @@ bool stringEndsWith(const std::string& str, const std::string endStr) {
 }
 
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories) {
-    if (std::ifstream file(directory); !file.good()) {
-        std::cerr << "Unable to find directory " << directory << std::endl;
+    if (const std::ifstream file(directory); !file.good()) {
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to find directory %s", directory.c_str());
         return;
     }
 
@@ -59,14 +59,14 @@ void searchDirectory(const std::string& directory, std::unordered_map<std::strin
             continue;
         }
 
-        std::cout << "Processing file: " << filesystemPathToString(romFile.path()) << " - " << sha1FromFile(filesystemPathToString(romFile.path())) << std::endl;
+        SDL_Log("Processing file: %s - %s", filesystemPathToString(romFile.path()).c_str(), sha1FromFile(filesystemPathToString(romFile.path())).c_str());
 
         if (romFile.file_size() > 3584) {
             continue;
         }
 
         // Check if the rom directory doesn't exist in romFiles, then add it
-        if (romFiles.find(&romDirectories.back()) == romFiles.end()) {
+        if (!romFiles.contains(&romDirectories.back())) {
             romFiles.emplace(&romDirectories.back(), std::vector<std::string>());
         }
 
@@ -97,8 +97,8 @@ Clay_String toClayString(const std::string& str) {
     return clayStr;
 }
 
-Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData) {
-    TTF_Font **fonts = (TTF_Font**) userData;
+Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig* config, void *userData) {
+    auto** fonts = static_cast<TTF_Font**>(userData);
     TTF_Font *font = fonts[config->fontId];
     int width, height;
 
@@ -106,7 +106,7 @@ Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *c
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to measure text: %s", SDL_GetError());
     }
 
-    return (Clay_Dimensions) { (float) width, (float) height };
+    return (Clay_Dimensions) { static_cast<float>(width), static_cast<float>(height) };
 }
 
 std::string sha1FromFile(const std::string& filename) {
@@ -194,8 +194,8 @@ std::string sha1FromFile(const std::string& filename) {
     SHA1_Final(hash, &sha1);
 
     std::stringstream ss;
-    for (int i = 0; i < SHA_DIGEST_LENGTH; i++) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+    for (unsigned char i : hash) {
+        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(i);
     }
 
     file.close();
@@ -203,7 +203,7 @@ std::string sha1FromFile(const std::string& filename) {
 #endif
 }
 
-char intToHexCipher(int n) {
+char intToHexCipher(const int n) {
     if (n <= 9) {
         return '0' + n;
     }

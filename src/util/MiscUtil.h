@@ -11,7 +11,7 @@
 std::string toLowerCase(std::string string);
 std::string filesystemPathToString(const std::filesystem::path& path);
 std::string getFileFromStringPath(const std::string& path);
-bool stringEndsWith(const std::string& str, const std::string endStr);
+bool stringEndsWith(const std::string& str, const std::string& endStr);
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles, std::vector<std::string>& romDirectories);
 void handleClayErrors(Clay_ErrorData errorData);
 void clearClayStringBuffers();
