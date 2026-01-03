@@ -9,7 +9,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "Timer.h"
 #include "sdl/Emulator.h"
 #include "sdl/MainMenu.h"
 #include "util/Constants.h"
@@ -114,8 +113,8 @@ bool EmulatorMain::initialise(int argc, char **argv) {
         this->windows.emplace_back(std::make_unique<Emulator>(this->rom, RomSettings{}, defaultKeymap))->init(); // TODO: Handle Rom Settings
     }
 
-    this->fpsTimer.start();
-    this->fpsPrintTimer.start();
+    this->fpsTimer = SDL_GetTicks();
+    this->fpsPrintTimer = SDL_GetTicks();
 
     return true;
 }
@@ -131,7 +130,7 @@ void EmulatorMain::event(SDL_Event* event) {
 }
 
 void EmulatorMain::run() {
-    this->capTimer.start();
+    const uint64_t capTimer = SDL_GetTicks();
 
     // Do not change, this makes multiple windows not crash
     for (int i = 0; i < this->windows.size(); ++i) {
@@ -155,14 +154,14 @@ void EmulatorMain::run() {
         this->running = false;
     }
 
-    float avgFPS = this->countedFrames / (this->fpsTimer.getTicks() / 1000.f);
+    float avgFPS = this->countedFrames / ((SDL_GetTicks() - this->fpsTimer) / 1000.f);
     if (avgFPS > 2000000) {
         avgFPS = 0;
     }
 
-    if (debug && this->fpsPrintTimer.getTicks() >= 1000) {
+    if (debug && (SDL_GetTicks() - this->fpsPrintTimer) >= 1000) {
         if (!this->windows.empty()) {
-            std::cout << "FPS: " << avgFPS << std::endl;
+            SDL_Log("FPS: %f", avgFPS);
             for (int i = 0; i < this->windows.size(); i++) {
                 if (auto* emulatorPtr = dynamic_cast<Emulator*>(this->windows[i].get())) {
                     SDL_Log("Window %i - %i", i, emulatorPtr->getInstructions());
@@ -172,17 +171,17 @@ void EmulatorMain::run() {
                 }
             }
         }
-        this->fpsPrintTimer.start();
+        this->fpsPrintTimer = SDL_GetTicks();
     }
 
     ++this->countedFrames;
-    if (const int frameTicks = this->capTimer.getTicks(); frameTicks < 1000 / 60) {
+    if (const int frameTicks = (SDL_GetTicks() - capTimer); frameTicks < 1000 / 60) {
         SDL_Delay(1000 / 60 - frameTicks);
     }
 }
 
 void EmulatorMain::quit() const {
-    TTF_CloseFont(font);
+    TTF_CloseFont(this->font);
     TTF_Quit();
     SDL_Quit();
 }

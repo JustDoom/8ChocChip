@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Timer.h"
 #include "SDL3/SDL_events.h"
 #include "sdl/Window.h"
 
@@ -19,9 +18,8 @@ private:
     bool running = true;
     TTF_Font* font = nullptr;
 
-    Timer fpsTimer;
-    Timer capTimer;
-    Timer fpsPrintTimer;
+    uint64_t fpsTimer = 0;
+    uint64_t fpsPrintTimer = 0;
 
     int countedFrames = 0;
 public:
