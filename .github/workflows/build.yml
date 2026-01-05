@@ -64,34 +64,34 @@ jobs:
             build/Release/*.so
             build/Release/assets/
 
-  build-mac:
-    name: Build for Apple
-    runs-on: macos-14
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ['']
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Setup Xcode version
-        uses: maxim-lobanov/setup-xcode@v1.6.0
-        with:
-          xcode-version: "16.1"
-      - name: Configure
-        run: cmake -G "Xcode" -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO -DCMAKE_SYSTEM_NAME=${{ matrix.target }} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -S . -B build
-      - name: Build
-        run: cmake --build build --target install --config Release
-      - name: Ad-Hoc Codesign
-        run: codesign -s - -f "./build/release/sdl-min.app" --deep
-      - name: Create DMG
-        run: |
-          cd build
-          hdiutil create -size 2g -srcfolder release -volname 8ChocChip_apple_${{ matrix.target }} 8ChocChip_apple_${{ matrix.target }}.dmg
-      - name: Upload Build
-        uses: actions/upload-artifact@v4
-        with:
-          name: 8ChocChip-apple-${{ matrix.target }}
-          path: build/*.dmg
+#  build-mac:
+#    name: Build for Apple
+#    runs-on: macos-14
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        target: ['']
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          submodules: recursive
+#      - name: Setup Xcode version
+#        uses: maxim-lobanov/setup-xcode@v1.6.0
+#        with:
+#          xcode-version: "16.1"
+#      - name: Configure
+#        run: cmake -G "Xcode" -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO -DCMAKE_SYSTEM_NAME=${{ matrix.target }} -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -S . -B build
+#      - name: Build
+#        run: cmake --build build --target install --config Release
+#      - name: Ad-Hoc Codesign
+#        run: codesign -s - -f "./build/release/sdl-min.app" --deep
+#      - name: Create DMG
+#        run: |
+#          cd build
+#          hdiutil create -size 2g -srcfolder release -volname 8ChocChip_apple_${{ matrix.target }} 8ChocChip_apple_${{ matrix.target }}.dmg
+#      - name: Upload Build
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: 8ChocChip-apple-${{ matrix.target }}
+#          path: build/*.dmg
