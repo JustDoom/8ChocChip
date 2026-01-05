@@ -103,7 +103,7 @@ target_link_libraries(${EXECUTABLE_NAME} PUBLIC
 
 if (WIN32)
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE bcrypt)
-else ()
+elseif (!EMSCRIPTEN)
     find_package(OpenSSL REQUIRED)
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE OpenSSL::Crypto)
 endif()
@@ -136,9 +136,7 @@ if (APPLE)
 elseif(EMSCRIPTEN)
     # On the web, we have to put the files inside of the webassembly somewhat unintuitively, this is done via a linker argument.
     target_link_libraries(${EXECUTABLE_NAME} PRIVATE
-            "--preload-file \"${CMAKE_CURRENT_LIST_DIR}/assets/font.ttf@/\""
-            "--preload-file \"${CMAKE_CURRENT_LIST_DIR}/assets/icon.bmp@/\""
-            "--preload-file \"${CMAKE_CURRENT_LIST_DIR}/assets/icon.png@/\""
+            "--preload-file=${CMAKE_CURRENT_LIST_DIR}/assets@/assets"
     )
 else()
     if (ANDROID)

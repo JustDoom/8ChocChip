@@ -15,7 +15,9 @@
 #include <bcrypt.h>
 #pragma comment(lib, "bcrypt.lib")
 #else
-#include <openssl/sha.h>
+    #ifndef __EMSCRIPTEN__
+    #include <openssl/sha.h>
+    #endif
 #endif
 
 std::vector<std::unique_ptr<char[]>> clayStringBuffers;
@@ -175,6 +177,9 @@ std::string sha1FromFile(const std::string& filename) {
 
     return result;
 #else
+    #ifdef __EMSCRIPTEN__
+    return "";
+    #else
     SHA_CTX sha1;
     SHA1_Init(&sha1);
 
@@ -200,6 +205,7 @@ std::string sha1FromFile(const std::string& filename) {
 
     file.close();
     return ss.str();
+    #endif
 #endif
 }
 

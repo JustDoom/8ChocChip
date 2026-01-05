@@ -39,7 +39,7 @@ void MainMenu::init() {
 
     const uint64_t totalMemorySize = Clay_MinMemorySize();
     const Clay_Arena clayMemory = {
-        .capacity = totalMemorySize,
+        .capacity = static_cast<size_t>(totalMemorySize),
         .memory = static_cast<char*>(SDL_malloc(totalMemorySize))
     };
 
