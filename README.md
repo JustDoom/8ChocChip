@@ -19,8 +19,8 @@ There are a couple of things left to do until I would say it works well enough
 - [ ] MacOS Support
 - [x] Switch to SDL from SFML
 - [x] Save state
-- [ ] Configurable keys
-- [ ] Database for auto setting selector
+- [x] Configurable keys
+- [x] Database for auto setting selector
 - [ ] Other Chip8 variants
 - [ ] Per program settings (Keybindings, graphics, sounds, etc)
 - [ ] Discord Rich Presence support
