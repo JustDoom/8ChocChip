@@ -38,9 +38,7 @@ jobs:
           path: |
             build/Release/*.exe
             build/Release/*.dll
-            build/Release/*.ttf
-            build/Release/*.png
-            build/Release/*.bmp
+            build/Release/assets/
 
   build-linux:
     name: Build for Linux
@@ -64,9 +62,7 @@ jobs:
           path: |
             build/Release/8ChocChip
             build/Release/*.so
-            build/Release/*.ttf
-            build/Release/*.png
-            build/Release/*.bmp
+            build/Release/assets/
 
   build-mac:
     name: Build for Apple
