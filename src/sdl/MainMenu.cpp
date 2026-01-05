@@ -15,11 +15,11 @@
 #include "Emulator.h"
 #include "KeybindingsMenu.h"
 
-constexpr auto COLOR_BOX = (Clay_Color) {224, 215, 210, 255};
-constexpr auto COLOR_TITLE = (Clay_Color) {140, 100, 60, 255};
-constexpr auto COLOR_ROMS = (Clay_Color) {180, 140, 90, 255};
-constexpr auto COLOR_HIGHLIGHT = (Clay_Color) {110, 80, 50, 255};
-constexpr auto COLOR_BUTTON = (Clay_Color) {90, 60, 40, 255};
+constexpr Clay_Color COLOR_BOX = {224, 215, 210, 255};
+constexpr Clay_Color COLOR_TITLE = {140, 100, 60, 255};
+constexpr Clay_Color COLOR_ROMS = {180, 140, 90, 255};
+constexpr Clay_Color COLOR_HIGHLIGHT = {110, 80, 50, 255};
+constexpr Clay_Color COLOR_BUTTON = {90, 60, 40, 255};
 
 bool clicked = false;
 Clay_Vector2 wheel{};
@@ -38,14 +38,14 @@ void MainMenu::init() {
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
     const uint64_t totalMemorySize = Clay_MinMemorySize();
-    const auto clayMemory = (Clay_Arena) {
+    const Clay_Arena clayMemory = {
         .capacity = totalMemorySize,
         .memory = static_cast<char*>(SDL_malloc(totalMemorySize))
     };
 
     int width, height;
     SDL_GetWindowSize(this->window, &width, &height);
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { static_cast<float>(width), static_cast<float>(height) }, (Clay_ErrorHandler) { handleClayErrors });
+    Clay_Initialize(clayMemory, { static_cast<float>(width), static_cast<float>(height) }, { handleClayErrors });
     Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
 }
 
@@ -102,9 +102,9 @@ void MainMenu::update() {
 void MainMenu::render() {
     float x, y;
     SDL_GetMouseState(&x, &y);
-    Clay_SetLayoutDimensions((Clay_Dimensions) { static_cast<float>(this->width), static_cast<float>(this->height) });
-    Clay_SetPointerState((Clay_Vector2) { x, y }, clicked);
-    Clay_UpdateScrollContainers(false, (Clay_Vector2) { wheel.x, wheel.y }, 0.0166f);
+    Clay_SetLayoutDimensions({ static_cast<float>(this->width), static_cast<float>(this->height) });
+    Clay_SetPointerState({ x, y }, clicked);
+    Clay_UpdateScrollContainers(false, { wheel.x, wheel.y }, 0.0166f);
     wheel.x = 0;
     wheel.y = 0;
 

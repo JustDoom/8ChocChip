@@ -3,7 +3,6 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -50,14 +49,14 @@ void KeybindingsMenu::init() {
     this->textEngine = TTF_CreateRendererTextEngine(this->renderer);
 
     const uint64_t totalMemorySize = Clay_MinMemorySize();
-    Clay_Arena clayMemory = (Clay_Arena) {
+    const Clay_Arena clayMemory = {
         .capacity = totalMemorySize,
-        .memory = (char*) SDL_malloc(totalMemorySize)
+        .memory = static_cast<char*>(SDL_malloc(totalMemorySize))
     };
 
     int width, height;
     SDL_GetWindowSize(this->window, &width, &height);
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { static_cast<float>(width), static_cast<float>(height) }, (Clay_ErrorHandler) { handleClayErrors });
+    Clay_Initialize(clayMemory, { static_cast<float>(width), static_cast<float>(height) }, { handleClayErrors });
     Clay_SetMeasureTextFunction(SDL_MeasureText, this->fonts);
 
     SDL_SetWindowResizable(this->window, false);
@@ -115,11 +114,11 @@ void KeybindingsMenu::update() {
 void KeybindingsMenu::render() {
     float x,y;
     SDL_GetMouseState(&x, &y);
-    Clay_SetLayoutDimensions((Clay_Dimensions) { static_cast<float>(this->width), static_cast<float>(this->height) });
-    Clay_SetPointerState((Clay_Vector2) { x, y }, keybindingsMenuClicked);
-    Clay_UpdateScrollContainers(false, (Clay_Vector2) { 0, 0 }, 0.0166f);
+    Clay_SetLayoutDimensions({ static_cast<float>(this->width), static_cast<float>(this->height) });
+    Clay_SetPointerState({ x, y }, keybindingsMenuClicked);
+    Clay_UpdateScrollContainers(false, { 0, 0 }, 0.0166f);
 
-    Clay_SetLayoutDimensions((Clay_Dimensions) { static_cast<float>(this->width), static_cast<float>(this->height) });
+    Clay_SetLayoutDimensions({ static_cast<float>(this->width), static_cast<float>(this->height) });
     Clay_BeginLayout();
     
     CLAY({ .id = CLAY_ID("KeybindingsConfiguration"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) }, .padding = CLAY_PADDING_ALL(8), .childGap = 8, .layoutDirection = CLAY_TOP_TO_BOTTOM }, .backgroundColor = {250, 250, 250, 250} }) {

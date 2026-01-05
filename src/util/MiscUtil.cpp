@@ -106,7 +106,7 @@ Clay_Dimensions SDL_MeasureText(Clay_StringSlice text, Clay_TextElementConfig* c
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to measure text: %s", SDL_GetError());
     }
 
-    return (Clay_Dimensions) { static_cast<float>(width), static_cast<float>(height) };
+    return { static_cast<float>(width), static_cast<float>(height) };
 }
 
 std::string sha1FromFile(const std::string& filename) {

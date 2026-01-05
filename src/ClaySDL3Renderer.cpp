@@ -3,6 +3,8 @@
 
 #include "ClaySDL3Renderer.h"
 
+#include <vector>
+
 void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect, const float cornerRadius, const Clay_Color _color) {
     const SDL_FColor color = { _color.r/255, _color.g/255, _color.b/255, _color.a/255 };
 
@@ -16,8 +18,8 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
     int totalVertices = 4 + (4 * (numCircleSegments * 2)) + 2*4;
     int totalIndices = 6 + (4 * (numCircleSegments * 3)) + 6*4;
 
-    SDL_Vertex vertices[totalVertices];
-    int indices[totalIndices];
+    std::vector<SDL_Vertex> vertices(totalVertices);
+    std::vector<int> indices(totalIndices);
 
     //define center rectangle
     vertices[vertexCount++] = (SDL_Vertex){ {rect.x + clampedRadius, rect.y + clampedRadius}, color, {0, 0} }; //0 center TL
@@ -101,7 +103,7 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
     indices[indexCount++] = vertexCount - 1; //LT
 
     // Render everything
-    SDL_RenderGeometry(renderer, NULL, vertices, vertexCount, indices, indexCount);
+    SDL_RenderGeometry(renderer, NULL, vertices.data(), vertexCount, indices.data(), indexCount);
 }
 
 void SDL_Clay_RenderArc(SDL_Renderer* renderer, const SDL_FPoint center, const float radius, const float startAngle, const float endAngle, const float thickness, const Clay_Color color) {
@@ -121,7 +123,7 @@ void SDL_Clay_RenderArc(SDL_Renderer* renderer, const SDL_FPoint center, const f
 
         for (int i = 0; i <= numCircleSegments; i++) {
             const float angle = radStart + i * angleStep;
-            points[i] = (SDL_FPoint){
+            points[i] = {
                     SDL_roundf(center.x + SDL_cosf(angle) * clampedRadius),
                     SDL_roundf(center.y + SDL_sinf(angle) * clampedRadius) };
         }
@@ -200,32 +202,32 @@ void SDL_Clay_RenderClayCommands(SDL_Renderer* renderer, TTF_TextEngine* textEng
                 if (config->cornerRadius.topLeft > 0) {
                     const float centerX = rect.x + clampedRadii.topLeft - 1;
                     const float centerY = rect.y + clampedRadii.topLeft - 1;
-                    SDL_Clay_RenderArc(renderer, (SDL_FPoint){centerX, centerY}, clampedRadii.topLeft,
+                    SDL_Clay_RenderArc(renderer, {centerX, centerY}, clampedRadii.topLeft,
                         180.0f, 270.0f, config->width.top, config->color);
                 }
                 if (config->cornerRadius.topRight > 0) {
                     const float centerX = rect.x + rect.w - clampedRadii.topRight;
                     const float centerY = rect.y + clampedRadii.topRight - 1;
-                    SDL_Clay_RenderArc(renderer, (SDL_FPoint){centerX, centerY}, clampedRadii.topRight,
+                    SDL_Clay_RenderArc(renderer, {centerX, centerY}, clampedRadii.topRight,
                         270.0f, 360.0f, config->width.top, config->color);
                 }
                 if (config->cornerRadius.bottomLeft > 0) {
                     const float centerX = rect.x + clampedRadii.bottomLeft -1;
                     const float centerY = rect.y + rect.h - clampedRadii.bottomLeft;
-                    SDL_Clay_RenderArc(renderer, (SDL_FPoint){centerX, centerY}, clampedRadii.bottomLeft,
+                    SDL_Clay_RenderArc(renderer, {centerX, centerY}, clampedRadii.bottomLeft,
                         90.0f, 180.0f, config->width.bottom, config->color);
                 }
                 if (config->cornerRadius.bottomRight > 0) {
                     const float centerX = rect.x + rect.w - clampedRadii.bottomRight;
                     const float centerY = rect.y + rect.h - clampedRadii.bottomRight;
-                    SDL_Clay_RenderArc(renderer, (SDL_FPoint){centerX, centerY}, clampedRadii.bottomRight,
+                    SDL_Clay_RenderArc(renderer, {centerX, centerY}, clampedRadii.bottomRight,
                         0.0f, 90.0f, config->width.bottom, config->color);
                 }
 
             } break;
             case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START: {
                 Clay_BoundingBox boundingBox = rcmd->boundingBox;
-                currentClippingRectangle = (SDL_Rect) {
+                currentClippingRectangle = {
                         .x = (int) boundingBox.x,
                         .y = (int) boundingBox.y,
                         .w = (int) boundingBox.width,
