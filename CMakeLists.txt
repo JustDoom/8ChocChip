@@ -37,7 +37,7 @@ add_subdirectory(src)
 
 # To get an app icon on Apple platforms, add it to your executable. Afterward, the image file in Info.plist.in.
 if(APPLE)
-    target_sources("${EXECUTABLE_NAME}" PRIVATE "assets/logo.png")
+    target_sources("${EXECUTABLE_NAME}" PRIVATE "assets/icon.png")
 endif()
 
 target_compile_features(${EXECUTABLE_NAME} PUBLIC cxx_std_20)

@@ -22,10 +22,10 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
     std::vector<int> indices(totalIndices);
 
     //define center rectangle
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + clampedRadius, rect.y + clampedRadius}, color, {0, 0} }; //0 center TL
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + rect.w - clampedRadius, rect.y + clampedRadius}, color, {1, 0} }; //1 center TR
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + rect.w - clampedRadius, rect.y + rect.h - clampedRadius}, color, {1, 1} }; //2 center BR
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + clampedRadius, rect.y + rect.h - clampedRadius}, color, {0, 1} }; //3 center BL
+    vertices[vertexCount++] = { {rect.x + clampedRadius, rect.y + clampedRadius}, color, {0, 0} }; //0 center TL
+    vertices[vertexCount++] = { {rect.x + rect.w - clampedRadius, rect.y + clampedRadius}, color, {1, 0} }; //1 center TR
+    vertices[vertexCount++] = { {rect.x + rect.w - clampedRadius, rect.y + rect.h - clampedRadius}, color, {1, 1} }; //2 center BR
+    vertices[vertexCount++] = { {rect.x + clampedRadius, rect.y + rect.h - clampedRadius}, color, {0, 1} }; //3 center BL
 
     indices[indexCount++] = 0;
     indices[indexCount++] = 1;
@@ -51,8 +51,8 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
                 default: return;
             }
 
-            vertices[vertexCount++] = (SDL_Vertex){ {cx + SDL_cosf(angle1) * clampedRadius * signX, cy + SDL_sinf(angle1) * clampedRadius * signY}, color, {0, 0} };
-            vertices[vertexCount++] = (SDL_Vertex){ {cx + SDL_cosf(angle2) * clampedRadius * signX, cy + SDL_sinf(angle2) * clampedRadius * signY}, color, {0, 0} };
+            vertices[vertexCount++] = { {cx + SDL_cosf(angle1) * clampedRadius * signX, cy + SDL_sinf(angle1) * clampedRadius * signY}, color, {0, 0} };
+            vertices[vertexCount++] = { {cx + SDL_cosf(angle2) * clampedRadius * signX, cy + SDL_sinf(angle2) * clampedRadius * signY}, color, {0, 0} };
 
             indices[indexCount++] = j;  // Connect to corresponding central rectangle vertex
             indices[indexCount++] = vertexCount - 2;
@@ -62,8 +62,8 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
 
     //Define edge rectangles
     // Top edge
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + clampedRadius, rect.y}, color, {0, 0} }; //TL
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + rect.w - clampedRadius, rect.y}, color, {1, 0} }; //TR
+    vertices[vertexCount++] = { {rect.x + clampedRadius, rect.y}, color, {0, 0} }; //TL
+    vertices[vertexCount++] = { {rect.x + rect.w - clampedRadius, rect.y}, color, {1, 0} }; //TR
 
     indices[indexCount++] = 0;
     indices[indexCount++] = vertexCount - 2; //TL
@@ -72,8 +72,8 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
     indices[indexCount++] = 0;
     indices[indexCount++] = vertexCount - 1; //TR
     // Right edge
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + rect.w, rect.y + clampedRadius}, color, {1, 0} }; //RT
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + rect.w, rect.y + rect.h - clampedRadius}, color, {1, 1} }; //RB
+    vertices[vertexCount++] = { {rect.x + rect.w, rect.y + clampedRadius}, color, {1, 0} }; //RT
+    vertices[vertexCount++] = { {rect.x + rect.w, rect.y + rect.h - clampedRadius}, color, {1, 1} }; //RB
 
     indices[indexCount++] = 1;
     indices[indexCount++] = vertexCount - 2; //RT
@@ -82,8 +82,8 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
     indices[indexCount++] = 1;
     indices[indexCount++] = vertexCount - 1; //RB
     // Bottom edge
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + rect.w - clampedRadius, rect.y + rect.h}, color, {1, 1} }; //BR
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x + clampedRadius, rect.y + rect.h}, color, {0, 1} }; //BL
+    vertices[vertexCount++] = { {rect.x + rect.w - clampedRadius, rect.y + rect.h}, color, {1, 1} }; //BR
+    vertices[vertexCount++] = { {rect.x + clampedRadius, rect.y + rect.h}, color, {0, 1} }; //BL
 
     indices[indexCount++] = 2;
     indices[indexCount++] = vertexCount - 2; //BR
@@ -92,8 +92,8 @@ void SDL_Clay_RenderFillRoundedRect(SDL_Renderer* renderer, const SDL_FRect rect
     indices[indexCount++] = 2;
     indices[indexCount++] = vertexCount - 1; //BL
     // Left edge
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x, rect.y + rect.h - clampedRadius}, color, {0, 1} }; //LB
-    vertices[vertexCount++] = (SDL_Vertex){ {rect.x, rect.y + clampedRadius}, color, {0, 0} }; //LT
+    vertices[vertexCount++] = { {rect.x, rect.y + rect.h - clampedRadius}, color, {0, 1} }; //LB
+    vertices[vertexCount++] = { {rect.x, rect.y + clampedRadius}, color, {0, 0} }; //LT
 
     indices[indexCount++] = 3;
     indices[indexCount++] = vertexCount - 2; //LB
