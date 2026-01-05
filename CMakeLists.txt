@@ -171,7 +171,7 @@ endif()
 # Set some extra configs for each platform
 set(RESOURCE_FILES "assets/icon.png")
 if(IOS)
-#    set(RESOURCE_FILES "src/iosLaunchScreen.storyboard;assets/icon.png") # make the splash screen show up on iOS
+    set(RESOURCE_FILES "src/iosLaunchScreen.storyboard;assets/icon.png") # make the splash screen show up on iOS
 endif()
 
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES

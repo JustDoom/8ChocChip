@@ -118,16 +118,17 @@ void SDL_Clay_RenderArc(SDL_Renderer* renderer, const SDL_FPoint center, const f
     const float thicknessStep = 0.4f; //arbitrary value to avoid overlapping lines. Changing THICKNESS_STEP or numCircleSegments might cause artifacts.
 
     for (float t = thicknessStep; t < thickness - thicknessStep; t += thicknessStep) {
-        SDL_FPoint points[numCircleSegments + 1];
+        std::vector<SDL_FPoint> points(numCircleSegments + 1);
         const float clampedRadius = SDL_max(radius - t, 1.0f);
 
         for (int i = 0; i <= numCircleSegments; i++) {
             const float angle = radStart + i * angleStep;
             points[i] = {
-                    SDL_roundf(center.x + SDL_cosf(angle) * clampedRadius),
-                    SDL_roundf(center.y + SDL_sinf(angle) * clampedRadius) };
+                SDL_roundf(center.x + SDL_cosf(angle) * clampedRadius),
+                SDL_roundf(center.y + SDL_sinf(angle) * clampedRadius)
+            };
         }
-        SDL_RenderLines(renderer, points, numCircleSegments + 1);
+        SDL_RenderLines(renderer, points.data(), numCircleSegments + 1);
     }
 }
 
