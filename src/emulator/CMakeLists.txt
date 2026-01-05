@@ -1,4 +1,4 @@
-target_sources(8ChocChip PRIVATE
+target_sources(${EXECUTABLE_NAME} PRIVATE
         Cpu.cpp
         Cpu.h
         Keyboard.cpp
@@ -6,5 +6,4 @@ target_sources(8ChocChip PRIVATE
         Renderer.cpp
         Renderer.h
         Speaker.cpp
-        Speaker.h
-)
+        Speaker.h)

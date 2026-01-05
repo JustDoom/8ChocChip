@@ -1,4 +1,4 @@
-target_sources(8ChocChip PRIVATE
+target_sources(${EXECUTABLE_NAME} PRIVATE
         Constants.h
         MiscUtil.cpp
         MiscUtil.h)

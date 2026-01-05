@@ -1,4 +1,4 @@
-target_sources(8ChocChip PRIVATE
+target_sources(${EXECUTABLE_NAME} PRIVATE
         Emulator.cpp
         Emulator.h
         MainMenu.cpp
@@ -10,5 +10,4 @@ target_sources(8ChocChip PRIVATE
         Database.cpp
         Database.h
         KeybindingsMenu.h
-        KeybindingsMenu.cpp
-)
+        KeybindingsMenu.cpp)

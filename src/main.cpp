@@ -1,9 +1,9 @@
 #define SDL_MAIN_USE_CALLBACKS  // This is necessary for the new callbacks API. To use the legacy API, don't define this.
-#include <SDL3/SDL_main.h>
 #include <SDL3/SDL_init.h>
+#include <SDL3/SDL_log.h>
+#include <SDL3/SDL_main.h>
 
 #include "EmulatorMain.h"
-#include "SDL3/SDL_log.h"
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     auto* app = new EmulatorMain();
