@@ -101,14 +101,6 @@ target_link_libraries(${EXECUTABLE_NAME} PUBLIC
         SDL3::SDL3
 )
 
-if (WIN32)
-    target_link_libraries(${EXECUTABLE_NAME} PRIVATE bcrypt)
-elseif (EMSCRIPTEN)
-else ()
-    find_package(OpenSSL REQUIRED)
-    target_link_libraries(${EXECUTABLE_NAME} PRIVATE OpenSSL::Crypto)
-endif()
-
 # SDL_Image bug: https://github.com/libsdl-org/SDL_image/issues/506
 if (APPLE AND NOT BUILD_SHARED_LIBS)
     find_library(IO_LIB ImageIO REQUIRED)

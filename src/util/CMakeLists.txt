@@ -1,4 +1,6 @@
 target_sources(${EXECUTABLE_NAME} PRIVATE
         Constants.h
         MiscUtil.cpp
-        MiscUtil.h)
+        MiscUtil.h
+        Sha1.cpp
+        Sha1.h)
