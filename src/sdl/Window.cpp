@@ -34,8 +34,17 @@ void Window::init(const int width, const int height) {
     SDL_GetWindowSize(this->window, &this->originalSize.x, &this->originalSize.y);
 }
 
+void Window::init(SDL_Window* window, SDL_Renderer* renderer) {
+    this->window = window;
+    this->renderer = renderer;
+}
+
 bool Window::handleEvent(SDL_Event* event) {
+#ifdef __EMSCRIPTEN__
+    if (true) {
+#else
     if (event->window.windowID == this->windowId) { // TODO: Maybe let it go one more frame?
+#endif
         switch (event->type) {
             case SDL_EVENT_WINDOW_SHOWN:
                 this->shown = true;

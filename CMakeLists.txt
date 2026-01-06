@@ -111,6 +111,14 @@ if (APPLE AND NOT BUILD_SHARED_LIBS)
     target_link_libraries(${EXECUTABLE_NAME} PUBLIC ${CF_LIB} ${CT_LIB} ${IO_LIB} ${CS_LIB} ${CG_LIB})
 endif()
 
+if(EMSCRIPTEN)
+    target_link_options(${EXECUTABLE_NAME} PRIVATE
+            -sEXPORTED_FUNCTIONS=_main,_free,_malloc
+            -sEXPORTED_RUNTIME_METHODS=ccall,cwrap
+            -sDISABLE_EXCEPTION_CATCHING=0
+    )
+endif()
+
 # Dealing with assets
 # We have some non-code resources that our application needs in order to work. How we deal with those differs per platform.
 if (APPLE)

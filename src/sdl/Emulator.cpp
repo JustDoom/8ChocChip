@@ -16,7 +16,7 @@ Emulator::Emulator(const std::string& path, const RomSettings& romSettings, cons
             SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Error opening file '%s'", path.c_str());
             return;
         }
-    
+
         std::vector<uint8_t> buffer(sha1Dimension);
     
         fileReader.seekg(0, std::ios::end);
@@ -34,8 +34,13 @@ Emulator::Emulator(const std::string& path, const RomSettings& romSettings, cons
     this->keyboard.keymap = keymap;
 }
 
+#ifdef __EMSCRIPTEN__
+void Emulator::init(SDL_Window* window, SDL_Renderer* renderer) {
+    Window::init(window, renderer);
+#else
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
+#endif
 
     if (this->path.empty()) {
         std::cerr << "No ROM file has been specified :(" << std::endl;
@@ -56,6 +61,8 @@ void Emulator::init() {
         this->cpu.loadProgramIntoMemory(&file);
         this->cpu.loadSpritesIntoMemory();
     }
+
+    SDL_Log("Loaded");
 }
 
 bool Emulator::handleEvent(SDL_Event* event) {

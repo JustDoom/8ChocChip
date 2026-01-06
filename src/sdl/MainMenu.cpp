@@ -24,6 +24,10 @@ constexpr Clay_Color COLOR_BUTTON = {90, 60, 40, 255};
 bool clicked = false;
 Clay_Vector2 wheel{};
 
+#ifdef __EMSCRIPTEN__
+std::unique_ptr<Emulator> emulator = nullptr;
+#endif
+
 MainMenu::MainMenu(TTF_Font* font, std::unordered_map<std::string *, std::vector<std::string>> &romFiles,
                    std::vector<std::string> &romDirectories, std::vector<std::unique_ptr<Window>> &windows) :
     romDirectories(romDirectories), romFiles(romFiles), windows(windows), mutex(SDL_CreateMutex()), database() {
@@ -50,6 +54,13 @@ void MainMenu::init() {
 }
 
 bool MainMenu::handleEvent(SDL_Event* event) {
+#ifdef __EMSCRIPTEN__
+    if (emulator != nullptr) {
+        emulator->handleEvent(event);
+        return true;
+    }
+#endif
+
     if (!Window::handleEvent(event)) {
         return false;
     }
@@ -63,9 +74,9 @@ bool MainMenu::handleEvent(SDL_Event* event) {
         break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
             this->inputHandler.removeButton(event->button.button);
-        if (event->button.button == SDL_BUTTON_LEFT) {
-            clicked = false;
-        }
+            if (event->button.button == SDL_BUTTON_LEFT) {
+                clicked = false;
+            }
         break;
         case SDL_EVENT_MOUSE_MOTION:
             // Clay_SetPointerState((Clay_Vector2) { event.motion.x, event.motion.y }, event.motion.state & SDL_BUTTON_LMASK);
@@ -80,12 +91,96 @@ bool MainMenu::handleEvent(SDL_Event* event) {
             wheel.x = event->wheel.x * 2;
             wheel.y = event->wheel.y * 2;
         break;
+        case SDL_EVENT_DROP_FILE: {
+            if (!event->drop.data) break;
+
+            const std::string fileString = event->drop.data;
+            SDL_Log("File dropped: %s", fileString.c_str());
+            SDL_Log("File hash (temp): %s", sha1FromFile(fileString).c_str());
+
+            std::ifstream file(fileString, std::ios::binary);
+            if (!file.good()) {
+                SDL_Log("Failed to open dropped file");
+                break;
+            }
+
+            // Create persistent directory
+            std::error_code ec;
+            std::filesystem::create_directories("/persistent", ec);
+            if (ec) {
+                SDL_Log("Failed to create /persistent: %s", ec.message().c_str());
+                file.close();
+                break;
+            }
+
+            // Copy to persistent location
+            std::string filename = std::filesystem::path(fileString).filename().string();
+            std::string persistentPath = "/persistent/" + filename;
+
+            std::ofstream outFile(persistentPath, std::ios::binary);
+            if (!outFile.good()) {
+                SDL_Log("Failed to create output file");
+                file.close();
+                break;
+            }
+
+            outFile << file.rdbuf();
+            file.close();
+            outFile.close();
+
+            // Verify the file was written
+            std::string fileHash = sha1FromFile(persistentPath);
+            SDL_Log("Processing file: %s - %s", persistentPath.c_str(), fileHash.c_str());
+
+            if (fileHash.empty()) {
+                SDL_Log("ERROR: Failed to read back written file!");
+                break;
+            }
+
+            SDL_LockMutex(mutex);
+
+            // Find or create "Dropped Files" directory entry
+            const std::string droppedDirName = "Dropped Files";
+            auto dirIt = std::find(romDirectories.begin(), romDirectories.end(), droppedDirName);
+
+            if (dirIt == romDirectories.end()) {
+                romDirectories.push_back(droppedDirName);
+                dirIt = romDirectories.end() - 1;
+            }
+
+            // Get pointer to the directory string (must be stable!)
+            std::string* dirPtr = &(*dirIt);
+
+            // Ensure this directory has an entry in romFiles
+            if (!romFiles.contains(dirPtr)) {
+                romFiles[dirPtr] = std::vector<std::string>();
+            }
+
+            // Check if file already exists
+            auto& filesList = romFiles[dirPtr];
+            if (std::find(filesList.begin(), filesList.end(), persistentPath) == filesList.end()) {
+                filesList.push_back(persistentPath);
+                SDL_Log("Added ROM to collection");
+            } else {
+                SDL_Log("ROM already in collection");
+            }
+
+            SDL_UnlockMutex(mutex);
+            break;
+        }
     }
 
     return true;
 }
 
 void MainMenu::update() {
+#ifdef __EMSCRIPTEN__
+    if (emulator != nullptr) {
+        emulator->update();
+        return;
+    }
+#endif
+
     if (!this->mouseFocus) {
         clicked = false;
         return;
@@ -100,6 +195,13 @@ void MainMenu::update() {
 }
 
 void MainMenu::render() {
+#ifdef __EMSCRIPTEN__
+    if (emulator != nullptr) {
+        emulator->render();
+        return;
+    }
+#endif
+
     float x, y;
     SDL_GetMouseState(&x, &y);
     Clay_SetLayoutDimensions({ static_cast<float>(this->width), static_cast<float>(this->height) });
@@ -124,7 +226,7 @@ void MainMenu::render() {
                 .backgroundColor = COLOR_BOX,
                 .clip = { .vertical = true, .childOffset = Clay_GetScrollOffset() }
             }) {
-                if (this->romDirectories.empty() || this->romFiles.empty()) {
+                if (this->romDirectories.empty() && this->romFiles.empty()) {
                     CLAY_TEXT(CLAY_STRING("No files found"), CLAY_TEXT_CONFIG({ .textColor = {0, 0, 0, 255}, .fontSize = 24, .textAlignment = CLAY_TEXT_ALIGN_CENTER }));
                 } else {
                     for (auto& dir : this->romFiles) {
@@ -342,6 +444,13 @@ void MainMenu::render() {
 }
 
 void MainMenu::resize(SDL_Event* event) {
+#ifdef __EMSCRIPTEN__
+    if (emulator != nullptr) {
+        emulator->resize(event);
+        return;
+    }
+#endif
+
     this->width = event->window.data1;
     this->height = event->window.data2;
 }
@@ -395,12 +504,24 @@ void MainMenu::handlePlay(Clay_ElementId elementId, const Clay_PointerData point
             return;
         }
         std::unordered_map<uint8_t, unsigned char> romKeymap = data->self->getSelectedRomKeymap();
+
+        SDL_Log("Rom that was selected %s", data->self->selectedRom->c_str());
+
+        #ifdef __EMSCRIPTEN__
         if (data->self->selectedState != nullptr) {
-            std::cout << *data->self->selectedState << std::endl;
+            emulator = std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap);
+            emulator->init(data->self->window, data->self->renderer);
+        } else {
+            emulator = std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, romKeymap);
+            emulator->init(data->self->window, data->self->renderer);
+        }
+        #else
+        if (data->self->selectedState != nullptr) {
             data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedState, data->self->romSettings, romKeymap))->init();
         } else {
             data->self->windows.emplace_back(std::make_unique<Emulator>(*data->self->selectedRom, data->self->romSettings, romKeymap))->init();
         }
+        #endif
     }
 }
 

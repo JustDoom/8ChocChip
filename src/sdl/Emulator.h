@@ -24,7 +24,11 @@ private:
 public:
     Emulator(const std::string& path, const RomSettings& romSettings, const std::unordered_map<uint8_t, unsigned char>& keymap);
 
+#ifdef __EMSCRIPTEN__
+    void init(SDL_Window* window, SDL_Renderer* renderer);
+#else
     void init() override;
+#endif
     bool handleEvent(SDL_Event* event) override;
     void update() override;
     void render() override;

@@ -30,6 +30,7 @@ public:
 
     virtual void init();
     virtual void init(int width, int height);
+    virtual void init(SDL_Window* window, SDL_Renderer* renderer);
     virtual bool handleEvent(SDL_Event* event);
     virtual void update();
     virtual void render() = 0;

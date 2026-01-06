@@ -19,20 +19,21 @@
 #include "../dependencies/clay/clay.h"
 
 bool EmulatorMain::initialise(int argc, char **argv) {
-    for (int i = 0; i < argc; i++) {
-        std::string command = toLowerCase(argv[i]);
-        if (command.rfind("--") != 0 && command.rfind('-') != 0) {
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+
+        if (arg.empty() || arg[0] != '-') {
             continue;
         }
+        std::string command = toLowerCase(arg);
 
         if (command == "--path" || command == "-p") {
             if (i + 1 < argc) {
                 this->rom = argv[++i];
-                continue;
+            } else {
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Please include the path to the file");
+                return false;
             }
-
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Please include the path to the file");
-            return false;
         }
         if (command == "--help" || command == "-h") {
             SDL_Log("Usage: 8ChocChip --path <pathtorom/pathtostate>");
@@ -42,12 +43,10 @@ bool EmulatorMain::initialise(int argc, char **argv) {
             debug = true;
         }
         if (command == "--speedtest" || command == "-st") {
-            SDL_Log("Speed");
             speedTest = true;
         }
         if (command == "--instructions" || command == "-ipf") {
-            std::cout << argv[++i] << std::endl;
-            ipf = std::stoi(argv[i]);
+            ipf = std::stoi(argv[++i]);
         }
     }
 
@@ -58,7 +57,6 @@ bool EmulatorMain::initialise(int argc, char **argv) {
     }
     configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
 
-    std::unordered_map<uint8_t, unsigned char> keymap = defaultKeymap;
     if (std::ifstream file(configFilePath); file.good()) {
         nlohmann::json json;
         try {
@@ -69,7 +67,6 @@ bool EmulatorMain::initialise(int argc, char **argv) {
             return false;
         }
         file.close();
-        std::cout << json << std::endl;
         if (json["directories"] != nullptr) {
             for (const auto& directory : json["directories"]) {
                 if (std::ifstream file(directory.get<std::string>()); !file.good()) {
@@ -80,9 +77,6 @@ bool EmulatorMain::initialise(int argc, char **argv) {
 
                 searchDirectory(directory.get<std::string>(), this->romFiles, this->romDirectories);
             }
-        }
-        if (json["keymap"] != nullptr) {
-            keymap = json["keymap"];
         }
     }
 
