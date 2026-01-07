@@ -63,13 +63,8 @@ For a proper test suite you can check out https://github.com/Timendus/chip8-test
 
 Install dependencies
 ```
-sudo apt-get install build-essential git make \
-        pkg-config cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev \
-        libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev \
-        libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxtst-dev \
-        libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev \
-        libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev \
-        libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev
+sudo apt update
+sudo apt install -y --no-install-recommends build-essential git cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev fcitx-libs-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev libxtst-dev
 ```
 
 Clone the repository through the command line, or another option you may have
@@ -84,17 +79,15 @@ git submodule update --init --recursive
 
 Configure CMake
 ```
-mkdir -p build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -S . -B build
 ```
 
 Build
 ```
-cmake --build . --config Release
+cmake --build build --target 8ChocChip --config Release
 ```
 
-The generated files will be inside the `build/bin` directory
+The generated files will be inside the `build` directory
 
 ### Windows
 
@@ -111,6 +104,5 @@ Thanks to these two blogs that helped me through creating this emulator.
 
 - [SDL](https://github.com/libsdl-org/SDL) - UI, graphics, input and sounds
 - [SDL-ttf](https://github.com/libsdl-org/SDL_ttf) - Text fonts
-- [SDL-image](https://github.com/libsdl-org/SDL_image) - Images
 - [nlohmann/json](https://github.com/nlohmann/json) - Library to manage save data (like directories that hold ROMs) and possible future config files
 - [nicbarker/clay](https://github.com/nicbarker/clay) - UI layout library
