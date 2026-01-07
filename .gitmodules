@@ -10,9 +10,6 @@
 [submodule "dependencies/clay"]
 	path = dependencies/clay
 	url = https://github.com/nicbarker/clay.git
-[submodule "dependencies/sdl_image"]
-	path = dependencies/sdl_image
-	url = https://github.com/libsdl-org/SDL_image.git
 [submodule "dependencies/chip-8-database"]
 	path = dependencies/chip-8-database
 	url = https://github.com/chip-8/chip-8-database.git

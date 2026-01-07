@@ -1,6 +1,7 @@
 #include "Cpu.h"
 
 #include <cstring>
+#include <fstream>
 #include <iostream>
 #include <random>
 
@@ -26,7 +27,7 @@ void Cpu::loadSpritesIntoMemory() {
 
 void Cpu::loadProgramIntoMemory(std::ifstream* file) {
     if (file->is_open()) {
-        std::streampos size = file->tellg();
+        const std::streampos size = file->tellg();
         std::vector<char> buffer(size);
         file->seekg(0, std::ios::beg);
         file->read(buffer.data(), size);
