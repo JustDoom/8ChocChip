@@ -4,8 +4,6 @@
 #include <iostream>
 #include <random>
 
-#include "../util/Constants.h"
-
 Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : renderer(renderer), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
     this->address = 0;
     this->delay = 0;

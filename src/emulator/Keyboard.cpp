@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "Keyboard.h"
 
 void Keyboard::setOnNextKeyPress(std::function<void(unsigned char)> callback) {

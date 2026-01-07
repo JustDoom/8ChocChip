@@ -91,7 +91,7 @@ void Emulator::update() {
             this->cpu.cycle();
         }
     } catch (uint16_t opcode) {
-        SDL_Log("Program cancelled, Unknown opcode - %s", opcode);
+        SDL_Log("Program cancelled, Unknown opcode - %hu", opcode);
         this->encounteredError = true;
         SDL_SetWindowTitle(this->window, ("Program cancelled, Unknown opcode - " + std::to_string(opcode)).c_str());
     }

@@ -2,8 +2,6 @@
 #define CPU_H
 
 #include <array>
-#include <cstdint>
-#include <fstream>
 
 #include "Keyboard.h"
 #include "Renderer.h"

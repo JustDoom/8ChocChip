@@ -1,7 +1,6 @@
 #include "InputHandler.h"
 
 #include <algorithm>
-#include <iostream>
 
 void InputHandler::addKey(SDL_Keycode key) {
     removeKey(key); // Do this because when a button is held down it adds many into the list and breaks functionality\

@@ -1,7 +1,5 @@
 #include "Renderer.h"
 
-#include <iostream>
-
 void Renderer::render(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
