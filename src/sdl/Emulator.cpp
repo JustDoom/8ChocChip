@@ -1,4 +1,7 @@
 #include "Emulator.h"
+
+#include <algorithm>
+
 #include "../util/Constants.h"
 
 #include <iostream>
@@ -106,7 +109,7 @@ void Emulator::render() {
     for (uint8_t y = 0; y < 32; ++y) {
         for (uint8_t x = 0; x < 64; ++x) {
             if (this->cpu.getDisplay()[y * 64 + x]) {
-                const SDL_FRect rect = {x * this->scale, y * this->scale, this->scale, this->scale};
+                const SDL_FRect rect = {this->offsetX + static_cast<float>(x) * this->scale, this->offsetY + static_cast<float>(y) * this->scale, this->scale, this->scale};
                 SDL_RenderFillRect(renderer, &rect);
             }
         }
@@ -115,7 +118,9 @@ void Emulator::render() {
 }
 
 void Emulator::resize(SDL_Event* event) {
-
+    this->scale = std::min(event->display.data1 / 64, event->display.data2 / 32);
+    this->offsetX = (event->display.data1 - 64 * this->scale) / 2.f;
+    this->offsetY = (event->display.data2 - 32 * this->scale) / 2;
 }
 
 void Emulator::handleSaveState() {

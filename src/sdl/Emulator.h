@@ -15,6 +15,8 @@ private:
     Cpu cpu;
 
     float scale = 15;
+    int offsetX = 0;
+    int offsetY = 0;
     
     const std::string &path;
     std::string sha1;
