@@ -4,17 +4,17 @@
 #include "../emulator/Cpu.h"
 #include "Window.h"
 #include "../emulator/Keyboard.h"
-#include "../emulator/Renderer.h"
 #include "../emulator/Speaker.h"
 
 #include "../Settings.h"
 
 class Emulator : public Window {
 private:
-    Renderer renderWrapper;
     Speaker speaker;
     Keyboard keyboard;
     Cpu cpu;
+
+    float scale = 15;
     
     const std::string &path;
     std::string sha1;

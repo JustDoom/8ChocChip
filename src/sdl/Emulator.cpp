@@ -7,7 +7,7 @@
 
 #include "../util/MiscUtil.h"
 
-Emulator::Emulator(const std::string& path, const RomSettings& romSettings, const std::unordered_map<uint8_t, unsigned char>& keymap) : cpu(&renderWrapper, &keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
+Emulator::Emulator(const std::string& path, const RomSettings& romSettings, const std::unordered_map<uint8_t, unsigned char>& keymap) : cpu(&keyboard, &speaker, romSettings, keymap), path(path), sha1(sha1FromFile(path)) {
     if (this->path.ends_with(".state")) {
         std::ifstream fileReader;
         fileReader.open(path, std::ios::binary);
@@ -54,7 +54,7 @@ void Emulator::init() {
     }
     SDL_SetWindowTitle(this->window, (std::string(SDL_GetWindowTitle(this->window)) + " - " + getFileFromStringPath(this->path)).c_str());
 
-    // Setup the emulator
+    // Set up the emulator
     if (stringEndsWith(this->path, ".state")) {
         this->loadState();
     } else {
@@ -101,7 +101,16 @@ void Emulator::render() {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
     SDL_RenderClear(this->renderer);
 
-    this->renderWrapper.render(this->renderer);
+    SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
+
+    for (uint8_t y = 0; y < 32; ++y) {
+        for (uint8_t x = 0; x < 64; ++x) {
+            if (this->cpu.getDisplay()[y * 64 + x]) {
+                const SDL_FRect rect = {x * this->scale, y * this->scale, this->scale, this->scale};
+                SDL_RenderFillRect(renderer, &rect);
+            }
+        }
+    }
     SDL_RenderPresent(this->renderer);
 }
 

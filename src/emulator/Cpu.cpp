@@ -5,7 +5,7 @@
 #include <iostream>
 #include <random>
 
-Cpu::Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : renderer(renderer), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
+Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : display(64 * 32), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -89,7 +89,7 @@ void Cpu::runInstruction() {
             switch (opcode) {
                 // Clear screen
                 case 0x00E0:
-                    this->renderer->clear();
+                    clearDisplay();
                     break;
                 case 0x00EE:
                     this->pc = this->stack[--this->sp & 0xF];
@@ -236,7 +236,7 @@ void Cpu::runInstruction() {
                             continue;
                         }
 
-                        if (this->renderer->setPixel(drawX, drawY)) {
+                        if (setPixel(drawX, drawY)) {
                             vF = 1;
                         }
                     }
@@ -333,9 +333,25 @@ uint8_t Cpu::random8bit() {
     return this->seed;
 }
 
-std::vector<uint8_t> Cpu::serialize() {
+std::vector<uint8_t> &Cpu::getDisplay() {
+    return this->display;
+}
+
+bool Cpu::setPixel(const uint8_t x, const uint8_t y) {
+    return !(this->display[y * 64 + x] ^= 1);
+}
+
+bool Cpu::getPixel(const uint8_t x, const uint8_t y) const {
+    return this->display[y * 64 + x];
+}
+
+void Cpu::clearDisplay() {
+    this->display.assign(this->display.size(), false);
+}
+
+std::vector<uint8_t> Cpu::serialize() const {
     std::vector<uint8_t> serializedData;
-    serializedData.reserve(this->serializationDimension);
+    serializedData.reserve(serializationDimension);
 
     serializedData.insert(serializedData.end(), memory.cbegin(), memory.cend());
     serializedData.insert(serializedData.end(), registers.cbegin(), registers.cend());
@@ -355,7 +371,7 @@ std::vector<uint8_t> Cpu::serialize() {
     serializedData.push_back(this->delay);
     serializedData.push_back(this->soundTimer);
     
-    serializedData.push_back(static_cast<uint8_t>(this->drawn));
+    serializedData.push_back(this->drawn);
     serializedData.push_back(this->speed >> 24);
     serializedData.push_back(this->speed >> 16);
     serializedData.push_back(this->speed >> 8);
@@ -370,7 +386,7 @@ std::vector<uint8_t> Cpu::serialize() {
     serializedData.push_back(static_cast<uint8_t>((this->instructions >> 8) & 0xFF));
     serializedData.push_back(static_cast<uint8_t>((this->instructions & 0xFF)));
 
-    serializedData.insert(serializedData.end(), this->renderer->display.cbegin(), this->renderer->display.cend());
+    serializedData.insert(serializedData.end(), this->display.cbegin(), this->display.cend());
 
     return serializedData;
 }
@@ -440,6 +456,6 @@ void Cpu::deserialize(uint8_t* serialization) {
     current_position++;
 
     copy(serialization + current_position, 
-         serialization + current_position + this->renderer->display.size(), 
-         this->renderer->display.begin());
+         serialization + current_position + this->display.size(),
+         this->display.begin());
 }

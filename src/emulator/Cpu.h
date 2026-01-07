@@ -4,13 +4,14 @@
 #include <array>
 
 #include "Keyboard.h"
-#include "Renderer.h"
 #include "Speaker.h"
 
 #include "../Settings.h"
 
 class Cpu {
 private:
+    std::vector<uint8_t> display;
+
     alignas(64) std::array<uint8_t, 4096> memory;
     alignas(16) std::array<uint8_t, 16> registers;
     alignas(32) std::array<uint16_t, 16> stack;
@@ -24,7 +25,6 @@ private:
     uint32_t speed;
     uint8_t seed;
 
-    Renderer* renderer;
     Keyboard* keyboard;
     Speaker* speaker;
 
@@ -49,7 +49,7 @@ private:
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 public:
-    Cpu(Renderer* renderer, Keyboard* keyboard, Speaker* speaker, RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
+    Cpu(Keyboard* keyboard, Speaker* speaker, RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
 
     void loadSpritesIntoMemory();
     void loadProgramIntoMemory(std::ifstream* file);
@@ -59,7 +59,12 @@ public:
 
     uint8_t random8bit();
 
-    std::vector<uint8_t> serialize();
+    std::vector<uint8_t>& getDisplay();
+    void clearDisplay();
+    bool getPixel(uint8_t x, uint8_t y) const;
+    bool setPixel(uint8_t x, uint8_t y);
+
+    std::vector<uint8_t> serialize() const;
     void deserialize(uint8_t* serialization);
     static const size_t serializationDimension = 4096 + 16 + 32 + 2 + 2 + 1 + 1 + 1 + 1 + 4 + 1 + 8 + 2048;
 
