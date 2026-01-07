@@ -10,6 +10,7 @@
 
 class Emulator : public Window {
 private:
+    SDL_Texture* renderTexture;
     Speaker speaker;
     Keyboard keyboard;
     Cpu cpu;

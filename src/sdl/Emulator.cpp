@@ -14,18 +14,18 @@ Emulator::Emulator(const std::string& path, const RomSettings& romSettings, cons
     if (this->path.ends_with(".state")) {
         std::ifstream fileReader;
         fileReader.open(path, std::ios::binary);
-        
+
         if (!fileReader.is_open()) {
             SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Error opening file '%s'", path.c_str());
             return;
         }
 
         std::vector<uint8_t> buffer(sha1Dimension);
-    
+
         fileReader.seekg(0, std::ios::end);
         size_t file_size = fileReader.tellg();
         fileReader.seekg(Cpu::serializationDimension - 1, std::ios::beg);
-        
+
         fileReader.read(reinterpret_cast<char*>(&buffer[0]), sha1Dimension);
         fileReader.close();
 
@@ -44,6 +44,14 @@ void Emulator::init(SDL_Window* window, SDL_Renderer* renderer) {
 void Emulator::init() {
     Window::init(64 * 15, 32 * 15);
 #endif
+
+    this->renderTexture = SDL_CreateTexture(
+        this->renderer,
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        64, 32
+    );
+    SDL_SetTextureScaleMode(this->renderTexture, SDL_SCALEMODE_NEAREST);
 
     if (this->path.empty()) {
         std::cerr << "No ROM file has been specified :(" << std::endl;
@@ -101,19 +109,24 @@ void Emulator::update() {
 }
 
 void Emulator::render() {
-    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 0);
-    SDL_RenderClear(this->renderer);
-
-    SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
-
-    for (uint8_t y = 0; y < 32; ++y) {
-        for (uint8_t x = 0; x < 64; ++x) {
-            if (this->cpu.getDisplay()[y * 64 + x]) {
-                const SDL_FRect rect = {this->offsetX + static_cast<float>(x) * this->scale, this->offsetY + static_cast<float>(y) * this->scale, this->scale, this->scale};
-                SDL_RenderFillRect(renderer, &rect);
-            }
-        }
+    static uint32_t pixels[64 * 32];
+    const auto& display = this->cpu.getDisplay();
+    for (int i = 0; i < 64 * 32; ++i) {
+        pixels[i] = 0x00FFFFFF * display[i] | 0xFF000000;
     }
+
+    SDL_UpdateTexture(this->renderTexture, nullptr, pixels, 64 * sizeof(uint32_t));
+
+    const SDL_FRect rect = {
+        static_cast<float>(this->offsetX),
+        static_cast<float>(this->offsetY),
+        64 * this->scale,
+        32 * this->scale
+    };
+
+    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(this->renderer);
+    SDL_RenderTexture(this->renderer, this->renderTexture, nullptr, &rect);
     SDL_RenderPresent(this->renderer);
 }
 
@@ -134,7 +147,7 @@ void Emulator::handleSaveState() {
     SDL_ShowSaveFileDialog([](void* userData, const char* const* selectedPath, int filter) {
         const auto data = static_cast<Emulator*>(userData);
         data->isStopped = false;
-        
+
         if (!selectedPath || !*selectedPath) {
             SDL_Log("The user did not select any file. Most likely, the dialog was canceled.");
             return;
@@ -153,11 +166,11 @@ void Emulator::saveState(const std::string& path) {
     std::ofstream fileWriter;
     fileWriter.open(path, std::ios::binary);
     auto serialization = this->cpu.serialize();
-    
+
     // After the CPU serialization, I insert the SHA1 of the ROM to check it when selecting a state
     // in the main dialog
     serialization.insert(serialization.end(), this->sha1.cbegin(), this->sha1.cend());
-    
+
     fileWriter.write(reinterpret_cast<char*>(serialization.data()), serialization.size());
     fileWriter.close();
 }
@@ -165,7 +178,7 @@ void Emulator::saveState(const std::string& path) {
 void Emulator::loadState() {
     std::ifstream fileReader;
     fileReader.open(this->path, std::ios::binary);
-    
+
     if (!fileReader.is_open()) {
         std::cerr << "Error opening file '" << this->path << "'" << std::endl;
         return;
@@ -176,7 +189,7 @@ void Emulator::loadState() {
     fileReader.seekg(0, std::ios::end);
     const size_t file_size = fileReader.tellg();
     fileReader.seekg(0, std::ios::beg);
-    
+
     fileReader.read(reinterpret_cast<char*>(&buffer[0]), file_size);
     fileReader.close();
 
