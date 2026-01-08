@@ -14,6 +14,7 @@ Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, st
     this->drawn = false;
     this->speed = ipf;
 
+    this->display.fill(0ULL);
     this->memory.fill(0);
     this->registers.fill(0);
     this->stack.fill(0);
@@ -86,7 +87,7 @@ void Cpu::runInstruction() {
             switch (opcode) {
                 // Clear screen
                 case 0x00E0:
-                    this->display.fill(false);
+                    this->display.fill(0ULL);
                     break;
                 case 0x00EE:
                     this->pc = this->stack[--this->sp & 0xF];
@@ -211,39 +212,43 @@ void Cpu::runInstruction() {
             break;
         }
         case 0xD000: {
-            const uint8_t height = opcode & 0xF;
-            const uint8_t uX = this->registers[x] & 63;
-            const uint8_t uY = this->registers[y] & 31;
-            const uint8_t* sprites = &this->memory[this->address];
-            uint8_t& vF = this->registers[0xF]; // Store reference to not fetching it every time
-            vF = 0;
+                const uint8_t height = opcode & 0xF;
+                const uint8_t uX = this->registers[x] & 63;
+                const uint8_t uY = this->registers[y] & 31;
+                const uint8_t* sprites = &this->memory[this->address];
+                uint8_t& vF = this->registers[0xF]; // Store reference to not fetching it every time
+                vF = 0;
 
-            for (uint8_t row = 0; row < height; ++row) {
-                uint8_t sprite = sprites[row];
-                const uint8_t drawY = (uY + row);
-                if (drawY > 31) {
-                    continue;
-                }
-
-                for (uint8_t col = 0; col < 8; ++col) {
-                    if (sprite & 0x80) {
-                        const uint8_t drawX = (uX + col);
-
-                        if (drawX > 63) {
-                            continue;
-                        }
-
-                        uint8_t& pixel = this->display[drawY * 64 + drawX];
-                        if (pixel) vF = 1;
-                        pixel ^= 1;
+                for (uint8_t row = 0; row < height; ++row) {
+                    uint8_t sprite = sprites[row];
+                    if (sprite == 0) {
+                        continue;
                     }
-                    sprite <<= 1;
+                    const uint8_t drawY = uY + row;
+                    if (drawY > 31) {
+                        continue;
+                    }
+
+                    uint64_t& pixelRow = this->display[drawY];
+                    uint8_t col = 0;
+                    while (sprite) {
+                        if (sprite & 0x80) {
+                            const uint64_t mask = 1ULL << (63 - (uX + col) & 63);
+                            if (pixelRow & mask) {
+                                vF = 1;
+                            }
+                            pixelRow ^= mask;
+                        }
+                        sprite <<= 1;
+                        if (++col == 8) {
+                            break;
+                        }
+                    }
                 }
-            }
-            if (this->romSettings.quirks.vblank) {
-                this->drawn = true;
-            }
-            break;
+                if (this->romSettings.quirks.vblank) {
+                    this->drawn = true;
+                }
+                break;
         }
         case 0xE000:
             switch (second) {
@@ -330,7 +335,7 @@ uint8_t Cpu::random8bit() {
     return this->seed;
 }
 
-std::array<uint8_t, 2048>& Cpu::getDisplay() {
+std::array<uint64_t, 32>& Cpu::getDisplay() {
     return this->display;
 }
 

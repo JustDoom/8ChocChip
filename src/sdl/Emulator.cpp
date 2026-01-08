@@ -111,8 +111,11 @@ void Emulator::update() {
 void Emulator::render() {
     static uint32_t pixels[64 * 32];
     const auto& display = this->cpu.getDisplay();
-    for (int i = 0; i < 64 * 32; ++i) {
-        pixels[i] = 0x00FFFFFF * display[i] | 0xFF000000;
+    for (int row = 0; row < 32; ++row) {
+        const uint64_t rowBits = display[row];
+        for (int col = 0; col < 64; ++col) {
+            pixels[row * 64 + col] = 0x00FFFFFF * ((rowBits & 1ULL << (63 - col)) != 0) | 0xFF000000;
+        }
     }
 
     SDL_UpdateTexture(this->renderTexture, nullptr, pixels, 64 * sizeof(uint32_t));

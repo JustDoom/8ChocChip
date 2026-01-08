@@ -10,7 +10,7 @@
 
 class Cpu {
 private:
-    alignas(64) std::array<uint8_t, 2048> display;
+    alignas(64) std::array<uint64_t, 32> display;
     alignas(64) std::array<uint8_t, 4096> memory;
     alignas(16) std::array<uint8_t, 16> registers;
     alignas(32) std::array<uint16_t, 16> stack;
@@ -58,7 +58,7 @@ public:
 
     uint8_t random8bit();
 
-    std::array<uint8_t, 2048>& getDisplay();
+    std::array<uint64_t, 32>& getDisplay();
 
     std::vector<uint8_t> serialize() const;
     void deserialize(uint8_t* serialization);
