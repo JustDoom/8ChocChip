@@ -21,7 +21,7 @@ public:
     ~Speaker();
 
     void play();
-    void stop();
+    void stop() const;
     void generateSample();
 };
 

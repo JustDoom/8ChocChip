@@ -50,36 +50,6 @@ bool EmulatorMain::initialise(int argc, char **argv) {
         }
     }
 
-    // TODO: Move config stuff to its own file
-    if (!home) {
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s environment variable not set.", home);
-        return false;
-    }
-    configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
-
-    if (std::ifstream file(configFilePath); file.good()) {
-        nlohmann::json json;
-        try {
-            json = nlohmann::json::parse(file);
-        } catch (const nlohmann::json::parse_error& error) {
-            // TODO: Better warning
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to parse the config, please make sure it contains valid JSON");
-            return false;
-        }
-        file.close();
-        if (json["directories"] != nullptr) {
-            for (const auto& directory : json["directories"]) {
-                if (std::ifstream file(directory.get<std::string>()); !file.good()) {
-                    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to find directory %s", directory.dump().c_str());
-                    continue;
-                }
-                this->romDirectories.emplace_back(directory.get<std::string>());
-
-                searchDirectory(directory.get<std::string>(), this->romFiles, this->romDirectories);
-            }
-        }
-    }
-
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "SDL could not initialize. SDL_Error: %s", SDL_GetError());
         return false;
@@ -101,6 +71,35 @@ bool EmulatorMain::initialise(int argc, char **argv) {
     }
 
     if (this->rom.empty()) {
+        // TODO: Move config stuff to its own file
+        if (!home) {
+            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s environment variable not set.", home);
+            return false;
+        }
+        configFilePath = (std::filesystem::path(home) / ".8chocchip.json").string();
+
+        if (std::ifstream file(configFilePath); file.good()) {
+            nlohmann::json json;
+            try {
+                json = nlohmann::json::parse(file);
+            } catch (const nlohmann::json::parse_error& error) {
+                // TODO: Better warning
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to parse the config, please make sure it contains valid JSON");
+                return false;
+            }
+            file.close();
+            if (json["directories"] != nullptr) {
+                for (const auto& directory : json["directories"]) {
+                    if (std::ifstream file(directory.get<std::string>()); !file.good()) {
+                        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Unable to find directory %s", directory.dump().c_str());
+                        continue;
+                    }
+                    this->romDirectories.emplace_back(directory.get<std::string>());
+
+                    searchDirectory(directory.get<std::string>(), this->romFiles, this->romDirectories);
+                }
+            }
+        }
         this->windows.emplace_back(std::make_unique<MainMenu>(this->font, this->romFiles, this->romDirectories, this->windows))->init();
     } else {
         // FIXME maybe load from file or something like that

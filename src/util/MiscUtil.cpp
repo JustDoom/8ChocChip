@@ -43,6 +43,7 @@ bool stringEndsWith(const std::string& str, const std::string& endStr) {
     return str.compare(str.size() - endStr.size(), endStr.size(), endStr) == 0;
 }
 
+// TODO: Add threading for calculating the hash
 void searchDirectory(const std::string& directory, std::unordered_map<std::string*, std::vector<std::string>>& romFiles,
                      std::vector<std::string>& romDirectories) {
     if (const std::ifstream file(directory); !file.good()) {

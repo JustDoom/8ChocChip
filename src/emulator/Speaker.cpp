@@ -34,7 +34,7 @@ void Speaker::play() {
     }
 }
 
-void Speaker::stop() {
+void Speaker::stop() const {
     if (this->audioStream != nullptr) {
         SDL_PauseAudioStreamDevice(this->audioStream);
     }
