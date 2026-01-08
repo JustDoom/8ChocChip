@@ -20,6 +20,8 @@ Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, st
     this->stack.fill(0);
 
     this->keyboard->keymap = keymap;
+
+    this->seed = static_cast<uint8_t>(time(nullptr) & 0xFF);
 }
 
 void Cpu::loadSpritesIntoMemory() {
@@ -330,9 +332,7 @@ void Cpu::runInstruction() {
 }
 
 uint8_t Cpu::random8bit() {
-    this->seed ^= static_cast<uint8_t>(time(nullptr) & 0xFF);
-    this->seed = (this->seed * 1103515245 + 12345) & 0xFF;
-    return this->seed;
+    return (this->seed * 1103515245 + 12345) & 0xFF;
 }
 
 std::array<uint64_t, 32>& Cpu::getDisplay() {
