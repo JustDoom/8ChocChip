@@ -5,7 +5,7 @@
 #include <iostream>
 #include <random>
 
-Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : display(64 * 32), keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
+Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -236,9 +236,9 @@ void Cpu::runInstruction() {
                             continue;
                         }
 
-                        if (setPixel(drawX, drawY)) {
-                            vF = 1;
-                        }
+                        uint8_t& pixel = this->display[drawY * 64 + drawX];
+                        if (pixel) vF = 1;
+                        pixel ^= 1;
                     }
                     sprite <<= 1;
                 }
@@ -333,20 +333,12 @@ uint8_t Cpu::random8bit() {
     return this->seed;
 }
 
-std::vector<uint8_t> &Cpu::getDisplay() {
+std::array<uint8_t, 2048>& Cpu::getDisplay() {
     return this->display;
 }
 
-bool Cpu::setPixel(const uint8_t x, const uint8_t y) {
-    return !(this->display[y * 64 + x] ^= 1);
-}
-
-bool Cpu::getPixel(const uint8_t x, const uint8_t y) const {
-    return this->display[y * 64 + x];
-}
-
 void Cpu::clearDisplay() {
-    this->display.assign(this->display.size(), false);
+    this->display.fill(false);
 }
 
 std::vector<uint8_t> Cpu::serialize() const {
@@ -392,70 +384,72 @@ std::vector<uint8_t> Cpu::serialize() const {
 }
 
 void Cpu::deserialize(uint8_t* serialization) {
-    int current_position = 0;
+    int currentPosition = 0;
 
-    std::copy(serialization + current_position, 
-         serialization + current_position + this->memory.size(), 
+    std::copy(serialization + currentPosition,
+         serialization + currentPosition + this->memory.size(),
          this->memory.begin());
-    current_position += this->memory.size();
+    currentPosition += this->memory.size();
 
 
-    std::copy(serialization + current_position,
-         serialization + current_position + this->registers.size(),
+    std::copy(serialization + currentPosition,
+         serialization + currentPosition + this->registers.size(),
         this->registers.begin());
-    current_position += this->registers.size();
+    currentPosition += this->registers.size();
 
     for (int i = 0; i < this->stack.size(); i++) {
-        this->stack[i] = serialization[current_position] << 8;
-        this->stack[i] |= serialization[current_position + 1];
-        current_position += 2;
+        this->stack[i] = serialization[currentPosition] << 8;
+        this->stack[i] |= serialization[currentPosition + 1];
+        currentPosition += 2;
     }
 
-    this->address = serialization[current_position] << 8;
-    this->address |= serialization[current_position + 1];
-    current_position += 2;
+    this->address = serialization[currentPosition] << 8;
+    this->address |= serialization[currentPosition + 1];
+    currentPosition += 2;
 
-    this->pc = serialization[current_position] << 8;
-    this->pc |= serialization[current_position + 1];
-    current_position += 2;
+    this->pc = serialization[currentPosition] << 8;
+    this->pc |= serialization[currentPosition + 1];
+    currentPosition += 2;
 
-    this->sp = serialization[current_position];
-    current_position++;
-    this->delay = serialization[current_position];
-    current_position++;
-    this->soundTimer = serialization[current_position];
-    current_position++;
+    this->sp = serialization[currentPosition];
+    currentPosition++;
+    this->delay = serialization[currentPosition];
+    currentPosition++;
+    this->soundTimer = serialization[currentPosition];
+    currentPosition++;
     
-    this->drawn = serialization[current_position];
-    current_position++;
-    this->speed = serialization[current_position] << 24;
-    current_position++;
-    this->speed |= serialization[current_position] << 16;
-    current_position++;
-    this->speed |= serialization[current_position] << 8;
-    current_position++;
-    this->speed |= serialization[current_position];
-    current_position++;
+    this->drawn = serialization[currentPosition];
+    currentPosition++;
+    this->speed = serialization[currentPosition] << 24;
+    currentPosition++;
+    this->speed |= serialization[currentPosition] << 16;
+    currentPosition++;
+    this->speed |= serialization[currentPosition] << 8;
+    currentPosition++;
+    this->speed |= serialization[currentPosition];
+    currentPosition++;
     
-    this->seed = serialization[current_position];
-    current_position++;
+    this->seed = serialization[currentPosition];
+    currentPosition++;
 
-    this->instructions = static_cast<uint64_t>(serialization[current_position]) << 56;
-    current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 48;
-    current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 32;
-    current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 24;
-    current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 16;
-    current_position++;
-    this->instructions |= static_cast<uint64_t>(serialization[current_position]) << 8;
-    current_position++;
-    this->instructions |= serialization[current_position] & 0xFF;
-    current_position++;
+    this->instructions = static_cast<uint64_t>(serialization[currentPosition]) << 56;
+    currentPosition++;
+    this->instructions |= static_cast<uint64_t>(serialization[currentPosition]) << 48;
+    currentPosition++;
+    this->instructions |= static_cast<uint64_t>(serialization[currentPosition]) << 32;
+    currentPosition++;
+    this->instructions |= static_cast<uint64_t>(serialization[currentPosition]) << 24;
+    currentPosition++;
+    this->instructions |= static_cast<uint64_t>(serialization[currentPosition]) << 16;
+    currentPosition++;
+    this->instructions |= static_cast<uint64_t>(serialization[currentPosition]) << 8;
+    currentPosition++;
+    this->instructions |= serialization[currentPosition] & 0xFF;
+    currentPosition++;
 
-    copy(serialization + current_position, 
-         serialization + current_position + this->display.size(),
-         this->display.begin());
+    std::copy(
+        serialization + currentPosition,
+        serialization + currentPosition + this->display.size(),
+        this->display.begin()
+    );
 }

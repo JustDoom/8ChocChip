@@ -10,8 +10,7 @@
 
 class Cpu {
 private:
-    std::vector<uint8_t> display;
-
+    alignas(64) std::array<uint8_t, 2048> display;
     alignas(64) std::array<uint8_t, 4096> memory;
     alignas(16) std::array<uint8_t, 16> registers;
     alignas(32) std::array<uint16_t, 16> stack;
@@ -55,14 +54,12 @@ public:
     void loadProgramIntoMemory(std::ifstream* file);
 
     void cycle();
-    void runInstruction();
+    inline void runInstruction();
 
     uint8_t random8bit();
 
-    std::vector<uint8_t>& getDisplay();
+    std::array<uint8_t, 2048>& getDisplay();
     void clearDisplay();
-    bool getPixel(uint8_t x, uint8_t y) const;
-    bool setPixel(uint8_t x, uint8_t y);
 
     std::vector<uint8_t> serialize() const;
     void deserialize(uint8_t* serialization);
