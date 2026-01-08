@@ -59,7 +59,6 @@ public:
     uint8_t random8bit();
 
     std::array<uint8_t, 2048>& getDisplay();
-    void clearDisplay();
 
     std::vector<uint8_t> serialize() const;
     void deserialize(uint8_t* serialization);

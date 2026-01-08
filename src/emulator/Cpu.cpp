@@ -48,10 +48,7 @@ void Cpu::cycle() {
             count++;
         }
     } else {
-        for (int i = 0; i < this->speed; i++) {
-            if (this->drawn) {
-                break;
-            }
+        for (int i = 0; i < this->speed && !this->drawn; i++) {
             runInstruction();
             count++;
         }
@@ -89,7 +86,7 @@ void Cpu::runInstruction() {
             switch (opcode) {
                 // Clear screen
                 case 0x00E0:
-                    clearDisplay();
+                    this->display.fill(false);
                     break;
                 case 0x00EE:
                     this->pc = this->stack[--this->sp & 0xF];
@@ -335,10 +332,6 @@ uint8_t Cpu::random8bit() {
 
 std::array<uint8_t, 2048>& Cpu::getDisplay() {
     return this->display;
-}
-
-void Cpu::clearDisplay() {
-    this->display.fill(false);
 }
 
 std::vector<uint8_t> Cpu::serialize() const {
