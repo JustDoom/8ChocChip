@@ -235,11 +235,13 @@ void Cpu::runInstruction() {
                     uint8_t col = 0;
                     while (sprite) {
                         if (sprite & 0x80) {
-                            const uint64_t mask = 1ULL << (63 - (uX + col) & 63);
-                            if (pixelRow & mask) {
-                                vF = 1;
+                            if (const uint8_t drawX = uX + col; drawX < 64) {
+                                const uint64_t mask = 1ULL << (63 - drawX);
+                                if (pixelRow & mask) {
+                                    vF = 1;
+                                }
+                                pixelRow ^= mask;
                             }
-                            pixelRow ^= mask;
                         }
                         sprite <<= 1;
                         if (++col == 8) {
