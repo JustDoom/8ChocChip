@@ -214,45 +214,41 @@ void Cpu::runInstruction() {
             break;
         }
         case 0xD000: {
-                const uint8_t height = opcode & 0xF;
-                const uint8_t uX = this->registers[x] & 63;
-                const uint8_t uY = this->registers[y] & 31;
-                const uint8_t* sprites = &this->memory[this->address];
-                uint8_t& vF = this->registers[0xF]; // Store reference to not fetching it every time
-                vF = 0;
+            const uint8_t height = opcode & 0xF;
+            const uint8_t uX = this->registers[x] & 63;
+            const uint8_t uY = this->registers[y] & 31;
+            const uint8_t *sprites = &this->memory[this->address];
+            uint8_t &vF = this->registers[0xF];
+            vF = 0;
 
-                for (uint8_t row = 0; row < height; ++row) {
-                    uint8_t sprite = sprites[row];
-                    if (sprite == 0) {
-                        continue;
-                    }
-                    const uint8_t drawY = uY + row;
-                    if (drawY > 31) {
-                        continue;
-                    }
+            const int shift = 56 - static_cast<int>(uX);
+            for (uint8_t row = 0; row < height; ++row) {
+                const uint8_t sprite = sprites[row];
+                if (sprite == 0) {
+                    continue;
+                }
+                const uint8_t drawY = uY + row;
+                if (drawY > 31) {
+                    continue;
+                }
 
-                    uint64_t& pixelRow = this->display[drawY];
-                    uint8_t col = 0;
-                    while (sprite) {
-                        if (sprite & 0x80) {
-                            if (const uint8_t drawX = uX + col; drawX < 64) {
-                                const uint64_t mask = 1ULL << (63 - drawX);
-                                if (pixelRow & mask) {
-                                    vF = 1;
-                                }
-                                pixelRow ^= mask;
-                            }
-                        }
-                        sprite <<= 1;
-                        if (++col == 8) {
-                            break;
-                        }
-                    }
+                uint64_t sprite_placed;
+                if (shift >= 0) {
+                    sprite_placed = static_cast<uint64_t>(sprite) << shift;
+                } else {
+                    sprite_placed = static_cast<uint64_t>(sprite) >> (-shift);
                 }
-                if (this->romSettings.quirks.vblank) {
-                    this->drawn = true;
+
+                uint64_t &pixelRow = this->display[drawY];
+                if (pixelRow & sprite_placed) {
+                    vF = 1;
                 }
-                break;
+                pixelRow ^= sprite_placed;
+            }
+            if (this->romSettings.quirks.vblank) {
+                this->drawn = true;
+            }
+            break;
         }
         case 0xE000:
             switch (second) {
@@ -347,7 +343,7 @@ std::vector<uint8_t> Cpu::serialize() const {
 
     serializedData.insert(serializedData.end(), memory.cbegin(), memory.cend());
     serializedData.insert(serializedData.end(), registers.cbegin(), registers.cend());
-    
+
     for (int i = 0; i < this->stack.size(); i++) {
         serializedData.push_back(this->stack[i] >> 8);
         serializedData.push_back(this->stack[i] & 0xFF);
@@ -362,7 +358,7 @@ std::vector<uint8_t> Cpu::serialize() const {
     serializedData.push_back(this->sp);
     serializedData.push_back(this->delay);
     serializedData.push_back(this->soundTimer);
-    
+
     serializedData.push_back(this->drawn);
     serializedData.push_back(this->speed >> 24);
     serializedData.push_back(this->speed >> 16);
@@ -417,7 +413,7 @@ void Cpu::deserialize(uint8_t* serialization) {
     currentPosition++;
     this->soundTimer = serialization[currentPosition];
     currentPosition++;
-    
+
     this->drawn = serialization[currentPosition];
     currentPosition++;
     this->speed = serialization[currentPosition] << 24;
@@ -428,7 +424,7 @@ void Cpu::deserialize(uint8_t* serialization) {
     currentPosition++;
     this->speed |= serialization[currentPosition];
     currentPosition++;
-    
+
     this->seed = serialization[currentPosition];
     currentPosition++;
 
