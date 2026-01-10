@@ -50,10 +50,12 @@ void Cpu::cycle() {
         }
         this->instructions += this->speed;
     } else {
+        uint32_t count = 0;
         for (int i = 0; i < this->speed && !this->drawn; i++) {
             runInstruction();
+            count++;
         }
-        this->instructions += this->speed;
+        this->instructions += count;
     }
 
     this->drawn = false;
