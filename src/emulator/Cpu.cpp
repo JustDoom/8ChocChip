@@ -44,20 +44,18 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 }
 
 void Cpu::cycle() {
-    uint64_t count = 0;
     if (speedTest) {
         for (int i = 0; i < this->speed; i++) {
             runInstruction();
-            count++;
         }
+        this->instructions += this->speed;
     } else {
         for (int i = 0; i < this->speed && !this->drawn; i++) {
             runInstruction();
-            count++;
         }
+        this->instructions += this->speed;
     }
 
-    this->instructions += count;
     this->drawn = false;
 
     if (this->delay > 0) {
@@ -217,7 +215,7 @@ void Cpu::runInstruction() {
             const uint8_t height = opcode & 0xF;
             const uint8_t uX = this->registers[x] & 63;
             const uint8_t uY = this->registers[y] & 31;
-            const uint8_t *sprites = &this->memory[this->address];
+            const uint8_t* sprites = &this->memory[this->address];
             uint8_t &vF = this->registers[0xF];
             vF = 0;
 
@@ -232,18 +230,18 @@ void Cpu::runInstruction() {
                     continue;
                 }
 
-                uint64_t sprite_placed;
+                uint64_t spritePlaced;
                 if (shift >= 0) {
-                    sprite_placed = static_cast<uint64_t>(sprite) << shift;
+                    spritePlaced = static_cast<uint64_t>(sprite) << shift;
                 } else {
-                    sprite_placed = static_cast<uint64_t>(sprite) >> (-shift);
+                    spritePlaced = static_cast<uint64_t>(sprite) >> (-shift);
                 }
 
-                uint64_t &pixelRow = this->display[drawY];
-                if (pixelRow & sprite_placed) {
+                uint64_t& pixelRow = this->display[drawY];
+                if (pixelRow & spritePlaced) {
                     vF = 1;
                 }
-                pixelRow ^= sprite_placed;
+                pixelRow ^= spritePlaced;
             }
             if (this->romSettings.quirks.vblank) {
                 this->drawn = true;
