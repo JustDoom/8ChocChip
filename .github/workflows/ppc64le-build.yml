@@ -13,21 +13,30 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          sudo dpkg --add-architecture ppc64el
           sudo apt update
-          sudo apt install -y --no-install-recommends build-essential git cmake ninja-build gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu    
+          sudo apt install -y --no-install-recommends \
+            build-essential git cmake ninja-build \
+            gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu \
+            libx11-dev:ppc64el libxext-dev:ppc64el libxrandr-dev:ppc64el libxcursor-dev:ppc64el \
+            libxfixes-dev:ppc64el libxi-dev:ppc64el libxss-dev:ppc64el libxkbcommon-dev:ppc64el \
+            libdrm-dev:ppc64el libgbm-dev:ppc64el libgl1-mesa-dev:ppc64el libgles2-mesa-dev:ppc64el \
+            libegl1-mesa-dev:ppc64el libwayland-dev:ppc64el libdecor-0-dev:ppc64el \
+            libasound2-dev:ppc64el libpulse-dev:ppc64el libudev-dev:ppc64el libdbus-1-dev:ppc64el
+
 
       - name: Configure
         run: |
           cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PWD/toolchains/toolchain-ppc64le.cmake -S . -B build
-          
-          - name: Build
-            run: cmake --build build --target 8ChocChip --config Release
-          
-          - name: Upload Build
-            uses: actions/upload-artifact@v4
-            with:
-              name: 8ChocChip-Linux-ppc64le
-              path: |
-                build/Release/8ChocChip*
-                build/Release/*.so
-                build/Release/assets/
+
+      - name: Build
+        run: cmake --build build --target 8ChocChip --config Release
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 8ChocChip-Linux-ppc64le
+          path: |
+            build/Release/8ChocChip*
+            build/Release/*.so
+            build/Release/assets/
