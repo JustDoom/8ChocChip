@@ -11,11 +11,22 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Dependencies
+      - name: Install Dependencies (ppc64le)
         run: |
+          sudo dpkg --add-architecture ppc64el
+          echo "deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/ports.list
+          echo "deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ports.list
+          echo "deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ports.list
+          echo "deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ports.list
           sudo apt update
           sudo apt install -y --no-install-recommends \
-            build-essential git cmake ninja-build gnome-desktop-testing libasound2-dev libpulse-dev libaudio-dev libjack-dev libsndio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxss-dev libxkbcommon-dev libdrm-dev libgbm-dev libgl1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev libdbus-1-dev libibus-1.0-dev libudev-dev fcitx-libs-dev libpipewire-0.3-dev libwayland-dev libdecor-0-dev liburing-dev libxtst-dev
+            build-essential git cmake ninja-build \
+            gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu \
+            libx11-dev:ppc64el libxext-dev:ppc64el libxrandr-dev:ppc64el libxcursor-dev:ppc64el \
+            libxfixes-dev:ppc64el libxi-dev:ppc64el libxss-dev:ppc64el libxkbcommon-dev:ppc64el \
+            libdrm-dev:ppc64el libgbm-dev:ppc64el libgl1-mesa-dev:ppc64el libgles2-mesa-dev:ppc64el \
+            libegl1-mesa-dev:ppc64el libwayland-dev:ppc64el libdecor-0-dev:ppc64el \
+            libasound2-dev:ppc64el libpulse-dev:ppc64el libudev-dev:ppc64el libdbus-1-dev:ppc64el
 
 
       - name: Configure
