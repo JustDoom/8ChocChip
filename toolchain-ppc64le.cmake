@@ -1,13 +1,14 @@
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR ppc64le)
+set(CMAKE_SYSTEM_PROCESSOR powerpc64le)
 
-set(CMAKE_C_COMPILER powerpc64le-linux-gnu-gcc)
-set(CMAKE_CXX_COMPILER powerpc64le-linux-gnu-g++)
+find_program(CMAKE_C_COMPILER NAMES ppc64le-linux-gnu-gcc)
+find_program(CMAKE_CXX_COMPILER NAMES ppc64le-linux-gnu-g++)
 
-set(CMAKE_SYSROOT /usr/ppc64el-linux-gnu)
-set(CMAKE_FIND_ROOT_PATH /usr/ppc64el-linux-gnu)
-
+set(CMAKE_SYSROOT /usr/powerpc64le-linux-gnu)
+set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+set(PKG_CONFIG_EXECUTABLE /usr/bin/powerpc64le-linux-gnu-pkg-config CACHE INTERNAL "")

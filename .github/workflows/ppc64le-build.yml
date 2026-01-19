@@ -5,45 +5,30 @@ on:
 
 jobs:
   build-linux-ppc64le:
-    name: Build for Linux (ppc64le)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Install Dependencies
         run: |
-          sudo dpkg --add-architecture ppc64el
-          sudo tee /etc/apt/sources.list.d/ports.list <<EOF
-          deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse
-          deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse
-          deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse
-          deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
-          EOF
           sudo apt update
-          sudo apt install -y --no-install-recommends \
-            build-essential git cmake ninja-build \
-            gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu binutils-powerpc64le-linux-gnu \
-            gnome-desktop-testing
-          sudo apt install -y --no-install-recommends \
-            libasound2-dev:ppc64el libpulse-dev:ppc64el libaudio-dev:ppc64el \
-            libjack-dev:ppc64el libsndio-dev:ppc64el libx11-dev:ppc64el \
-            libxext-dev:ppc64el libxrandr-dev:ppc64el libxcursor-dev:ppc64el \
-            libxfixes-dev:ppc64el libxi-dev:ppc64el libxss-dev:ppc64el \
-            libxkbcommon-dev:ppc64el libdrm-dev:ppc64el libgbm-dev:ppc64el \
-            libgl1-mesa-dev:ppc64el libgles2-mesa-dev:ppc64el libegl1-mesa-dev:ppc64el \
-            libdbus-1-dev:ppc64el libibus-1.0-dev:ppc64el libudev-dev:ppc64el \
-            fcitx-libs-dev:ppc64el libpipewire-0.3-dev:ppc64el libwayland-dev:ppc64el \
-            libdecor-0-dev:ppc64el liburing-dev:ppc64el libxtst-dev:ppc64el
+          sudo apt install -y --no-install-recommends build-essential git cmake ninja-build \
+            gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu pkg-config-powerpc64le-linux-gnu
+
       - name: Configure
-        run: cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=toolchain-ppc64le.cmake -DCMAKE_BUILD_TYPE=Release -S . -B build-ppc64le
+        run: |
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$PWD/toolchains/toolchain-ppc64le.cmake -S . -B build
+
       - name: Build
-        run: cmake --build build-ppc64le --target 8ChocChip --config Release
+        run: cmake --build build --target 8ChocChip --config Release
+
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:
           name: 8ChocChip-Linux-ppc64le
           path: |
-            build-ppc64le/Release/8ChocChip
-            build-ppc64le/Release/*.so
-            build-ppc64le/Release/assets/
+            build/Release/8ChocChip*
+            build/Release/*.so
+            build/Release/assets/
