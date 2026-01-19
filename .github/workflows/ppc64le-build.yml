@@ -17,7 +17,6 @@ jobs:
           
           sudo dpkg --add-architecture ppc64el
           
-          # Add Ubuntu Ports repo for the foreign arch (ppc64el)
           sudo tee /etc/apt/sources.list.d/ubuntu-ports-ppc64el.list >/dev/null <<'EOF'
           deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse
           deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse
@@ -25,32 +24,35 @@ jobs:
           deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse
           EOF
           
-          # Ensure the default Ubuntu repos are *not* used for ppc64el (they 404).
-          # Restrict them to amd64 only.
+          # Patch classic .list files (match both http and https)
           sudo sed -i \
-            -e 's|^deb http://azure.archive.ubuntu.com/ubuntu|deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu|g' \
-            -e 's|^deb http://archive.ubuntu.com/ubuntu|deb [arch=amd64] http://archive.ubuntu.com/ubuntu|g' \
             -e 's|^deb http://security.ubuntu.com/ubuntu|deb [arch=amd64] http://security.ubuntu.com/ubuntu|g' \
+            -e 's|^deb https://security.ubuntu.com/ubuntu|deb [arch=amd64] https://security.ubuntu.com/ubuntu|g' \
+            -e 's|^deb http://archive.ubuntu.com/ubuntu|deb [arch=amd64] http://archive.ubuntu.com/ubuntu|g' \
+            -e 's|^deb https://archive.ubuntu.com/ubuntu|deb [arch=amd64] https://archive.ubuntu.com/ubuntu|g' \
+            -e 's|^deb http://azure.archive.ubuntu.com/ubuntu|deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu|g' \
+            -e 's|^deb https://azure.archive.ubuntu.com/ubuntu|deb [arch=amd64] https://azure.archive.ubuntu.com/ubuntu|g' \
             /etc/apt/sources.list || true
           
-          # Also patch any *.list files that mention security.ubuntu.com / archive.ubuntu.com
-          sudo find /etc/apt/sources.list.d -name '*.list' -print0 | \
+          sudo find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) -print0 | \
             sudo xargs -0 sed -i \
               -e 's|^deb http://security.ubuntu.com/ubuntu|deb [arch=amd64] http://security.ubuntu.com/ubuntu|g' \
+              -e 's|^deb https://security.ubuntu.com/ubuntu|deb [arch=amd64] https://security.ubuntu.com/ubuntu|g' \
               -e 's|^deb http://archive.ubuntu.com/ubuntu|deb [arch=amd64] http://archive.ubuntu.com/ubuntu|g' \
+              -e 's|^deb https://archive.ubuntu.com/ubuntu|deb [arch=amd64] https://archive.ubuntu.com/ubuntu|g' \
               -e 's|^deb http://azure.archive.ubuntu.com/ubuntu|deb [arch=amd64] http://azure.archive.ubuntu.com/ubuntu|g' \
+              -e 's|^deb https://azure.archive.ubuntu.com/ubuntu|deb [arch=amd64] https://azure.archive.ubuntu.com/ubuntu|g' \
+            || true
+          
+          # For deb822 (*.sources), also restrict architectures if present.
+          # This handles lines like: "URIs: https://security.ubuntu.com/ubuntu"
+          sudo find /etc/apt/sources.list.d -name '*.sources' -print0 | \
+            sudo xargs -0 sed -i \
+              -e 's|^URIs: https://security.ubuntu.com/ubuntu|URIs: https://security.ubuntu.com/ubuntu\nArchitectures: amd64|g' \
+              -e 's|^URIs: http://security.ubuntu.com/ubuntu|URIs: http://security.ubuntu.com/ubuntu\nArchitectures: amd64|g' \
             || true
           
           sudo apt-get update
-          
-          sudo apt-get install -y --no-install-recommends \
-            build-essential git cmake ninja-build \
-            gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu \
-            libx11-dev:ppc64el libxext-dev:ppc64el libxrandr-dev:ppc64el libxcursor-dev:ppc64el \
-            libxfixes-dev:ppc64el libxi-dev:ppc64el libxss-dev:ppc64el libxkbcommon-dev:ppc64el \
-            libdrm-dev:ppc64el libgbm-dev:ppc64el libgl1-mesa-dev:ppc64el libgles2-mesa-dev:ppc64el \
-            libegl1-mesa-dev:ppc64el libwayland-dev:ppc64el libdecor-0-dev:ppc64el \
-            libasound2-dev:ppc64el libpulse-dev:ppc64el libudev-dev:ppc64el libdbus-1-dev:ppc64el
 
 
       - name: Configure
