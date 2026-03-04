@@ -133,10 +133,10 @@ void Emulator::render() {
     SDL_RenderPresent(this->renderer);
 }
 
-void Emulator::resize(SDL_Event* event) {
-    this->scale = std::min(event->display.data1 / 64, event->display.data2 / 32);
-    this->offsetX = (event->display.data1 - 64 * this->scale) / 2.f;
-    this->offsetY = (event->display.data2 - 32 * this->scale) / 2;
+void Emulator::resize(int& width, int& height) {
+    this->scale = std::min(width / 64, height / 32);
+    this->offsetX = (width - 64 * this->scale) / 2.f;
+    this->offsetY = (height - 32 * this->scale) / 2;
 }
 
 void Emulator::handleSaveState() {

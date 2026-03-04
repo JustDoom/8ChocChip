@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-#include "../Settings.h"
+#include "Settings.h"
 
 struct PlatformData {
     std::string id;

@@ -1,6 +1,6 @@
 #include "Database.h"
 
-#include "../util/Constants.h"
+#include "util/Constants.h"
 
 #include <iostream>
 #include <filesystem>

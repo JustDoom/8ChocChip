@@ -53,7 +53,7 @@ bool Window::handleEvent(SDL_Event* event) {
                 this->shown = false;
             break;
             case SDL_EVENT_WINDOW_RESIZED:
-                resize(event);
+                resize(event->display.data1, event->display.data2);
             break;
             case SDL_EVENT_WINDOW_EXPOSED:
                 SDL_RenderPresent(this->renderer);
@@ -89,14 +89,6 @@ bool Window::handleEvent(SDL_Event* event) {
     }
 
     return false;
-}
-
-
-void Window::update() {
-}
-
-void Window::resize(SDL_Event* event) {
-
 }
 
 void Window::close() {

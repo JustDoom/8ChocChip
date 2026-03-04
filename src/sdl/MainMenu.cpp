@@ -443,16 +443,16 @@ void MainMenu::render() {
     this->dataList.clear();
 }
 
-void MainMenu::resize(SDL_Event* event) {
+void MainMenu::resize(int& width, int& height) {
 #ifdef __EMSCRIPTEN__
     if (emulator != nullptr) {
-        emulator->resize(event);
+        emulator->resize(width, height);
         return;
     }
 #endif
 
-    this->width = event->window.data1;
-    this->height = event->window.data2;
+    this->width = width;
+    this->height = height;
 }
 
 void MainMenu::close() {

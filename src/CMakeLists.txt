@@ -6,5 +6,7 @@ target_sources(${EXECUTABLE_NAME} PRIVATE
         main.cpp
         ClaySDL3Renderer.cpp
         ClaySDL3Renderer.h
+        Database.cpp
+        Database.h
         EmulatorMain.cpp
         EmulatorMain.h)

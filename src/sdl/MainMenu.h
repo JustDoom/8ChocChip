@@ -11,7 +11,7 @@
 #include "InputHandler.h"
 #include "Window.h"
 #include "../Settings.h"
-#include "Database.h"
+#include "../Database.h"
 #include "../util/Constants.h"
 
 #include "../../dependencies/clay/clay.h"
@@ -52,7 +52,7 @@ public:
     bool handleEvent(SDL_Event* event) override;
     void update() override;
     void render() override;
-    void resize(SDL_Event* event) override;
+    void resize(int& width, int& height) override;
     void close() override;
 
     static void handleRomClick(Clay_ElementId elementId, Clay_PointerData pointerData, intptr_t userData);

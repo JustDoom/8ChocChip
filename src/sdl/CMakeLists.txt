@@ -7,7 +7,5 @@ target_sources(${EXECUTABLE_NAME} PRIVATE
         InputHandler.h
         Window.cpp
         Window.h
-        Database.cpp
-        Database.h
         KeybindingsMenu.h
         KeybindingsMenu.cpp)

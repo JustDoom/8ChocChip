@@ -32,9 +32,9 @@ public:
     virtual void init(int width, int height);
     virtual void init(SDL_Window* window, SDL_Renderer* renderer);
     virtual bool handleEvent(SDL_Event* event);
-    virtual void update();
+    virtual void update() = 0;
     virtual void render() = 0;
-    virtual void resize(SDL_Event* event);
+    virtual void resize(int& width, int& height) {};
     virtual void close();
 
     bool isShown() const;
