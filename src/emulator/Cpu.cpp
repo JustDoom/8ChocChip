@@ -78,7 +78,7 @@ void Cpu::cycle() {
 
 void Cpu::runInstruction() {
     const uint8_t second = this->memory[this->pc + 1];
-    const uint16_t opcode = (this->memory[this->pc] << 8) | second;
+    const uint16_t opcode = __builtin_bswap16(*reinterpret_cast<const uint16_t*>(&this->memory[this->pc]));
     this->pc += 2;
 
     const uint8_t x = (opcode >> 8) & 0xF;
