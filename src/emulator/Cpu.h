@@ -52,7 +52,7 @@ public:
     void loadProgramIntoMemory(std::ifstream* file);
 
     void cycle();
-    inline void runInstruction();
+    void runInstruction();
 
     uint8_t random8bit();
 
