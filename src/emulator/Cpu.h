@@ -45,6 +45,25 @@ private:
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
+
+    inline void instruction00E0();
+    inline void instruction00EE(uint16_t& pc, const uint16_t* stk);
+    static inline void instruction1nnn(uint16_t& pc, uint16_t nnn);
+    inline void instruction2nnn(uint16_t& pc, uint16_t nnn, uint16_t* stk);
+    inline void instruction3xnn(uint16_t& pc, uint8_t second, uint8_t x) const;
+    inline void instruction4xnn(uint16_t& pc, uint8_t second, uint8_t x) const;
+    inline void instruction5xy0(uint16_t& pc, uint8_t x, uint8_t y) const;
+    inline void instruction6xnn(uint8_t second, uint8_t x);
+    inline void instruction7xnn(uint8_t second, uint8_t x);
+    inline void instruction8xy(uint16_t opcode, uint8_t x, uint8_t y);
+    inline void instruction9xy0(uint16_t& pc, uint8_t x, uint8_t y) const;
+    inline void instructionAnnn(uint16_t nnn);
+    inline void instructionBnnn(uint16_t nnn, uint8_t x);
+    inline void instructionCxnn(uint8_t second, uint8_t x);
+    inline void instructionDxyn(uint16_t opcode, uint8_t x, uint8_t y);
+    inline void instructionEx9e(uint16_t& pc, uint8_t x) const;
+    inline void instructionExA1(uint16_t& pc, uint8_t x) const;
+    inline void instructionFx(uint16_t& pc, uint8_t second, uint8_t x);
 public:
     Cpu(Keyboard* keyboard, Speaker* speaker, RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap);
 

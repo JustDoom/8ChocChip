@@ -110,115 +110,199 @@ void Cpu::runInstruction() {
 
 op0:
     switch (opcode) {
-        case 0x00E0: std::memset(disp, 0, 32 * sizeof(uint64_t)); break;
-        case 0x00EE: pc = stk[--this->sp & 0xF]; break;
+        case 0x00E0: instruction00E0(); break;
+        case 0x00EE: instruction00EE(pc, stk); break;
         default: THROW_OPCODE();
     }
     FETCH_DISPATCH();
 
 op1:
-    pc = nnn;
+    instruction1nnn(pc, nnn);
     FETCH_DISPATCH();
 
 op2:
-    stk[this->sp++ & 0xF] = pc;
-    pc = nnn;
+    instruction2nnn(pc, nnn, stk);
     FETCH_DISPATCH();
 
 op3:
-    if (regs[x] == second) pc += 2;
+    instruction3xnn(pc, second, x);
     FETCH_DISPATCH();
 
 op4:
-    if (regs[x] != second) pc += 2;
+    instruction4xnn(pc, second, x);
     FETCH_DISPATCH();
 
 op5:
-    if (regs[x] == regs[y]) pc += 2;
+    instruction5xy0(pc, x, y);
     FETCH_DISPATCH();
 
 op6:
-    regs[x] = second;
+    instruction6xnn(second, x);
     FETCH_DISPATCH();
 
 op7:
-    regs[x] += second;
+    instruction7xnn(second, x);
     FETCH_DISPATCH();
 
 op8:
-    switch (opcode & 0xF) {
-        case 0x0: regs[x] = regs[y]; break;
-        case 0x1:
-            regs[x] |= regs[y];
-            if (this->romSettings.quirks.logic) regs[0xF] = 0;
+    instruction8xy(opcode, x, y);
+    FETCH_DISPATCH();
+
+op9:
+    instruction9xy0(pc, x, y);
+    FETCH_DISPATCH();
+
+opA:
+    instructionAnnn(nnn);
+    FETCH_DISPATCH();
+
+opB:
+    instructionBnnn(nnn, x);
+    FETCH_DISPATCH();
+
+opC:
+    instructionCxnn(second, x);
+    FETCH_DISPATCH();
+
+opD:
+    instructionDxyn(opcode, x, y);
+    FETCH_DISPATCH();
+
+opE:
+    switch (second) {
+        case 0x9E:
+            instructionEx9e(pc, x);
             break;
-        case 0x2:
-            regs[x] &= regs[y];
-            if (this->romSettings.quirks.logic) regs[0xF] = 0;
+        case 0xA1:
+            instructionExA1(pc, x);
             break;
-        case 0x3:
-            regs[x] ^= regs[y];
-            if (this->romSettings.quirks.logic) regs[0xF] = 0;
-            break;
-        case 0x4: {
-            const uint16_t sum = regs[x] + regs[y];
-            regs[x] = sum & 0xFF;
-            regs[0xF] = sum > 0xFF ? 1 : 0;
-            break;
-        }
-        case 0x5: {
-            const uint8_t value = regs[x] >= regs[y] ? 1 : 0;
-            regs[x] -= regs[y];
-            regs[0xF] = value;
-            break;
-        }
-        case 0x6: {
-            if (!this->romSettings.quirks.shift) regs[x] = regs[y];
-            const uint8_t value = regs[x] & 0x1;
-            regs[x] >>= 1;
-            regs[0xF] = value;
-            break;
-        }
-        case 0x7: {
-            const uint8_t value = regs[y] >= regs[x] ? 1 : 0;
-            regs[x] = regs[y] - regs[x];
-            regs[0xF] = value;
-            break;
-        }
-        case 0xE: {
-            if (!this->romSettings.quirks.shift) regs[x] = regs[y];
-            const uint8_t value = (regs[x] & 0x80) >> 7;
-            regs[x] <<= 1;
-            regs[0xF] = value;
-            break;
-        }
         default: THROW_OPCODE();
     }
     FETCH_DISPATCH();
 
-op9:
-    if (regs[x] != regs[y]) pc += 2;
+opF:
+    instructionFx(pc, second, x);
     FETCH_DISPATCH();
 
-opA:
+threadedEnd:
+    this->pc = pc;
+    this->instructions += executed;
+
+    #undef FETCH_DISPATCH
+    #undef THROW_OPCODE
+}
+
+void Cpu::instruction00E0() {
+    std::memset(this->display.data(), 0, 32 * sizeof(uint64_t));
+}
+
+void Cpu::instruction00EE(uint16_t& pc, const uint16_t* stk) {
+    pc = stk[--this->sp & 0xF];
+}
+
+void Cpu::instruction1nnn(uint16_t& pc, const uint16_t nnn) {
+    pc = nnn;
+}
+
+void Cpu::instruction2nnn(uint16_t& pc, const uint16_t nnn, uint16_t* stk) {
+    stk[this->sp++ & 0xF] = pc;
+    pc = nnn;
+}
+
+void Cpu::instruction3xnn(uint16_t& pc, const uint8_t second, const uint8_t x) const {
+    if (this->registers[x] == second) pc += 2;
+}
+
+void Cpu::instruction4xnn(uint16_t& pc, const uint8_t second, const uint8_t x) const {
+    if (this->registers[x] != second) pc += 2;
+}
+
+void Cpu::instruction5xy0(uint16_t& pc, const uint8_t x, const uint8_t y) const {
+    if (this->registers[x] == this->registers[y]) pc += 2;
+}
+
+void Cpu::instruction6xnn(const uint8_t second, const uint8_t x) {
+    this->registers[x] = second;
+}
+
+void Cpu::instruction7xnn(const uint8_t second, const uint8_t x) {
+    this->registers[x] += second;
+}
+
+void Cpu::instruction8xy(const uint16_t opcode, const uint8_t x, const uint8_t y) {
+    switch (opcode & 0xF) {
+        case 0x0: this->registers[x] = this->registers[y]; break;
+        case 0x1:
+            this->registers[x] |= this->registers[y];
+            if (this->romSettings.quirks.logic) this->registers[0xF] = 0;
+            break;
+        case 0x2:
+            this->registers[x] &= this->registers[y];
+            if (this->romSettings.quirks.logic) this->registers[0xF] = 0;
+            break;
+        case 0x3:
+            this->registers[x] ^= this->registers[y];
+            if (this->romSettings.quirks.logic) this->registers[0xF] = 0;
+            break;
+        case 0x4: {
+            const uint16_t sum = this->registers[x] + this->registers[y];
+            this->registers[x] = sum & 0xFF;
+            this->registers[0xF] = sum > 0xFF ? 1 : 0;
+            break;
+        }
+        case 0x5: {
+            const uint8_t value = this->registers[x] >= this->registers[y] ? 1 : 0;
+            this->registers[x] -= this->registers[y];
+            this->registers[0xF] = value;
+            break;
+        }
+        case 0x6: {
+            if (!this->romSettings.quirks.shift) this->registers[x] = this->registers[y];
+            const uint8_t value = this->registers[x] & 0x1;
+            this->registers[x] >>= 1;
+            this->registers[0xF] = value;
+            break;
+        }
+        case 0x7: {
+            const uint8_t value = this->registers[y] >= this->registers[x] ? 1 : 0;
+            this->registers[x] = this->registers[y] - this->registers[x];
+            this->registers[0xF] = value;
+            break;
+        }
+        case 0xE: {
+            if (!this->romSettings.quirks.shift) this->registers[x] = this->registers[y];
+            const uint8_t value = (this->registers[x] & 0x80) >> 7;
+            this->registers[x] <<= 1;
+            this->registers[0xF] = value;
+            break;
+        }
+        // default: THROW_OPCODE();
+    }
+}
+
+void Cpu::instruction9xy0(uint16_t& pc, const uint8_t x, const uint8_t y) const {
+    if (this->registers[x] != this->registers[y]) pc += 2;
+}
+
+void Cpu::instructionAnnn(const uint16_t nnn) {
     this->address = nnn;
-    FETCH_DISPATCH();
+}
 
-opB:
-    if (this->romSettings.quirks.jump) pc = nnn + regs[x];
-    else pc = nnn + regs[0];
-    FETCH_DISPATCH();
+void Cpu::instructionBnnn(const uint16_t nnn, const uint8_t x) {
+    if (this->romSettings.quirks.jump) pc = nnn + this->registers[x];
+    else pc = nnn + this->registers[0];
+}
 
-opC:
-    regs[x] = (random8bit() & 0xFF) & second;
-    FETCH_DISPATCH();
+void Cpu::instructionCxnn(const uint8_t second, const uint8_t x) {
+    this->registers[x] = (random8bit() & 0xFF) & second;
+}
 
-opD: {
+void Cpu::instructionDxyn(const uint16_t opcode, const uint8_t x, const uint8_t y) {
     const uint8_t height = opcode & 0xF;
-    const uint8_t uX = regs[x] & 63;
-    const uint8_t uY = regs[y] & 31;
-    const uint8_t* sprites = &mem[this->address];
-    uint8_t& vF = regs[0xF];
+    const uint8_t uX = this->registers[x] & 63;
+    const uint8_t uY = this->registers[y] & 31;
+    const uint8_t* sprites = &this->memory[this->address];
+    uint8_t& vF = this->registers[0xF];
     vF = 0;
     const int shift = 56 - static_cast<int>(uX);
     for (uint8_t row = 0; row < height; ++row) {
@@ -229,29 +313,24 @@ opD: {
         uint64_t spritePlaced;
         if (shift >= 0) spritePlaced = static_cast<uint64_t>(sprite) << shift;
         else spritePlaced = static_cast<uint64_t>(sprite) >> (-shift);
-        uint64_t& pixelRow = disp[drawY];
+        uint64_t& pixelRow = this->display[drawY];
         if (pixelRow & spritePlaced) vF = 1;
         pixelRow ^= spritePlaced;
     }
     if (this->romSettings.quirks.vblank) this->drawn = true;
-    FETCH_DISPATCH();
 }
 
-opE:
-    switch (second) {
-        case 0x9E:
-            if (this->keyboard->isKeyPressed(regs[x] & 0xF)) pc += 2;
-            break;
-        case 0xA1:
-            if (!this->keyboard->isKeyPressed(regs[x] & 0xF)) pc += 2;
-            break;
-        default: THROW_OPCODE();
-    }
-    FETCH_DISPATCH();
+void Cpu::instructionEx9e(uint16_t& pc, const uint8_t x) const {
+    if (this->keyboard->isKeyPressed(this->registers[x] & 0xF)) pc += 2;
+}
 
-opF:
+void Cpu::instructionExA1(uint16_t& pc, const uint8_t x) const {
+    if (!this->keyboard->isKeyPressed(this->registers[x] & 0xF)) pc += 2;
+}
+
+void Cpu::instructionFx(uint16_t& pc, const uint8_t second, const uint8_t x) {
     switch (second) {
-        case 0x07: regs[x] = this->delay; break;
+        case 0x07: this->registers[x] = this->delay; break;
         case 0x0A:
             pc -= 2;
             if (this->keyboard->onNextKeyPress != nullptr) break;
@@ -261,41 +340,33 @@ opF:
                 this->pc += 2;
             });
             break;
-        case 0x15: this->delay = regs[x]; break;
-        case 0x18: this->soundTimer = regs[x]; break;
-        case 0x1E: this->address = (this->address + regs[x]) & 0xFFF; break;
-        case 0x29: this->address = 0x50 + (regs[x] & 0xF) * 5; break;
+        case 0x15: this->delay = this->registers[x]; break;
+        case 0x18: this->soundTimer = this->registers[x]; break;
+        case 0x1E: this->address = (this->address + this->registers[x]) & 0xFFF; break;
+        case 0x29: this->address = 0x50 + (this->registers[x] & 0xF) * 5; break;
         case 0x33: {
-            uint8_t value = regs[x];
-            mem[(this->address + 2) & 0xFFF] = value % 10;
+            uint8_t value = this->registers[x];
+            this->memory[(this->address + 2) & 0xFFF] = value % 10;
             value /= 10;
-            mem[(this->address + 1) & 0xFFF] = value % 10;
+            this->memory[(this->address + 1) & 0xFFF] = value % 10;
             value /= 10;
-            mem[this->address] = value % 10;
+            this->memory[this->address] = value % 10;
             break;
         }
         case 0x55:
-            std::memcpy(&mem[this->address & 0xFFF], regs, x + 1);
+            std::memcpy(&this->memory[this->address & 0xFFF], this->registers.data(), x + 1);
             if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
                 this->address = (this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1)) & 0xFFF;
             }
             break;
         case 0x65:
-            std::memcpy(regs, &mem[this->address & 0xFFF], x + 1);
+            std::memcpy(this->registers.data(), &this->memory[this->address & 0xFFF], x + 1);
             if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
                 this->address = (this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1)) & 0xFFF;
             }
             break;
-        default: THROW_OPCODE();
+        // default: THROW_OPCODE();
     }
-    FETCH_DISPATCH();
-
-threadedEnd:
-    this->pc = pc;
-    this->instructions += executed;
-
-    #undef FETCH_DISPATCH
-    #undef THROW_OPCODE
 }
 
 uint8_t Cpu::random8bit() {
