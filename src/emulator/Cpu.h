@@ -11,7 +11,7 @@
 class Cpu {
 private:
     alignas(64) std::array<uint64_t, 32> display;
-    alignas(64) std::array<uint8_t, 4096> memory;
+    alignas(2) std::array<uint8_t, 4096> memory;
     alignas(16) std::array<uint8_t, 16> registers;
     alignas(32) std::array<uint16_t, 16> stack;
     uint16_t address;

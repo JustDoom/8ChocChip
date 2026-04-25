@@ -77,12 +77,18 @@ void Cpu::cycle() {
 }
 
 void Cpu::runInstruction() {
-    const uint8_t second = this->memory[this->pc + 1];
-    const uint16_t opcode = __builtin_bswap16(*reinterpret_cast<const uint16_t*>(&this->memory[this->pc]));
-    this->pc += 2;
+    const uint8_t* mem = this->memory.data();
+    const uint16_t pc = this->pc;
+
+    uint16_t raw;
+    std::memcpy(&raw, mem + pc, sizeof(raw));
+    const uint16_t opcode = __builtin_bswap16(raw);
+    this->pc = pc + 2;
 
     const uint8_t x = (opcode >> 8) & 0xF;
     const uint8_t y = (opcode >> 4) & 0xF;
+    const uint8_t second = opcode & 0xFF;
+    const uint16_t nnn = opcode & 0xFFF;
 
     switch (opcode & 0xF000) {
         case 0x0000:
@@ -100,11 +106,11 @@ void Cpu::runInstruction() {
 
             break;
         case 0x1000:
-            this->pc = (opcode & 0xFFF);
+            this->pc = nnn;
             break;
         case 0x2000:
             this->stack[this->sp++ & 0xF] = this->pc;
-            this->pc = (opcode & 0xFFF);
+            this->pc = nnn;
             break;
         case 0x3000:
             if (this->registers[x] == second) {
@@ -200,13 +206,13 @@ void Cpu::runInstruction() {
             }
             break;
         case 0xA000:
-            this->address = (opcode & 0xFFF);
+            this->address = nnn;
             break;
         case 0xB000:
             if (this->romSettings.quirks.jump) {
-                this->pc = (opcode & 0xFFF) + this->registers[x];
+                this->pc = nnn + this->registers[x];
             } else {
-                this->pc = (opcode & 0xFFF) + this->registers[0];
+                this->pc = nnn + this->registers[0];
             }
             break;
         case 0xC000: {
@@ -306,14 +312,14 @@ void Cpu::runInstruction() {
                     break;
                 }
                 case 0x55: {
-                    std::memcpy(&memory[address & 0xFFF], &registers[0], x + 1);
+                    std::memcpy(&this->memory[this->address & 0xFFF], &this->registers[0], x + 1);
                     if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
                         this->address = this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1) & 0xFFF;
                     }
                     break;
                 }
                 case 0x65: {
-                    std::memcpy(&registers[0], &memory[address & 0xFFF], x + 1);
+                    std::memcpy(&this->registers[0], &this->memory[this->address & 0xFFF], x + 1);
                     if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
                         this->address = this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1) & 0xFFF;
                     }
