@@ -3,9 +3,10 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <random>
 
-Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, std::unordered_map<uint8_t, unsigned char> keymap) : keyboard(keyboard), speaker(speaker), romSettings(romSettings) {
+Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings,
+         std::unordered_map<uint8_t, unsigned char> keymap) : romSettings(romSettings), keyboard(keyboard),
+                                                              speaker(speaker) {
     this->address = 0;
     this->delay = 0;
     this->soundTimer = 0;
@@ -25,7 +26,7 @@ Cpu::Cpu(Keyboard* keyboard, Speaker* speaker, const RomSettings romSettings, st
 }
 
 void Cpu::loadSpritesIntoMemory() {
-    std::memcpy(&memory[0x50], this->SPRITES.data(), this->SPRITES.size());
+    std::memcpy(&memory[0x50], SPRITES.data(), SPRITES.size());
 }
 
 void Cpu::loadProgramIntoMemory(std::ifstream* file) {
@@ -44,7 +45,7 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 }
 
 void Cpu::cycle() {
-    runInstruction();
+    runInstructions();
 
     this->drawn = false;
 
@@ -64,313 +65,291 @@ void Cpu::cycle() {
     }
 }
 
-void Cpu::runInstruction() {
+void Cpu::runInstructions() {
+    // This method runs as many instructions per frame as needed. Since it could be up to millions (1dcell)
+    // Create local variables here for faster and better access to stuff
     static const void* const table[16] = {
         &&op0, &&op1, &&op2, &&op3, &&op4, &&op5, &&op6, &&op7,
         &&op8, &&op9, &&opA, &&opB, &&opC, &&opD, &&opE, &&opF
     };
 
-    uint8_t* const mem = this->memory.data();
     uint8_t* const regs = this->registers.data();
+    uint8_t* const mem = this->memory.data();
     uint64_t* const disp = this->display.data();
-    uint16_t* const stk = this->stack.data();
+    uint16_t* const stack = this->stack.data();
 
+    // Settings
     const uint32_t budget = this->speed;
     const bool stopOnDrawn = !speedTest;
+    const bool quirkLogic = this->romSettings.quirks.logic;
+    const bool quirkShift = this->romSettings.quirks.shift;
+    const bool quirkJump = this->romSettings.quirks.jump;
+    const bool vblank = this->romSettings.quirks.vblank;
+    const bool quirkMemLeave = this->romSettings.quirks.memoryLeaveIUnchanged;
+    const bool quirkMemIncX = this->romSettings.quirks.memoryIncrementByX;
+
     uint32_t executed = 0;
     uint16_t pc = this->pc;
+    uint16_t address = this->address;
+    uint8_t sp = this->sp;
+    uint8_t delay = this->delay;
+    uint8_t seed = this->seed;
     uint16_t opcode = 0;
-    uint8_t x = 0, y = 0, second = 0;
-    uint16_t nnn = 0;
+    uint8_t x = 0;
+    uint8_t second = 0;
 
-    #define FETCH_DISPATCH()                                       \
-        do {                                                       \
-            if (executed >= budget) goto threadedEnd;              \
-            if (stopOnDrawn && this->drawn) goto threadedEnd;      \
-            ++executed;                                            \
-            uint16_t raw__;                                        \
-            std::memcpy(&raw__, mem + pc, sizeof(raw__));          \
-            opcode = __builtin_bswap16(raw__);                     \
-            pc += 2;                                               \
-            x = (opcode >> 8) & 0xF;                               \
-            y = (opcode >> 4) & 0xF;                               \
-            second = opcode & 0xFF;                                \
-            nnn = opcode & 0xFFF;                                  \
-            goto *table[opcode >> 12];                             \
+    static void* tableF[256];
+    static bool tableFInited = false;
+    if (__builtin_expect(!tableFInited, 0)) {
+        for (auto& e : tableF) {
+            e = &&opFErr;
+        }
+        tableF[0x07] = &&opF07;
+        tableF[0x0A] = &&opF0A;
+        tableF[0x15] = &&opF15;
+        tableF[0x18] = &&opF18;
+        tableF[0x1E] = &&opF1E;
+        tableF[0x29] = &&opF29;
+        tableF[0x33] = &&opF33;
+        tableF[0x55] = &&opF55;
+        tableF[0x65] = &&opF65;
+        tableFInited = true;
+    }
+
+#define FETCH_DISPATCH() \
+        do { \
+            if (executed >= budget) goto threadedEnd; \
+            ++executed; \
+            uint16_t raw__; \
+            std::memcpy(&raw__, mem + pc, sizeof(raw__)); \
+            opcode = __builtin_bswap16(raw__); \
+            pc += 2; \
+            x = (opcode >> 8) & 0xF; \
+            second = opcode & 0xFF; \
+            goto *table[opcode >> 12]; \
         } while (0)
 
-    #define THROW_OPCODE()                                         \
-        do {                                                       \
-            this->pc = pc;                                         \
-            this->instructions += executed;                        \
-            throw opcode;                                          \
+#define THROW_OPCODE() \
+        do { \
+            this->pc = pc; \
+            this->address = address; \
+            this->sp = sp; \
+            this->delay = delay; \
+            this->seed = seed; \
+            this->instructions += executed; \
+            throw opcode; \
         } while (0)
 
     FETCH_DISPATCH();
 
 op0:
-    switch (opcode) {
-        case 0x00E0: instruction00E0(); break;
-        case 0x00EE: instruction00EE(pc, stk); break;
-        default: THROW_OPCODE();
+    if (opcode == 0x00E0) {
+        std::memset(disp, 0, 32 * sizeof(uint64_t));
+    } else if (opcode == 0x00EE) {
+        pc = stack[--sp & 0xF];
+    } else {
+        THROW_OPCODE();
     }
     FETCH_DISPATCH();
 
 op1:
-    instruction1nnn(pc, nnn);
+    pc = opcode & 0xFFF;
     FETCH_DISPATCH();
 
 op2:
-    instruction2nnn(pc, nnn, stk);
+    stack[sp++ & 0xF] = pc;
+    pc = opcode & 0xFFF;
     FETCH_DISPATCH();
 
 op3:
-    instruction3xnn(pc, second, x);
+    if (regs[x] == second) pc += 2;
     FETCH_DISPATCH();
 
 op4:
-    instruction4xnn(pc, second, x);
+    if (regs[x] != second) pc += 2;
     FETCH_DISPATCH();
 
-op5:
-    instruction5xy0(pc, x, y);
+op5: {
+    if (const uint8_t y = second >> 4; regs[x] == regs[y]) pc += 2;
     FETCH_DISPATCH();
+}
 
 op6:
-    instruction6xnn(second, x);
+    regs[x] = second;
     FETCH_DISPATCH();
 
 op7:
-    instruction7xnn(second, x);
+    regs[x] += second;
     FETCH_DISPATCH();
 
-op8:
-    instruction8xy(opcode, x, y);
-    FETCH_DISPATCH();
-
-op9:
-    instruction9xy0(pc, x, y);
-    FETCH_DISPATCH();
-
-opA:
-    instructionAnnn(nnn);
-    FETCH_DISPATCH();
-
-opB:
-    instructionBnnn(nnn, x);
-    FETCH_DISPATCH();
-
-opC:
-    instructionCxnn(second, x);
-    FETCH_DISPATCH();
-
-opD:
-    instructionDxyn(opcode, x, y);
-    FETCH_DISPATCH();
-
-opE:
-    switch (second) {
-        case 0x9E:
-            instructionEx9e(pc, x);
+op8: {
+    const uint8_t y = second >> 4;
+    switch (second & 0xF) {
+        case 0x0: regs[x] = regs[y];
             break;
-        case 0xA1:
-            instructionExA1(pc, x);
-            break;
-        default: THROW_OPCODE();
-    }
-    FETCH_DISPATCH();
-
-opF:
-    instructionFx(pc, second, x);
-    FETCH_DISPATCH();
-
-threadedEnd:
-    this->pc = pc;
-    this->instructions += executed;
-
-    #undef FETCH_DISPATCH
-    #undef THROW_OPCODE
-}
-
-void Cpu::instruction00E0() {
-    std::memset(this->display.data(), 0, 32 * sizeof(uint64_t));
-}
-
-void Cpu::instruction00EE(uint16_t& pc, const uint16_t* stk) {
-    pc = stk[--this->sp & 0xF];
-}
-
-void Cpu::instruction1nnn(uint16_t& pc, const uint16_t nnn) {
-    pc = nnn;
-}
-
-void Cpu::instruction2nnn(uint16_t& pc, const uint16_t nnn, uint16_t* stk) {
-    stk[this->sp++ & 0xF] = pc;
-    pc = nnn;
-}
-
-void Cpu::instruction3xnn(uint16_t& pc, const uint8_t second, const uint8_t x) const {
-    if (this->registers[x] == second) pc += 2;
-}
-
-void Cpu::instruction4xnn(uint16_t& pc, const uint8_t second, const uint8_t x) const {
-    if (this->registers[x] != second) pc += 2;
-}
-
-void Cpu::instruction5xy0(uint16_t& pc, const uint8_t x, const uint8_t y) const {
-    if (this->registers[x] == this->registers[y]) pc += 2;
-}
-
-void Cpu::instruction6xnn(const uint8_t second, const uint8_t x) {
-    this->registers[x] = second;
-}
-
-void Cpu::instruction7xnn(const uint8_t second, const uint8_t x) {
-    this->registers[x] += second;
-}
-
-void Cpu::instruction8xy(const uint16_t opcode, const uint8_t x, const uint8_t y) {
-    switch (opcode & 0xF) {
-        case 0x0: this->registers[x] = this->registers[y]; break;
         case 0x1:
-            this->registers[x] |= this->registers[y];
-            if (this->romSettings.quirks.logic) this->registers[0xF] = 0;
+            regs[x] |= regs[y];
+            if (quirkLogic) regs[0xF] = 0;
             break;
         case 0x2:
-            this->registers[x] &= this->registers[y];
-            if (this->romSettings.quirks.logic) this->registers[0xF] = 0;
+            regs[x] &= regs[y];
+            if (quirkLogic) regs[0xF] = 0;
             break;
         case 0x3:
-            this->registers[x] ^= this->registers[y];
-            if (this->romSettings.quirks.logic) this->registers[0xF] = 0;
+            regs[x] ^= regs[y];
+            if (quirkLogic) regs[0xF] = 0;
             break;
         case 0x4: {
-            const uint16_t sum = this->registers[x] + this->registers[y];
-            this->registers[x] = sum & 0xFF;
-            this->registers[0xF] = sum > 0xFF ? 1 : 0;
+            const uint16_t sum = static_cast<uint16_t>(regs[x]) + regs[y];
+            regs[x] = static_cast<uint8_t>(sum);
+            regs[0xF] = sum > 0xFF ? 1 : 0;
             break;
         }
         case 0x5: {
-            const uint8_t value = this->registers[x] >= this->registers[y] ? 1 : 0;
-            this->registers[x] -= this->registers[y];
-            this->registers[0xF] = value;
+            const uint8_t vf = regs[x] >= regs[y] ? 1 : 0;
+            regs[x] -= regs[y];
+            regs[0xF] = vf;
             break;
         }
         case 0x6: {
-            if (!this->romSettings.quirks.shift) this->registers[x] = this->registers[y];
-            const uint8_t value = this->registers[x] & 0x1;
-            this->registers[x] >>= 1;
-            this->registers[0xF] = value;
+            if (!quirkShift) regs[x] = regs[y];
+            const uint8_t vf = regs[x] & 1;
+            regs[x] >>= 1;
+            regs[0xF] = vf;
             break;
         }
         case 0x7: {
-            const uint8_t value = this->registers[y] >= this->registers[x] ? 1 : 0;
-            this->registers[x] = this->registers[y] - this->registers[x];
-            this->registers[0xF] = value;
+            const uint8_t vf = regs[y] >= regs[x] ? 1 : 0;
+            regs[x] = regs[y] - regs[x];
+            regs[0xF] = vf;
             break;
         }
         case 0xE: {
-            if (!this->romSettings.quirks.shift) this->registers[x] = this->registers[y];
-            const uint8_t value = (this->registers[x] & 0x80) >> 7;
-            this->registers[x] <<= 1;
-            this->registers[0xF] = value;
+            if (!quirkShift) regs[x] = regs[y];
+            const uint8_t vf = regs[x] >> 7;
+            regs[x] <<= 1;
+            regs[0xF] = vf;
             break;
         }
-        // default: THROW_OPCODE();
+        default: THROW_OPCODE();
+        }
+        FETCH_DISPATCH();
     }
+
+op9: {
+    if (const uint8_t y = second >> 4; regs[x] != regs[y]) pc += 2;
+    FETCH_DISPATCH();
 }
 
-void Cpu::instruction9xy0(uint16_t& pc, const uint8_t x, const uint8_t y) const {
-    if (this->registers[x] != this->registers[y]) pc += 2;
-}
+opA:
+    address = opcode & 0xFFF;
+    FETCH_DISPATCH();
 
-void Cpu::instructionAnnn(const uint16_t nnn) {
-    this->address = nnn;
-}
+opB:
+    pc = (opcode & 0xFFF) + (quirkJump ? regs[x] : regs[0]);
+    FETCH_DISPATCH();
 
-void Cpu::instructionBnnn(const uint16_t nnn, const uint8_t x) {
-    if (this->romSettings.quirks.jump) pc = nnn + this->registers[x];
-    else pc = nnn + this->registers[0];
-}
+opC:
+    seed = static_cast<uint8_t>(seed * 1103515245 + 12345);
+    regs[x] = seed & second;
+    FETCH_DISPATCH();
 
-void Cpu::instructionCxnn(const uint8_t second, const uint8_t x) {
-    this->registers[x] = (random8bit() & 0xFF) & second;
-}
-
-void Cpu::instructionDxyn(const uint16_t opcode, const uint8_t x, const uint8_t y) {
-    const uint8_t height = opcode & 0xF;
-    const uint8_t uX = this->registers[x] & 63;
-    const uint8_t uY = this->registers[y] & 31;
-    const uint8_t* sprites = &this->memory[this->address];
-    uint8_t& vF = this->registers[0xF];
-    vF = 0;
+opD: {
+    const uint8_t height = second & 0xF;
+    const uint8_t uX = regs[x] & 63;
+    const uint8_t uY = regs[second >> 4] & 31;
+    const uint8_t* sprites = &mem[address];
+    regs[0xF] = 0;
     const int shift = 56 - static_cast<int>(uX);
     for (uint8_t row = 0; row < height; ++row) {
         const uint8_t sprite = sprites[row];
         if (sprite == 0) continue;
         const uint8_t drawY = uY + row;
-        if (drawY > 31) continue;
-        uint64_t spritePlaced;
-        if (shift >= 0) spritePlaced = static_cast<uint64_t>(sprite) << shift;
-        else spritePlaced = static_cast<uint64_t>(sprite) >> (-shift);
-        uint64_t& pixelRow = this->display[drawY];
-        if (pixelRow & spritePlaced) vF = 1;
-        pixelRow ^= spritePlaced;
+        if (drawY > 31) break;
+        const uint64_t placed = (shift >= 0) ? (static_cast<uint64_t>(sprite) << shift) : (static_cast<uint64_t>(sprite) >> (-shift));
+        if (disp[drawY] & placed) regs[0xF] = 1;
+        disp[drawY] ^= placed;
     }
-    if (this->romSettings.quirks.vblank) this->drawn = true;
-}
-
-void Cpu::instructionEx9e(uint16_t& pc, const uint8_t x) const {
-    if (this->keyboard->isKeyPressed(this->registers[x] & 0xF)) pc += 2;
-}
-
-void Cpu::instructionExA1(uint16_t& pc, const uint8_t x) const {
-    if (!this->keyboard->isKeyPressed(this->registers[x] & 0xF)) pc += 2;
-}
-
-void Cpu::instructionFx(uint16_t& pc, const uint8_t second, const uint8_t x) {
-    switch (second) {
-        case 0x07: this->registers[x] = this->delay; break;
-        case 0x0A:
-            pc -= 2;
-            if (this->keyboard->onNextKeyPress != nullptr) break;
-            this->pc = pc;
-            this->keyboard->setOnNextKeyPress([this, x](const uint8_t key) {
-                this->registers[x] = key;
-                this->pc += 2;
-            });
-            break;
-        case 0x15: this->delay = this->registers[x]; break;
-        case 0x18: this->soundTimer = this->registers[x]; break;
-        case 0x1E: this->address = (this->address + this->registers[x]) & 0xFFF; break;
-        case 0x29: this->address = 0x50 + (this->registers[x] & 0xF) * 5; break;
-        case 0x33: {
-            uint8_t value = this->registers[x];
-            this->memory[(this->address + 2) & 0xFFF] = value % 10;
-            value /= 10;
-            this->memory[(this->address + 1) & 0xFFF] = value % 10;
-            value /= 10;
-            this->memory[this->address] = value % 10;
-            break;
-        }
-        case 0x55:
-            std::memcpy(&this->memory[this->address & 0xFFF], this->registers.data(), x + 1);
-            if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
-                this->address = (this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1)) & 0xFFF;
-            }
-            break;
-        case 0x65:
-            std::memcpy(this->registers.data(), &this->memory[this->address & 0xFFF], x + 1);
-            if (!this->romSettings.quirks.memoryLeaveIUnchanged) {
-                this->address = (this->address + (this->romSettings.quirks.memoryIncrementByX ? x : x + 1)) & 0xFFF;
-            }
-            break;
-        // default: THROW_OPCODE();
+    if (vblank) {
+        this->drawn = true;
+        if (stopOnDrawn) executed = budget;
     }
+    FETCH_DISPATCH();
+}
+
+opE:
+    if (second == 0x9E) goto opEx9E;
+    if (second == 0xA1) goto opExA1;
+    THROW_OPCODE();
+opEx9E:
+    if (this->keyboard->isKeyPressed(regs[x] & 0xF)) pc += 2;
+    FETCH_DISPATCH();
+opExA1:
+    if (!this->keyboard->isKeyPressed(regs[x] & 0xF)) pc += 2;
+    FETCH_DISPATCH();
+
+opF:
+    goto *tableF[second];
+opF07:
+    regs[x] = delay;
+    FETCH_DISPATCH();
+opF0A:
+    pc -= 2;
+    if (this->keyboard->onNextKeyPress != nullptr) { FETCH_DISPATCH(); }
+    this->pc = pc;
+    this->keyboard->setOnNextKeyPress([this, x](const uint8_t key) {
+        this->registers[x] = key;
+        this->pc += 2;
+    });
+    FETCH_DISPATCH();
+opF15:
+    delay = regs[x];
+    FETCH_DISPATCH();
+opF18:
+    this->soundTimer = regs[x];
+    FETCH_DISPATCH();
+opF1E:
+    address = (address + regs[x]) & 0xFFF;
+    FETCH_DISPATCH();
+opF29:
+    address = 0x50 + (regs[x] & 0xF) * 5;
+    FETCH_DISPATCH();
+opF33: {
+    uint8_t v = regs[x];
+    mem[(address + 2) & 0xFFF] = v % 10;
+    v /= 10;
+    mem[(address + 1) & 0xFFF] = v % 10;
+    v /= 10;
+    mem[address & 0xFFF] = v % 10;
+    FETCH_DISPATCH();
+}
+opF55:
+    std::memcpy(&mem[address & 0xFFF], regs, x + 1);
+    if (!quirkMemLeave)
+        address = (address + (quirkMemIncX ? x : x + 1)) & 0xFFF;
+    FETCH_DISPATCH();
+opF65:
+    std::memcpy(regs, &mem[address & 0xFFF], x + 1);
+    if (!quirkMemLeave)
+        address = (address + (quirkMemIncX ? x : x + 1)) & 0xFFF;
+    FETCH_DISPATCH();
+opFErr:
+    THROW_OPCODE();
+
+threadedEnd:
+    this->pc = pc;
+    this->address = address;
+    this->sp = sp;
+    this->delay = delay;
+    this->seed = seed;
+    this->instructions += executed;
+
+#undef FETCH_DISPATCH
+#undef THROW_OPCODE
 }
 
 uint8_t Cpu::random8bit() {
-    return (this->seed * 1103515245 + 12345) & 0xFF;
+    return this->seed = static_cast<uint8_t>(this->seed * 1103515245 + 12345);
 }
 
 std::array<uint64_t, 32>& Cpu::getDisplay() {
@@ -423,14 +402,14 @@ void Cpu::deserialize(uint8_t* serialization) {
     int currentPosition = 0;
 
     std::copy(serialization + currentPosition,
-         serialization + currentPosition + this->memory.size(),
-         this->memory.begin());
+              serialization + currentPosition + this->memory.size(),
+              this->memory.begin());
     currentPosition += this->memory.size();
 
 
     std::copy(serialization + currentPosition,
-         serialization + currentPosition + this->registers.size(),
-        this->registers.begin());
+              serialization + currentPosition + this->registers.size(),
+              this->registers.begin());
     currentPosition += this->registers.size();
 
     for (int i = 0; i < this->stack.size(); i++) {
