@@ -8,7 +8,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE INTERNAL "")
 
-project(8ChocChip LANGUAGES CXX VERSION 0.2)
+project(8ChocChip LANGUAGES CXX VERSION 0.3)
 
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls -DNDEBUG")
