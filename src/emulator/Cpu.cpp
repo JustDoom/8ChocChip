@@ -120,9 +120,7 @@ void Cpu::runInstructions() {
         do { \
             if (executed >= budget) goto threadedEnd; \
             ++executed; \
-            uint16_t raw__; \
-            std::memcpy(&raw__, mem + pc, sizeof(raw__)); \
-            opcode = __builtin_bswap16(raw__); \
+            opcode = (static_cast<uint16_t>(mem[pc]) << 8) | mem[pc + 1]; \
             pc += 2; \
             x = (opcode >> 8) & 0xF; \
             second = opcode & 0xFF; \
