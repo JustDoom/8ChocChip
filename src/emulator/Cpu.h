@@ -53,6 +53,7 @@ public:
     void loadProgramIntoMemory(std::ifstream* file);
 
     void cycle();
+    template <bool QuirkShift, bool QuirkLogic, bool QuirkJump, bool QuirkMemLeaveI, bool QuirkMemIncrement>
     void runInstructions();
 
     uint8_t random8bit();

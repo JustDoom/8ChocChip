@@ -45,7 +45,7 @@ void Cpu::loadProgramIntoMemory(std::ifstream* file) {
 }
 
 void Cpu::cycle() {
-    runInstructions();
+    runInstructions<false, true, false, false, false>();
 
     this->drawn = false;
 
@@ -65,6 +65,7 @@ void Cpu::cycle() {
     }
 }
 
+template <bool QuirkShift, bool QuirkLogic, bool QuirkJump, bool QuirkMemLeaveI, bool QuirkMemIncrement>
 void Cpu::runInstructions() {
     // This method runs as many instructions per frame as needed. Since it could be up to millions (1dcell)
     // Create local variables here for faster and better access to stuff
@@ -81,12 +82,7 @@ void Cpu::runInstructions() {
     // Settings
     const uint32_t budget = this->speed;
     const bool stopOnDrawn = !speedTest;
-    const bool quirkLogic = this->romSettings.quirks.logic;
-    const bool quirkShift = this->romSettings.quirks.shift;
-    const bool quirkJump = this->romSettings.quirks.jump;
     const bool vblank = this->romSettings.quirks.vblank;
-    const bool quirkMemLeave = this->romSettings.quirks.memoryLeaveIUnchanged;
-    const bool quirkMemIncX = this->romSettings.quirks.memoryIncrementByX;
 
     uint32_t executed = 0;
     uint16_t pc = this->pc;
@@ -187,15 +183,15 @@ op8: {
             FETCH_DISPATCH();
         case 0x1:
             regs[x] |= regs[y];
-            if (quirkLogic) regs[0xF] = 0;
+            if constexpr (QuirkLogic) regs[0xF] = 0;
             FETCH_DISPATCH();
         case 0x2:
             regs[x] &= regs[y];
-            if (quirkLogic) regs[0xF] = 0;
+            if constexpr (QuirkLogic) regs[0xF] = 0;
             FETCH_DISPATCH();
         case 0x3:
             regs[x] ^= regs[y];
-            if (quirkLogic) regs[0xF] = 0;
+            if constexpr (QuirkLogic) regs[0xF] = 0;
             FETCH_DISPATCH();
         case 0x4: {
             const uint16_t sum = static_cast<uint16_t>(regs[x]) + regs[y];
@@ -210,7 +206,7 @@ op8: {
             FETCH_DISPATCH();
         }
         case 0x6: {
-            if (!quirkShift) regs[x] = regs[y];
+            if constexpr (!QuirkShift) regs[x] = regs[y];
             const uint8_t vf = regs[x] & 1;
             regs[x] >>= 1;
             regs[0xF] = vf;
@@ -223,7 +219,7 @@ op8: {
             FETCH_DISPATCH();
         }
         case 0xE: {
-            if (!quirkShift) regs[x] = regs[y];
+            if constexpr (!QuirkShift) regs[x] = regs[y];
             const uint8_t vf = regs[x] >> 7;
             regs[x] <<= 1;
             regs[0xF] = vf;
@@ -244,7 +240,7 @@ opA:
     FETCH_DISPATCH();
 
 opB:
-    pc = (opcode & 0xFFF) + (quirkJump ? regs[x] : regs[0]);
+    pc = (opcode & 0xFFF) + (QuirkJump ? regs[x] : regs[0]);
     FETCH_DISPATCH();
 
 opC:
@@ -323,13 +319,13 @@ opF33: {
 }
 opF55:
     std::memcpy(&mem[address & 0xFFF], regs, x + 1);
-    if (!quirkMemLeave)
-        address = (address + (quirkMemIncX ? x : x + 1)) & 0xFFF;
+    if (!QuirkMemLeaveI)
+        address = (address + (QuirkMemIncrement ? x : x + 1)) & 0xFFF;
     FETCH_DISPATCH();
 opF65:
     std::memcpy(regs, &mem[address & 0xFFF], x + 1);
-    if (!quirkMemLeave)
-        address = (address + (quirkMemIncX ? x : x + 1)) & 0xFFF;
+    if (!QuirkMemLeaveI)
+        address = (address + (QuirkMemIncrement ? x : x + 1)) & 0xFFF;
     FETCH_DISPATCH();
 opFErr:
     THROW_OPCODE();
