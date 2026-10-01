@@ -65,6 +65,12 @@ void Cpu::cycle() {
     }
 }
 
+static inline uint16_t memU16(const uint8_t* p) {
+    uint16_t v;
+    __builtin_memcpy(&v, p, 2);
+    return v;
+}
+
 template <bool QuirkShift, bool QuirkLogic, bool QuirkJump, bool QuirkMemLeaveI, bool QuirkMemIncrement>
 void Cpu::runInstructions() {
     // This method runs as many instructions per frame as needed. Since it could be up to millions (1dcell)
@@ -74,10 +80,10 @@ void Cpu::runInstructions() {
         &&op8, &&op9, &&opA, &&opB, &&opC, &&opD, &&opE, &&opF
     };
 
-    uint8_t* const regs = this->registers.data();
-    uint8_t* const mem = this->memory.data();
-    uint64_t* const disp = this->display.data();
-    uint16_t* const stack = this->stack.data();
+    uint8_t* __restrict const regs = this->registers.data();
+    uint8_t* __restrict const mem = this->memory.data();
+    uint64_t* __restrict const disp = this->display.data();
+    uint16_t* __restrict const stack = this->stack.data();
 
     // Settings
     const uint32_t budget = this->speed;
@@ -114,9 +120,9 @@ void Cpu::runInstructions() {
 
 #define FETCH_DISPATCH() \
         do { \
-            if (executed >= budget) goto threadedEnd; \
+            if (__builtin_expect(executed >= budget, 0)) goto threadedEnd; \
             ++executed; \
-            opcode = (static_cast<uint16_t>(mem[pc]) << 8) | mem[pc + 1]; \
+            opcode = __builtin_bswap16(memU16(mem + pc)); \
             pc += 2; \
             x = (opcode >> 8) & 0xF; \
             second = opcode & 0xFF; \
@@ -322,11 +328,15 @@ opF55:
     if (!QuirkMemLeaveI)
         address = (address + (QuirkMemIncrement ? x : x + 1)) & 0xFFF;
     FETCH_DISPATCH();
-opF65:
-    std::memcpy(regs, &mem[address & 0xFFF], x + 1);
+
+opF65: {
+    const uint32_t n = ((opcode >> 8) & 0xF) + 1;   // provably 1..16 here
+    std::memcpy(regs, mem + (address & 0xFFF), n);
     if (!QuirkMemLeaveI)
-        address = (address + (QuirkMemIncrement ? x : x + 1)) & 0xFFF;
+        address = (address + (QuirkMemIncrement ? n - 1 : n)) & 0xFFF;
     FETCH_DISPATCH();
+}
+
 opFErr:
     THROW_OPCODE();
 
