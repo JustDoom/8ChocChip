@@ -184,50 +184,50 @@ op8: {
     const uint8_t y = second >> 4;
     switch (second & 0xF) {
         case 0x0: regs[x] = regs[y];
-            break;
+            FETCH_DISPATCH();
         case 0x1:
             regs[x] |= regs[y];
             if (quirkLogic) regs[0xF] = 0;
-            break;
+            FETCH_DISPATCH();
         case 0x2:
             regs[x] &= regs[y];
             if (quirkLogic) regs[0xF] = 0;
-            break;
+            FETCH_DISPATCH();
         case 0x3:
             regs[x] ^= regs[y];
             if (quirkLogic) regs[0xF] = 0;
-            break;
+            FETCH_DISPATCH();
         case 0x4: {
             const uint16_t sum = static_cast<uint16_t>(regs[x]) + regs[y];
             regs[x] = static_cast<uint8_t>(sum);
             regs[0xF] = sum > 0xFF ? 1 : 0;
-            break;
+            FETCH_DISPATCH();
         }
         case 0x5: {
             const uint8_t vf = regs[x] >= regs[y] ? 1 : 0;
             regs[x] -= regs[y];
             regs[0xF] = vf;
-            break;
+            FETCH_DISPATCH();
         }
         case 0x6: {
             if (!quirkShift) regs[x] = regs[y];
             const uint8_t vf = regs[x] & 1;
             regs[x] >>= 1;
             regs[0xF] = vf;
-            break;
+            FETCH_DISPATCH();
         }
         case 0x7: {
             const uint8_t vf = regs[y] >= regs[x] ? 1 : 0;
             regs[x] = regs[y] - regs[x];
             regs[0xF] = vf;
-            break;
+            FETCH_DISPATCH();
         }
         case 0xE: {
             if (!quirkShift) regs[x] = regs[y];
             const uint8_t vf = regs[x] >> 7;
             regs[x] <<= 1;
             regs[0xF] = vf;
-            break;
+            FETCH_DISPATCH();
         }
         default: THROW_OPCODE();
         }
