@@ -10,8 +10,8 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}" CACHE INTERNAL "")
 
 project(8ChocChip LANGUAGES CXX VERSION 0.3)
 
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls -fprofile-use -fno-gcse -fno-crossjumping -falign-labels=8 -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "O2 -g -fno-omit-frame-pointer -fno-optimize-sibling-calls -fprofile-use -fno-gcse -fno-crossjumping -falign-labels=8 -flto -DNDEBUG")
 
 if ((APPLE AND NOT CMAKE_SYSTEM_NAME MATCHES "Darwin") OR EMSCRIPTEN)
     set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "") # Disable shared builds on platforms where it does not make sense to use them
